@@ -1,0 +1,127 @@
+# BÖLÜM 8 — Nuri Amca
+episode: 8
+title: "Nuri Amca"
+hook: "40 YILDIR KADIKÖY'E GİZLİCE NOT YAZIYOR"
+cliff: { question: "Sen olsan kalemi alır mıydın?", next: "BÖLÜM 9" }
+seo:
+  title: "Cebimdeki Not · Bölüm 8 — Nuri Amca"
+  description: "40 yıldır yalnız insanların cebine not bırakan bit pazarı satıcısı Nuri Amca. Peki neden? #8/10"
+
+shots:
+  - set: market
+    time: morning
+    mood: warm
+    cast:
+      - { who: nuri, at: [0, -0.2], face: 0, pose: sit, do: sit, hold: tea, look: kerem, expr: smile }
+      - { who: kerem, outfit: coat, at: [-0.85, 0.55], face: nuri, pose: sit, do: sit, hold: tea, look: nuri, expr: curious }
+      - { who: defne, at: [0.85, 0.55], face: nuri, pose: sit, do: sit, hold: tea, look: nuri, expr: curious }
+    cam: { shot: wide, on: nuri, move: push, amt: 0.2 }
+    tag: { who: nuri, name: "NURİ AMCA · 74", sub: "40 yıllık paltocu" }
+    lines:
+      - say: "Adı Nuri'ydi. Kırk yıldır palto satıyor, kırk yıldır *yalnız* insanların cebine not bırakıyordu."
+
+  - set: market
+    time: morning
+    mood: comedy
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.85, 0.55], face: nuri, pose: sit, do: sit_talk, hold: tea, look: nuri, expr: suspicious }
+      - { who: nuri, at: [0, -0.2], face: kerem, pose: sit, do: sit, hold: tea, look: kerem, expr: smile }
+    cam: { shot: close, on: kerem, angle: 30, move: push, amt: 0.2 }
+    lines:
+      - say: "Sordum: *Kilitli* dolaba nasıl girdin?"
+
+  - set: market
+    time: morning
+    mood: comedy
+    cast:
+      - { who: nuri, at: [0, -0.2], face: kerem, pose: sit, do: [[0, laugh], ["@Ev", sit_talk]], hold: tea, look: kerem, expr: [[0, laugh], ["@Ev", smile]] }
+      - { who: kerem, outfit: coat, at: [-0.85, 0.55], face: nuri, pose: sit, do: sit, hold: tea, look: nuri, expr: curious }
+    cam: { shot: close, on: nuri, angle: -20, move: push, amt: 0.2 }
+    lines:
+      - say: "Ev arkadaşın Emre'ye bir çay ısmarladım. Kamerayı da o kapattı."
+        v: nuri
+        by: nuri
+
+  - set: room
+    time: day
+    mood: comedy
+    cut: whip
+    cast:
+      - { who: emre, at: [0.2, -0.3], face: 0, do: [[0, eat], ["@Kendi", thumbsup]], hold: bowl, look: cam, expr: [[0, guilty], ["@Kendi", smile]] }
+    cam: { shot: medium, on: emre, angle: 5, move: push, amt: 0.3 }
+    overlay: { type: suspects, items: ["EMRE", "PAMUK", "ANNEM"], show: 3, strike: 0, circle: 1, at_word: "Emre" }
+    sfx: [ { type: sting_comedy, at: 0.1 } ]
+    lines:
+      - say: "*Emre!* Kendi çorabını bulamayan Emre!"
+
+  - set: market
+    time: morning
+    mood: warm
+    cast:
+      - { who: nuri, at: [0, -0.2], face: 0, pose: sit, do: sit_talk, hold: tea, look: cam, expr: smile }
+      - { who: kerem, outfit: coat, at: [-0.85, 0.55], face: nuri, pose: sit, do: sit, hold: tea, look: nuri, expr: surprised }
+      - { who: defne, at: [0.85, 0.55], face: nuri, pose: sit, do: sit, hold: tea, look: nuri, expr: surprised }
+    cam: { shot: medium, on: nuri, angle: 5, move: push, amt: 0.2 }
+    overlay: { type: network, items: ["SİMİTÇİ", "SAHAF", "HÜSNÜ", "SELİM & AYLA"] }
+    lines:
+      - say: "Simitçi, sahaf, şemsiyeli Hüsnü... Hepsi bir zamanlar cebinde *not* buldu."
+        v: nuri
+        by: nuri
+
+  - set: market
+    time: morning
+    mood: quiet
+    cast:
+      - { who: defne, at: [0.85, 0.55], face: nuri, pose: sit, do: sit_talk, hold: tea, look: nuri, expr: sad }
+      - { who: nuri, at: [0, -0.2], face: defne, pose: sit, do: sit, hold: tea, look: defne, expr: neutral }
+    cam: { shot: close, on: defne, angle: -30, move: push, amt: 0.2 }
+    lines:
+      - say: "Defne sordu: Peki ama *neden*?"
+
+  - set: pier
+    time: day
+    grade: sepia
+    mood: quiet
+    cut: fade
+    cast:
+      - { who: nuri_young, at: [-0.4, 0.3], face: 190, do: idle, look: ferry, expr: sad }
+      - { who: leyla_young, at: [2.5, 0, -3.15], face: 0, do: wave, look: nuri_young, expr: sad, onFerry: true }
+    cam: { shot: ots, on: nuri_young, to: ferry, move: push, amt: 0.15 }
+    fx: [ { type: ferry_depart, at: 0.8 } ]
+    sfx: [ { type: horn, at: 0.5 } ]
+    lines:
+      - say: "Gençken birini sevdim. Ona tek kelime söyleyemedim. Vapur kalktı, *gitti*."
+        v: nuri
+
+  - set: market
+    time: morning
+    mood: warm
+    cut: fade
+    cast:
+      - { who: nuri, at: [0, -0.2], face: 10, pose: sit, do: sit_talk, hold: tea, look: cam, expr: sad_smile }
+    cam: { shot: close, on: nuri, angle: 8, move: push, amt: 0.3 }
+    lines:
+      - say: "O günden beri, kimse benim gibi *susmasın* diye yazıyorum."
+        v: nuri
+        by: nuri
+
+  - set: insert
+    time: morning
+    mood: quiet
+    prop: { type: pen_shake, surface: market_cloth, hand: nuri }
+    cam: { shot: insert, move: push, amt: 0.25 }
+    lines:
+      - say: "Eli *titriyordu*. Kalemi zor tutuyordu."
+
+  - set: market
+    time: morning
+    mood: tension
+    cast:
+      - { who: nuri, at: [0, -0.2], face: kerem, pose: sit, do: give, hold: pen, look: kerem, expr: hopeful }
+      - { who: kerem, outfit: coat, at: [-0.85, 0.55], face: nuri, pose: sit, do: sit, look: nuri, expr: shock }
+    cam: { shot: ots, on: kerem, to: nuri, move: push, amt: 0.3 }
+    end: true
+    lines:
+      - say: "Artık yazamıyorum evlat. Kalemi *sen* alır mısın?"
+        v: nuri
+        by: nuri

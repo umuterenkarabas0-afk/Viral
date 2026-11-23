@@ -1,0 +1,111 @@
+# BÖLÜM 6 — Kırk Nokta
+episode: 6
+title: "Kırk Nokta"
+hook: "KADIKÖY HARİTASINDA 40 GİZLİ NOKTA"
+cliff: { question: "Pazar sabahı onları ne bekliyor?", next: "BÖLÜM 7" }
+seo:
+  title: "Cebimdeki Not · Bölüm 6 — Kırk Nokta"
+  description: "Haritadaki 40 nokta, 40 yılda tanıştırılan 40 çiftti. En eskisi 1984… En yenisi ise biz. #6/10"
+
+shots:
+  - set: insert
+    time: night
+    mood: mystery
+    prop: { type: map, surface: deck, dots: 40, reveal: false }
+    cam: { shot: insert, move: orbit, amt: 0.2 }
+    lines:
+      - say: "Haritada kırk nokta vardı. Her birinin yanında *iki isim* ve bir yıl."
+
+  - set: insert
+    time: night
+    mood: reveal
+    prop: { type: map, surface: deck, dots: 40, focus: selim }
+    cam: { shot: insert, move: push, amt: 0.45 }
+    sfx: [ { type: tick, at_word: "Selim" } ]
+    lines:
+      - say: "En eskisi: Selim ve Ayla. *{1984|Bin dokuz yüz seksen dört}*."
+
+  - set: deck
+    time: night
+    mood: reveal
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.45, 0.6], face: defne, do: show, hold: photo, look: hand, expr: surprised }
+      - { who: defne, at: [0.45, 0.6], face: kerem, do: show, hold: photo, look: hand, expr: surprised }
+    cam: { shot: two, on: kerem, to: defne, move: push, amt: 0.2 }
+    overlay: { type: photojoin, at_word: "birleştirdik" }
+    sfx: [ { type: match, at_word: "oturdu" } ]
+    lines:
+      - say: "Fotoğraftaki iki kişi! Parçaları birleştirdik. Tam *oturdu*."
+
+  - set: insert
+    time: night
+    mood: tension
+    prop: { type: map, surface: deck, dots: 40, focus: us }
+    cam: { shot: insert, move: push, amt: 0.45 }
+    sfx: [ { type: tick, at_word: "Kerem" } ]
+    lines:
+      - say: "En yenisi ise taze mürekkeple: *Kerem ve Defne*."
+
+  - set: deck
+    time: night
+    mood: comedy
+    cast:
+      - { who: defne, at: [0.45, 0.6], face: kerem, do: shy, look: floor, expr: blush }
+      - { who: kerem, outfit: coat, at: [-0.45, 0.6], face: -150, do: idle, look: sea, expr: awkward }
+    cam: { shot: two, on: kerem, to: defne, angle: -20, move: static }
+    lines:
+      - say: "Defne kızardı. Ben denize bakar gibi yaptım. Deniz de bana *baktı*."
+
+  - set: cafe
+    time: day
+    mood: warm
+    cut: whip
+    label: { place: "MODA · PASTANE", time: "ERTESİ GÜN" }
+    extras: 2
+    cast:
+      - { who: selim, at: [-0.62, 0], face: ayla, pose: sit, do: sit, hold: tea, look: ayla, expr: smile }
+      - { who: ayla, at: [0.62, 0], face: selim, pose: sit, do: sit, look: selim, expr: smile }
+      - { who: kerem, outfit: coat, walk: [[-2.6, 2.4], [-0.9, 1.1]], do: walk, look: selim, expr: curious }
+      - { who: defne, walk: [[-2.0, 2.9], [-0.2, 1.35]], do: walk, look: ayla, expr: curious }
+    props: [ cake ]
+    cam: { shot: wide, on: selim, move: push, amt: 0.2 }
+    lines:
+      - say: "Ertesi gün o adrese gittik: Moda'da küçük bir *pastane*."
+
+  - set: cafe
+    time: day
+    mood: warm
+    cast:
+      - { who: selim, at: [-0.62, 0], face: ayla, pose: sit, do: sit, hold: tea, look: ayla, expr: smile }
+      - { who: ayla, at: [0.62, 0], face: selim, pose: sit, do: sit, look: selim, expr: smile }
+    props: [ cake ]
+    cam: { shot: two, on: selim, to: ayla, move: push, amt: 0.2 }
+    tag: { who: selim, name: "SELİM & AYLA", sub: "Nokta #1 · 1984" }
+    lines:
+      - say: "Selim Amca ile Ayla Teyze, *kırk yıldır* aynı masada oturuyormuş."
+
+  - set: cafe
+    time: day
+    mood: mystery
+    cast:
+      - { who: selim, at: [-0.62, 0], face: 60, pose: sit, do: sit_talk, look: cam, expr: knowing }
+      - { who: ayla, at: [0.62, 0], face: selim, pose: sit, do: sit, look: selim, expr: smile }
+    props: [ cake ]
+    cam: { shot: close, on: selim, angle: 20, move: push, amt: 0.25 }
+    lines:
+      - say: "Biz de cebimizde not bulduk evlat. Yazan hiç değişmedi. Sadece *paltolar* değişti."
+        v: old
+        by: selim
+
+  - set: cafe
+    time: day
+    mood: tension
+    cast:
+      - { who: ayla, at: [0.62, 0], face: -70, pose: sit, do: whisper, look: cam, expr: knowing }
+      - { who: selim, at: [-0.62, 0], face: ayla, pose: sit, do: sit, look: ayla, expr: smile }
+    props: [ cake ]
+    cam: { shot: close, on: ayla, angle: -15, move: push, amt: 0.35 }
+    bubble: { who: ayla, text: "Pazar. 06:00. Bit pazarı.", at_word: "fısıldadı" }
+    end: true
+    lines:
+      - say: "Ayla Teyze fısıldadı: Pazar sabahı *altıda*, bit pazarına gidin."

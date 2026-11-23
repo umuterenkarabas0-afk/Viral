@@ -5,6 +5,8 @@
   python -m viral write "Uzayın en tuhaf 10 gezegeni"              # Claude ile senaryo yaz
   python -m viral auto                                             # kuyruktan sıradaki konuyu üret
   python -m viral voices                                           # Türkçe Google seslerini listele
+  python -m viral series content/series/cebimdeki-not --ep 1       # mini dizi bölümü (Edge TTS + 3D)
+  python -m viral series content/series/cebimdeki-not --ep all
 """
 from __future__ import annotations
 
@@ -42,6 +44,16 @@ def main(argv=None):
 
     sub.add_parser("voices", help="Türkçe Google TTS seslerini listele")
 
+    se = sub.add_parser("series", help="Mini dizi bölüm(ler)i üret (hikâye modu)")
+    se.add_argument("series_dir")
+    se.add_argument("--ep", default="1", help="bölüm no, '1,3,5' veya 'all'")
+    se.add_argument("--out", default="output")
+    se.add_argument("--workers", type=int)
+    se.add_argument("--no-render", action="store_true")
+    se.add_argument("--stills", help="virgülle ayrılmış saniyeler (önizleme kareleri)")
+    se.add_argument("--scale", type=float, help="3D katman çözünürlük ölçeği (varsayılan 0.75)")
+    se.add_argument("--keep-frames", action="store_true")
+
     args = ap.parse_args(argv)
     if args.cmd == "make":
         from .pipeline import make
@@ -56,6 +68,15 @@ def main(argv=None):
     elif args.cmd == "auto":
         from .autopilot import run
         run(args.queue, count=args.count, tts=args.tts, workers=args.workers, handle=args.handle)
+    elif args.cmd == "series":
+        from .story import load_series, make_episode
+        n_eps = load_series(args.series_dir).get("episodes", 10)
+        eps = list(range(1, n_eps + 1)) if args.ep == "all" else [int(x) for x in args.ep.split(",")]
+        stills = [float(x) for x in args.stills.split(",")] if args.stills else None
+        for n in eps:
+            r = make_episode(args.series_dir, n, args.out, render_video=not args.no_render, workers=args.workers, stills=stills,
+                             keep_frames=args.keep_frames, scale=args.scale)
+            print(r)
     elif args.cmd == "voices":
         from .tts import list_voices
         for v in list_voices():

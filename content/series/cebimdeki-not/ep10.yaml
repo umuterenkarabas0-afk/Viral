@@ -1,0 +1,107 @@
+# BÖLÜM 10 — Yeni Yazar (Sezon Finali)
+episode: 10
+title: "Yeni Yazar"
+hook: "SEZON FİNALİ"
+cliff: { question: "2. sezon gelsin mi?", next: "SEZON 1 SONU", final: true }
+seo:
+  title: "Cebimdeki Not · Bölüm 10 — Yeni Yazar (Sezon Finali)"
+  description: "Kalem artık bende. Her şey mükemmeldi… ta ki cebimde tanımadığım bir el yazısı bulana kadar. #10/10"
+
+shots:
+  - set: market
+    time: morning
+    mood: mystery
+    cast:
+      - { who: kerem, outfit: coat, at: [0.1, 0.5], face: 180, do: [[0, idle], ["@palto", reach]], look: rack, expr: sad }
+    props: [ empty_stall ]
+    cam: { shot: full, on: kerem, angle: 150, move: push, amt: 0.2 }
+    lines:
+      - say: "Tezgâh boştu. Askıda sadece benimkine benzeyen bir *palto* asılıydı."
+
+  - set: insert
+    time: morning
+    mood: warm
+    prop: { type: note, surface: coat, hand: nuri }
+    cam: { shot: insert, move: push, amt: 0.25 }
+    sfx: [ { type: paper, at: 0 } ]
+    lines:
+      - say: "Kalem artık senin Kerem. Ben denize karşı çay içmeye gidiyorum. Arkamdan gelme."
+        v: note
+        write: true
+
+  - set: market
+    time: day
+    mood: warm
+    cut: whip
+    extras: 6
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.35, -1.0], face: 0, do: talk, look: cam, expr: smile }
+      - { who: defne, at: [0.45, -1.0], face: -15, do: give, hold: coat_folded, look: kerem, expr: smile }
+    cam: { shot: medium, on: kerem, to: defne, angle: 0, move: push, amt: 0.2 }
+    label: { place: "BİT PAZARI", time: "HER PAZAR" }
+    lines:
+      - say: "O günden beri pazar günleri tezgâhı *ben* açıyorum. Defne de hep yanımda."
+
+  - set: market
+    time: day
+    mood: warm
+    extras: 8
+    crowd: readnotes
+    cam: { shot: wide, move: orbit, amt: 0.3 }
+    lines:
+      - say: "Her hafta yeni bir cep, yeni bir not. Kadıköy artık biraz daha *az yalnız*."
+
+  - set: deck
+    time: sunset
+    mood: warm
+    cut: fade
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.3, -1.0], face: 180, do: rail, look: sea, expr: smile }
+      - { who: defne, at: [0.3, -1.0], face: 180, do: rail, look: kerem, expr: smile }
+    cam: { shot: two, on: kerem, to: defne, angle: 160, move: crane }
+    fx: [ { type: holdhands, at_word: "Diyelim" } ]
+    lines:
+      - say: "Defne'yle aramızda ne var diye soruyorsunuz. Diyelim ki... haritadaki *kırk birinci* nokta biziz."
+
+  - set: room
+    time: night
+    mood: tension
+    cut: fade
+    cast:
+      - { who: kerem, outfit: casual, at: [1.1, -1.0], pose: lying, do: sleep, expr: sleep }
+    props: [ coat_stand ]
+    cam: { shot: custom, pos: [-0.8, 1.5, 1.4], look: [-0.25, 1.1, -1.55], fov: 40, move: push, amt: 0.25 }
+    fx: [ { type: flicker, at_word: "Ta" } ]
+    lines:
+      - say: "Her şey mükemmeldi. Ta ki *dün sabaha* kadar."
+
+  - set: room
+    time: morning
+    mood: tension
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.3, -0.5], face: 12, do: [[0, pocket], ["@not", read]], hold: [["@not", note_twist]], look: [[0, cam], ["@not", hand]], expr: [[0, smile], ["@tanımıyordum", shock]] }
+    cam: { shot: medium, on: kerem, angle: -20, move: push, amt: 0.3 }
+    sfx: [ { type: paper, at_word: "not" } ]
+    lines:
+      - say: "Paltomun cebinde bir not buldum. Ama bu sefer el yazısını hiç *tanımıyordum*."
+
+  - set: insert
+    time: night
+    mood: reveal
+    prop: { type: note, surface: wood, hand: twist, paper: grid }
+    cam: { shot: insert, move: push, amt: 0.4 }
+    fx: [ { type: flicker, at: 0 } ]
+    lines:
+      - say: "Nuri Amca'ya inanma."
+        v: twist
+        write: true
+
+  - set: room
+    time: morning
+    mood: tension
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.3, -0.5], face: 12, do: read, hold: note_twist, look: cam, expr: horror }
+    cam: { shot: ecu, on: kerem, angle: -5, move: push, amt: 0.35 }
+    end: true
+    lines:
+      - say: "Nuri Amca bize yalan mı söylemişti? Ve bu notu... *kim* yazmıştı?"

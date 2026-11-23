@@ -1,0 +1,133 @@
+# BÖLÜM 3 — Şüpheliler ve Kedi
+episode: 3
+title: "Üç Şüpheli, Bir Kedi"
+hook: "3 ŞÜPHELİ. 1 KEDİ. 0 MANTIK."
+cliff: { question: "Boğa'da onu kim bekliyor?", next: "BÖLÜM 4" }
+seo:
+  title: "Cebimdeki Not · Bölüm 3 — Üç Şüpheli, Bir Kedi"
+  description: "Notları kim yazıyor? Şüpheli listem: ev arkadaşım, kedim ve annem… #3/10"
+
+shots:
+  - set: room
+    time: day
+    mood: comedy
+    cast:
+      - { who: emre, at: [0.2, -0.3], face: -15, do: eat, hold: bowl, expr: bored, look: cam }
+      - { who: kerem, outfit: coat, at: [-1.3, 0.6], face: emre, do: point, look: emre, expr: suspicious }
+    cam: { shot: medium, on: emre, angle: 10, move: push, amt: 0.2 }
+    overlay: { type: suspects, items: ["EMRE", "PAMUK", "ANNEM"], show: 1 }
+    tag: { who: emre, name: "EMRE", sub: "Ev arkadaşı · Şüpheli #1" }
+    lines:
+      - say: "Şüpheli listesi yaptım. Bir: ev arkadaşım *Emre*."
+
+  - set: room
+    time: day
+    mood: comedy
+    cast:
+      - { who: emre, at: [0.6, -0.2], face: 160, do: search, expr: confused, look: floor }
+    cam: { shot: full, on: emre, angle: 35, move: static }
+    overlay: { type: suspects, items: ["EMRE", "PAMUK", "ANNEM"], show: 1, strike: 1, strike_word: "bulamıyor" }
+    sfx: [ { type: scratch, at_word: "bulamıyor" } ]
+    lines:
+      - say: "Ama Emre kendi çorabını bile *bulamıyor*."
+
+  - set: room
+    time: night
+    mood: mystery
+    props: [ cat_top ]
+    cam: { shot: custom, pos: [-0.7, 1.05, -0.2], look: [-1.1, 2.3, -1.65], fov: 42, move: push, amt: 0.25 }
+    overlay: { type: suspects, items: ["EMRE", "PAMUK", "ANNEM"], show: 2, strike: 1 }
+    sfx: [ { type: meow, at_word: "uyanık" } ]
+    lines:
+      - say: "İki: kedimiz *Pamuk*. Gece üçte uyanık olan tek kişi o."
+
+  - set: room
+    time: day
+    mood: comedy
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.3, -0.3], face: 15, do: phone, hold: phone, expr: [[0, determined], ["@bilir", tired]], look: cam }
+    cam: { shot: medium, on: kerem, angle: -20, move: push, amt: 0.2 }
+    overlay: { type: suspects, items: ["EMRE", "PAMUK", "ANNEM"], show: 3, strike: 2 }
+    bubble: { who: phone, text: "Kazağını giydin mi?", at_word: "bilir" }
+    lines:
+      - say: "Üç: *annem*. Çünkü annem her şeyi bilir."
+
+  - set: insert
+    time: morning
+    mood: mystery
+    cut: flash
+    prop: { type: note, surface: wood, hand: nuri }
+    cam: { shot: insert, move: push, amt: 0.25 }
+    sfx: [ { type: paper, at: 0 } ]
+    lines:
+      - say: "Emre'yi suçlama. Bahariye'deki sahafa git. Kırk yedinci sayfa. Kediye dokunma."
+        v: note
+        write: true
+
+  - set: bookshop
+    time: day
+    mood: mystery
+    cut: whip
+    label: { place: "BAHARİYE · SAHAF", time: "16:20" }
+    cast:
+      - { who: kerem, outfit: coat, walk: [[-1.0, 1.6], [0.0, 0.25]], do: walk, look: cat, expr: curious }
+    props: [ cat_counter ]
+    cam: { shot: wide, on: kerem, move: push, amt: 0.2 }
+    lines:
+      - say: "Sahafın tezgâhında dev gibi, *turuncu* bir kedi uyuyordu."
+
+  - set: bookshop
+    time: day
+    mood: comedy
+    cast:
+      - { who: kerem, outfit: coat, at: [0.35, 0.05], face: 110, do: pet, look: cat, expr: [[0, sneaky], ["@dokundum", smile]] }
+    props: [ cat_counter ]
+    cam: { shot: medium, on: kerem, angle: 70, move: push, amt: 0.3 }
+    hold: 0.3
+    sfx: [ { type: purr, at_word: "dokundum" } ]
+    lines:
+      - say: "Tabii ki... *dokundum*."
+
+  - set: bookshop
+    time: day
+    mood: comedy
+    cast:
+      - { who: kerem, outfit: coat, at: [0.35, 0.05], face: 30, do: [[0, surprised], ["@üstüme", duck]], look: shelf, expr: shock }
+    props: [ cat_jump ]
+    cam: { shot: full, on: kerem, angle: 25, move: shake }
+    fx: [ { type: cat_jump, at_word: "fırladı" }, { type: books, at_word: "üstüme" }, { type: shake, at_word: "üstüme", dur: 1.4 } ]
+    sfx: [ { type: hiss, at_word: "Kedi" }, { type: books, at_word: "üstüme" } ]
+    hold: 0.5
+    lines:
+      - say: "Kedi raflara *fırladı*. Raflar da üstüme!"
+
+  - set: insert
+    time: day
+    mood: reveal
+    prop: { type: book, surface: wood, page: 47 }
+    cam: { shot: insert, move: push, amt: 0.3 }
+    lines:
+      - say: "Bir kitap tam kırk yedinci sayfada açıldı. İçinde fotoğrafın *diğer yarısı* vardı."
+
+  - set: pier
+    time: day
+    grade: sepia
+    mood: reveal
+    cut: flash
+    cast:
+      - { who: ayla_young, at: [0, 0.4], face: -10, do: read, hold: note, look: cam, expr: smile }
+    cam: { shot: full, on: ayla_young, angle: -8, move: push, amt: 0.15 }
+    overlay: { type: photo, half: right, stamp: "1984" }
+    lines:
+      - say: "Genç bir kadın. O da elinde bir *not* tutuyordu."
+
+  - set: insert
+    time: day
+    mood: tension
+    prop: { type: book_margin, surface: wood, hand: nuri }
+    cam: { shot: insert, move: push, amt: 0.3 }
+    end: true
+    lines:
+      - say: "Yarın saat {14:00|on dörtte}, Boğa'nın önünde. *Yalnız* olmayacaksın."
+        v: note
+        write: true

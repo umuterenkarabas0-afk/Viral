@@ -1,0 +1,122 @@
+# BÖLÜM 5 — Defne
+episode: 5
+title: "Defne"
+hook: "İKİMİZE DE AYNI KİŞİ YAZIYORDU"
+cliff: { question: "Kırk nokta ne anlama geliyor?", next: "BÖLÜM 6" }
+seo:
+  title: "Cebimdeki Not · Bölüm 5 — Defne"
+  description: "Onun da cebinden not çıkıyordu. Notları yan yana koyduk ve gece yarısı son vapura bindik… #5/10"
+
+shots:
+  - set: cafe
+    time: day
+    mood: warm
+    label: { place: "MODA · ÇAY BAHÇESİ", time: "14:40" }
+    extras: 3
+    cast:
+      - { who: defne, at: [0.62, 0], face: kerem, pose: sit, do: [[0, sit_talk]], hold: tea, look: cam, expr: smile }
+      - { who: kerem, outfit: coat, at: [-0.62, 0], face: defne, pose: sit, do: sit, look: defne, expr: curious }
+    cam: { shot: medium, on: defne, angle: -35, move: push, amt: 0.2 }
+    tag: { who: defne, name: "DEFNE · 26", sub: "Çizer. O da sıkılmış." }
+    lines:
+      - say: "Adı Defne'ydi. Yirmi altı yaşında, *çizer*. Ve tıpkı benim gibi, hayattan sıkılmış."
+
+  - set: cafe
+    time: day
+    mood: mystery
+    extras: 3
+    cast:
+      - { who: defne, at: [0.62, 0], face: kerem, pose: sit, do: sit_talk, look: kerem, expr: neutral }
+      - { who: kerem, outfit: coat, at: [-0.62, 0], face: defne, pose: sit, do: sit, look: defne, expr: surprised }
+    cam: { shot: two, on: kerem, to: defne, move: push, amt: 0.15 }
+    lines:
+      - say: "Onun notları da bir ceketten çıkıyordu. Aynı gün, *aynı* bit pazarından almıştı."
+
+  - set: insert
+    time: day
+    mood: mystery
+    prop: { type: notes_many, surface: cloth, hand: nuri }
+    cam: { shot: insert, move: orbit, amt: 0.25 }
+    sfx: [ { type: paper, at: 0.2 }, { type: paper, at: 1.0 }, { type: paper, at: 1.7 } ]
+    lines:
+      - say: "Bütün notları masaya dizdik. Hepsi aynı *dolma kalemden* çıkmıştı."
+
+  - set: cafe
+    time: day
+    mood: comedy
+    cast:
+      - { who: defne, at: [0.62, 0], face: kerem, pose: sit, do: sit_talk, look: kerem, expr: dreamy }
+      - { who: kerem, outfit: coat, at: [-0.62, 0], face: defne, pose: sit, do: sit, look: defne, expr: neutral }
+    cam: { shot: close, on: defne, angle: -20, move: push, amt: 0.2 }
+    bubble: { who: defne, text: "Bu bir AŞK oyunu!", at_word: "teorisi" }
+    lines:
+      - say: "Defne'nin teorisi: Bu bir *aşk* oyunu."
+
+  - set: cafe
+    time: day
+    mood: comedy
+    cast:
+      - { who: defne, at: [0.62, 0], face: kerem, pose: sit, do: sit, look: kerem, expr: annoyed }
+      - { who: kerem, outfit: coat, at: [-0.62, 0], face: defne, pose: sit, do: sit_talk, look: defne, expr: suspicious }
+    cam: { shot: close, on: kerem, angle: 20, move: push, amt: 0.2 }
+    bubble: { who: kerem, text: "Bu bir tarikat.", at_word: "teorim" }
+    sfx: [ { type: rimshot, at_word: "tarikat", delay: 0.5 } ]
+    lines:
+      - say: "Benim teorim: Bu bir *tarikat*."
+
+  - set: cafe
+    time: day
+    mood: tension
+    cast:
+      - { who: defne, at: [0.62, 0], face: kerem, pose: sit, do: [[0, laugh], ["@ta", sit]], look: [[0, kerem], ["@ta", table]], expr: [[0, laugh], ["@ta", curious]] }
+      - { who: kerem, outfit: coat, at: [-0.62, 0], face: defne, pose: sit, do: [[0, laugh], ["@ta", sit]], look: [[0, defne], ["@ta", table]], expr: [[0, laugh], ["@ta", curious]] }
+    cam: { shot: two, on: kerem, to: defne, angle: 10, move: push, amt: 0.25 }
+    lines:
+      - say: "Güldük... ta ki son iki notu *yan yana* koyana kadar."
+
+  - set: insert
+    time: day
+    mood: reveal
+    prop: { type: notes_pair, surface: cloth, hand: nuri, left: "Bu gece son vapur.", right: "Arka güverte." }
+    cam: { shot: insert, move: push, amt: 0.25 }
+    fx: [ { type: join, at_word: "Arka" } ]
+    sfx: [ { type: paper, at: 0 }, { type: match, at_word: "Arka" } ]
+    lines:
+      - say: "Bu gece son vapur. Arka güverte."
+        v: note
+
+  - set: deck
+    time: night
+    mood: mystery
+    cut: whip
+    label: { place: "SON VAPUR · KADIKÖY–KARAKÖY", time: "23:45" }
+    cast:
+      - { who: kerem, outfit: coat, walk: [[-3.5, 0.9], [-0.9, 0.7]], do: walk, look: around, expr: nervous }
+      - { who: defne, walk: [[-4.3, 1.1], [-1.7, 0.95]], do: walk, look: around, expr: nervous }
+    props: [ envelope_bench ]
+    cam: { shot: wide, on: kerem, move: track }
+    sfx: [ { type: horn, at: 0.6 } ]
+    lines:
+      - say: "Gece yarısına çeyrek kala son vapurdaydık. Arka güverte *bomboştu*."
+
+  - set: deck
+    time: night
+    mood: tension
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.4, 0.75], face: 160, do: [[0, idle], ["@zarf", reach]], look: bench, expr: curious }
+      - { who: defne, at: [-1.2, 0.95], face: 140, do: grip, look: bench, expr: nervous }
+    props: [ envelope_bench ]
+    cam: { shot: custom, pos: [0.9, 0.75, 0.9], look: [0.25, 0.48, 0.0], fov: 40, move: push, amt: 0.3 }
+    lines:
+      - say: "Bankın üstünde bir *zarf* duruyordu. Üzerinde ikimizin adı yazıyordu."
+
+  - set: insert
+    time: night
+    mood: reveal
+    prop: { type: map, surface: deck, dots: 40, reveal: true }
+    cam: { shot: insert, move: push, amt: 0.3 }
+    fx: [ { type: dots, at_word: "kırk" } ]
+    sfx: [ { type: paper, at: 0 }, { type: dots, at_word: "kırk" } ]
+    end: true
+    lines:
+      - say: "Zarftan bir harita çıktı. Üstünde *kırk* tane kırmızı nokta vardı."

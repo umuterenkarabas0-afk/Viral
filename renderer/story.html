@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Story Renderer</title>
+<link rel="stylesheet" href="/node_modules/@fontsource/montserrat/700.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/montserrat/800.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/montserrat/900.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/anton/400.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/caveat/700.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/kalam/700.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/amatic-sc/700.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/courier-prime/700.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/playfair-display/700.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/playfair-display/900-italic.css">
+<style>
+  :root { --accent: #FFC94A; --accent2: #7FD4C1; --danger: #FF5A4E; --paper: #F4E9CF; --ink: #1E1A16; }
+  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  #gl { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+  #ui { position: absolute; inset: 0; pointer-events: none; font-family: 'Montserrat', sans-serif; color: #fff; }
+  .abs { position: absolute; }
+  .hide { opacity: 0; }
+
+  /* üst rozet */
+  .badge { position: absolute; top: 150px; left: 64px; display: flex; align-items: center; gap: 14px; transform-origin: left center; }
+  .badge .logo { display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 14px; border-radius: 14px; background: var(--paper); color: var(--ink);
+    font: 400 40px/1 'Anton'; letter-spacing: 1px; box-shadow: 0 8px 24px rgba(0,0,0,.35); transform: rotate(-2deg); }
+  .badge .logo svg { flex: none; }
+  .badge .ep { padding: 10px 18px; border-radius: 12px; background: rgba(20,16,12,.72); border: 2px solid rgba(255,255,255,.25); font: 900 30px 'Montserrat'; letter-spacing: 1px; }
+  .badge .ep b { color: var(--accent); }
+  .progress { position: absolute; top: 0; left: 0; height: 7px; background: var(--accent); box-shadow: 0 0 12px rgba(255,201,74,.7); }
+
+  /* kanca */
+  .hook { position: absolute; left: 50px; right: 50px; top: 430px; text-align: center; }
+  .hook .paper { display: inline-block; padding: 26px 40px 30px; background: var(--paper); color: var(--ink); transform: rotate(-3deg);
+    box-shadow: 0 22px 60px rgba(0,0,0,.55); border-radius: 6px; position: relative; max-width: 900px; }
+  .hook .paper::before { content: ''; position: absolute; top: -22px; left: 50%; width: 170px; height: 44px; margin-left: -85px; background: rgba(255,240,190,.75); transform: rotate(3deg); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+  .hook .w { display: inline-block; font: 400 124px/1.04 'Anton'; letter-spacing: 0px; margin: 0 12px; }
+  .hook .w.hl { color: #c0281e; }
+  .hook .kick { margin-top: 26px; font: 900 34px 'Montserrat'; letter-spacing: 8px; color: #fff; text-shadow: 0 4px 14px rgba(0,0,0,.8); }
+
+  /* konum etiketi */
+  .label { position: absolute; left: 64px; top: 250px; display: flex; flex-direction: column; gap: 6px; }
+  .label .row { display: flex; align-items: center; gap: 12px; padding: 12px 22px 12px 16px; background: rgba(12,10,8,.72); border-left: 8px solid var(--accent);
+    font: 700 36px 'Courier Prime'; letter-spacing: 1px; color: #fff; white-space: nowrap; width: max-content; }
+  .label .row.t { font-size: 30px; color: var(--accent); border-left-color: transparent; background: rgba(12,10,8,.55); }
+  .label .caret { display: inline-block; width: 16px; height: 32px; background: var(--accent); margin-left: 2px; }
+
+  /* karakter kartı */
+  .tag { position: absolute; transform-origin: left center; }
+  .tag .slab { padding: 14px 30px 16px 26px; background: var(--accent); color: var(--ink); font: 400 92px/1 'Anton'; letter-spacing: 1px; transform: rotate(-3deg); box-shadow: 0 14px 40px rgba(0,0,0,.45); white-space: nowrap; }
+  .tag .sub { margin: 12px 0 0 34px; display: inline-block; padding: 10px 20px; background: rgba(12,10,8,.82); font: 800 34px 'Montserrat'; transform: rotate(-3deg); white-space: nowrap; }
+  .tag .line { position: absolute; height: 5px; background: #fff; transform-origin: left center; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+
+  /* altyazılar */
+  .captions { position: absolute; left: 50px; right: 130px; top: 1215px; height: 290px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .speaker { margin-bottom: 14px; padding: 8px 18px; border-radius: 10px; background: rgba(12,10,8,.75); border: 2px solid var(--accent2); font: 900 30px 'Montserrat'; letter-spacing: 2px; color: var(--accent2); }
+  .capline { display: flex; flex-wrap: nowrap; justify-content: center; gap: 0 30px; text-align: center; transform-origin: 50% 50%; }
+  .capline .w { display: inline-block; font: 900 82px/1.12 'Montserrat'; color: #fff; letter-spacing: -0.5px;
+    -webkit-text-stroke: 14px #0b0806; paint-order: stroke fill; text-shadow: 0 7px 0 rgba(0,0,0,.55), 0 12px 30px rgba(0,0,0,.45); transform-origin: 50% 70%; white-space: nowrap; }
+  .capline .w.emph { color: var(--accent2); }
+  .capline .w.danger { color: var(--danger); }
+  .capline .w.on { color: var(--accent); }
+  .capline.note { padding: 10px 34px 16px; background: var(--paper); transform: rotate(-1.5deg); box-shadow: 0 14px 40px rgba(0,0,0,.5); border-radius: 4px; gap: 0 20px; }
+  .capline.note .w { font: 700 96px/1.05 'Caveat'; color: rgba(28,42,82,.35); -webkit-text-stroke: 0; text-shadow: none; }
+  .capline.note .w.said { color: #1c2a52; }
+  .capline.note .w.on { color: #1c2a52; text-decoration: underline 5px rgba(192,40,30,.75); text-underline-offset: 10px; }
+  .capline.twist { padding: 10px 34px 16px; background: #e9e4d6; transform: rotate(1.5deg); box-shadow: 0 0 0 3px #5e0d0d, 0 18px 50px rgba(0,0,0,.7); background-image: linear-gradient(rgba(80,120,170,.25) 2px, transparent 2px), linear-gradient(90deg, rgba(80,120,170,.25) 2px, transparent 2px); background-size: 34px 34px; }
+  .capline.twist .w { font: 700 120px/1.0 'Amatic SC'; color: rgba(94,13,13,.25); -webkit-text-stroke: 0; text-shadow: none; }
+  .capline.twist .w.said { color: #5e0d0d; }
+  .capline.shout .w { font-size: 110px; color: var(--accent); }
+
+  /* konuşma balonu */
+  .bubble { position: absolute; padding: 22px 32px; background: #fff; color: var(--ink); border-radius: 36px; font: 900 46px/1.1 'Montserrat'; max-width: 640px; text-align: center;
+    box-shadow: 0 14px 40px rgba(0,0,0,.45); border: 5px solid var(--ink); transform-origin: 50% 100%; }
+  .bubble::after { content: ''; position: absolute; left: var(--tail, 50%); bottom: -34px; border: 20px solid transparent; border-top: 22px solid var(--ink); margin-left: -20px; }
+  .bubble::before { content: ''; position: absolute; left: var(--tail, 50%); bottom: -24px; border: 15px solid transparent; border-top: 17px solid #fff; margin-left: -15px; z-index: 2; }
+
+  /* büyük yazı */
+  .bigtext { position: absolute; left: 0; right: 0; top: 520px; text-align: center; font: 400 176px/0.95 'Anton'; color: var(--accent);
+    -webkit-text-stroke: 12px #0b0806; paint-order: stroke fill; text-shadow: 0 14px 0 #c0281e, 0 24px 50px rgba(0,0,0,.6); }
+
+  /* şüpheliler */
+  .suspects { position: absolute; top: 260px; left: 50px; right: 50px; display: flex; gap: 26px; justify-content: center; }
+  .scard { position: relative; width: 290px; padding: 16px 16px 20px; background: #f6f1e6; color: var(--ink); box-shadow: 0 16px 40px rgba(0,0,0,.45); text-align: center; }
+  .scard:nth-child(1) { transform: rotate(-4deg); } .scard:nth-child(2) { transform: rotate(2deg); } .scard:nth-child(3) { transform: rotate(-2deg); }
+  .scard .num { font: 400 40px 'Anton'; color: #c0281e; }
+  .scard .nm { font: 400 64px/1 'Anton'; letter-spacing: 1px; }
+  .scard .pin { position: absolute; top: -14px; left: 50%; margin-left: -14px; width: 28px; height: 28px; border-radius: 50%; background: #c0281e; box-shadow: 0 3px 6px rgba(0,0,0,.4); }
+  .scard .strike { position: absolute; left: 6%; top: 52%; height: 12px; width: 88%; background: #c0281e; border-radius: 6px; transform-origin: left center; transform: rotate(-12deg) scaleX(0); }
+  .scard .circle { position: absolute; inset: -18px; border: 9px solid #c0281e; border-radius: 50%; opacity: 0; }
+
+  /* kayıt arayüzü */
+  .rec { position: absolute; inset: 0; }
+  .rec .corner { position: absolute; width: 90px; height: 90px; border: 0 solid rgba(255,255,255,.85); }
+  .rec .tl { top: 230px; left: 60px; border-top-width: 6px; border-left-width: 6px; }
+  .rec .tr { top: 230px; right: 60px; border-top-width: 6px; border-right-width: 6px; }
+  .rec .bl { bottom: 330px; left: 60px; border-bottom-width: 6px; border-left-width: 6px; }
+  .rec .br { bottom: 330px; right: 60px; border-bottom-width: 6px; border-right-width: 6px; }
+  .rec .top { position: absolute; top: 260px; left: 90px; right: 90px; display: flex; justify-content: space-between; font: 700 46px 'Courier Prime'; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,.8); }
+  .rec .dot { display: inline-block; width: 30px; height: 30px; border-radius: 50%; background: #ff2a2a; margin-right: 12px; vertical-align: -3px; box-shadow: 0 0 14px #ff2a2a; }
+  .rec .nosig { position: absolute; left: 0; right: 0; top: 760px; text-align: center; font: 700 80px 'Courier Prime'; color: #fff; text-shadow: 0 0 20px #000; }
+  .rec .lost { position: absolute; left: 0; right: 0; top: 880px; text-align: center; }
+  .rec .lost span { display: inline-block; padding: 12px 26px; background: #c0281e; font: 900 44px 'Montserrat'; letter-spacing: 2px; transform: rotate(-2deg); }
+  .static { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 2px, rgba(0,0,0,.25) 2px 4px); mix-blend-mode: screen; }
+
+  /* fotoğraf çerçevesi */
+  .photo { position: absolute; inset: 0; }
+  .photo .stamp { position: absolute; font: 400 120px 'Anton'; color: rgba(192,40,30,.85); border: 10px solid rgba(192,40,30,.85); padding: 0 26px; transform: rotate(-12deg); letter-spacing: 6px; }
+  .pjoin { position: absolute; left: 0; right: 0; top: 330px; height: 760px; }
+  .pjoin .half { position: absolute; top: 0; width: 330px; height: 560px; background: #f3eee2; padding: 18px; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+  .pjoin .half .img { width: 100%; height: 450px; background: linear-gradient(#c9b08a, #8a6f50 60%, #5a4632); position: relative; overflow: hidden; }
+  .pjoin .half .img i { position: absolute; bottom: 0; width: 120px; height: 290px; background: rgba(40,28,18,.75); border-radius: 60px 60px 0 0; }
+  .pjoin .half .img i::before { content: ''; position: absolute; top: -70px; left: 30px; width: 60px; height: 60px; border-radius: 50%; background: rgba(40,28,18,.75); }
+
+  /* ağ */
+  .network { position: absolute; inset: 0; }
+  .network .node { position: absolute; padding: 10px 20px; background: var(--paper); color: var(--ink); font: 400 44px 'Anton'; letter-spacing: 1px; box-shadow: 0 10px 26px rgba(0,0,0,.45); white-space: nowrap; transform-origin: center; }
+
+  /* son kart */
+  .endcard { position: absolute; inset: 0; }
+  .endcard .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,6,4,.15) 0%, rgba(8,6,4,.72) 38%, rgba(8,6,4,.9) 100%); }
+  .endcard .box { position: absolute; left: 60px; right: 60px; top: 560px; text-align: center; }
+  .endcard .kick { font: 900 44px 'Montserrat'; letter-spacing: 14px; color: var(--accent2); }
+  .endcard .big { margin-top: 26px; font: 400 170px/0.95 'Anton'; color: var(--accent); -webkit-text-stroke: 8px #0b0806; paint-order: stroke fill; text-shadow: 0 12px 0 rgba(0,0,0,.5); white-space: nowrap; }
+  .endcard .q { margin: 40px auto 0; max-width: 900px; display: inline-flex; align-items: center; gap: 16px; padding: 20px 34px; border-radius: 26px; background: var(--paper); color: var(--ink); font: 900 50px/1.1 'Montserrat'; transform: rotate(-2deg); box-shadow: 0 14px 40px rgba(0,0,0,.5); }
+  .endcard .follow { margin: 44px auto 0; width: max-content; padding: 22px 50px; border-radius: 999px; background: var(--danger); font: 900 52px 'Montserrat'; box-shadow: 0 14px 40px rgba(255,90,78,.55); display: flex; align-items: center; gap: 14px; }
+  .endcard .dots { margin: 46px auto 0; display: flex; gap: 14px; justify-content: center; }
+  .endcard .dots i { width: 58px; height: 58px; border-radius: 50%; border: 3px solid rgba(255,255,255,.4); display: flex; align-items: center; justify-content: center; font: 900 26px 'Montserrat'; font-style: normal; color: rgba(255,255,255,.6); }
+  .endcard .dots i.done { background: rgba(255,255,255,.25); color: #fff; }
+  .endcard .dots i.cur { background: var(--accent); border-color: #fff; color: var(--ink); box-shadow: 0 0 24px rgba(255,201,74,.7); }
+  .heart { position: absolute; font: 400 120px 'Anton'; color: #ff5a7a; text-shadow: 0 0 30px rgba(255,90,122,.8); }
+  .flashwhite { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="1080" height="1920"></canvas>
+  <div id="ui"></div>
+</div>
+<script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }</script>
+<script type="module" src="/renderer/story/main.js"></script>
+</body>
+</html>

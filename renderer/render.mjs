@@ -44,7 +44,7 @@ async function openPage(port, timeline, gpu, opts = {}) {
   page.on('console', (m) => { const t = m.text(); if (m.type() === 'error' || t.includes('INIT') ) errors.push(t); if (process.env.RENDER_DEBUG) console.log('[page]', t); });
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.addInitScript(([tl, ro]) => { window.__TIMELINE__ = tl; window.__RENDER_OPTS__ = ro; }, [timeline, opts]);
-  await page.goto(`http://127.0.0.1:${port}/renderer/index.html`);
+  await page.goto(`http://127.0.0.1:${port}/renderer/${(timeline.meta && timeline.meta.page) || 'index.html'}`);
   try {
     await page.waitForFunction('window.__ready === true || !!window.__initError', null, { timeout: 180000 });
   } catch (e) { throw new Error('Sayfa hazır olmadı: ' + errors.join('\n')); }
@@ -77,6 +77,7 @@ async function main() {
     // sahne geçişlerinin doğru kurulması için kısa ön-ısıtma yok: render tamamen t'ye bağlı
     for (const ts of String(o.stills).split(',').map(Number)) {
       await page.evaluate((t) => window.renderFrame(t), ts);
+      if (o.debug) console.log(ts, JSON.stringify(await page.evaluate(() => window.__director && window.__director.debug ? window.__director.debug() : null)));
       const buf = await capture(cdp, 'png');
       const f = path.join(outDir, `still_${ts.toFixed(2)}.png`);
       fs.writeFileSync(f, buf);

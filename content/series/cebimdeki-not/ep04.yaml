@@ -1,0 +1,127 @@
+# BÖLÜM 4 — Kırmızı Balık
+episode: 4
+title: "Kırmızı Balık"
+hook: "YÜZ KİŞİNİN ORTASINDA BAĞIRDIM"
+cliff: { question: "Bu kız kim?", next: "BÖLÜM 5" }
+seo:
+  title: "Cebimdeki Not · Bölüm 4 — Kırmızı Balık"
+  description: "Not, Altıyol'da Boğa'nın önünde 'Kırmızı balık!' diye bağırmamı istedi. Bağırdım. Ama yalnız değildim… #4/10"
+
+shots:
+  - set: square
+    time: day
+    mood: mystery
+    label: { place: "ALTIYOL · BOĞA HEYKELİ", time: "14:00" }
+    extras: 14
+    cast:
+      - { who: kerem, outfit: coat, walk: [[-1.6, 2.4], [-0.55, 0.3]], do: walk, look: around, expr: nervous }
+      - { who: defne, at: [1.7, 0.9], face: -40, do: idle, look: statue, expr: nervous }
+    cam: { shot: wide, on: kerem, move: crane }
+    lines:
+      - say: "Saat tam on dörtte, Altıyol'daki *Boğa* heykelinin önündeydim."
+
+  - set: insert
+    time: day
+    mood: mystery
+    prop: { type: note, surface: hand, hand: nuri }
+    cam: { shot: insert, move: push, amt: 0.25 }
+    lines:
+      - say: "Yüksek sesle 'Kırmızı balık!' diye bağır. Utanma."
+        v: note
+        write: true
+
+  - set: square
+    time: day
+    mood: tension
+    extras: 14
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.55, 0.3], face: 10, do: breathe, look: cam, expr: nervous }
+    cam: { shot: close, on: kerem, angle: 12, move: push, amt: 0.3 }
+    sfx: [ { type: heartbeat, at: 0, dur: 3.2 } ]
+    lines:
+      - say: "Etrafımda yüz kişi vardı. Derin bir nefes aldım."
+
+  - set: square
+    time: day
+    mood: reveal
+    extras: 14
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.55, 0.3], face: 0, do: [[0, breathe], ["@Kırmızı", shout]], look: up, expr: [[0, nervous], ["@Kırmızı", shout]] }
+    cam: { shot: low, on: kerem, angle: -10, move: push, amt: 0.2 }
+    fx: [ { type: shake, at_word: "Kırmızı", dur: 1.2 }, { type: pigeons, at_word: "Kırmızı" } ]
+    overlay: { type: bigtext, text: "KIRMIZI BALIK!", at_word: "Kırmızı" }
+    sfx: [ { type: pigeons, at_word: "Kırmızı" } ]
+    lines:
+      - say: "Ve bağırdım:"
+      - say: "Kırmızı balık!"
+        v: shout
+        by: kerem
+
+  - set: square
+    time: day
+    mood: comedy
+    extras: 14
+    crowd: stare
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.55, 0.3], face: 0, do: idle, look: around, expr: embarrassed }
+    cam: { shot: wide, on: kerem, angle: 160, move: pull, amt: 0.2 }
+    sfx: [ { type: spill, at_word: "döktü" } ]
+    lines:
+      - say: "Herkes durdu. Bir amca çayını döktü. Güvercinler kaçtı."
+
+  - set: square
+    time: day
+    mood: tension
+    extras: 14
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.55, 0.3], face: 0, do: idle, look: [[0, cam], ["@değildim", defne]], expr: [[0, embarrassed], ["@değildim", curious]] }
+      - { who: defne, at: [0.55, 0.3], face: 0, do: idle, look: kerem, expr: embarrassed }
+    cam: { shot: close, on: kerem, angle: -25, move: push, amt: 0.2 }
+    lines:
+      - say: "Ama bağıran tek kişi ben *değildim*."
+
+  - set: square
+    time: day
+    mood: reveal
+    extras: 14
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.55, 0.3], face: defne, do: idle, look: defne, expr: surprised }
+      - { who: defne, at: [0.55, 0.3], face: kerem, do: [[0, embarrassed]], hold: note, look: kerem, expr: embarrassed }
+    cam: { shot: two, on: kerem, to: defne, move: push, amt: 0.2 }
+    fx: [ { type: flash, at: 0 } ]
+    lines:
+      - say: "Hemen yanımda, *yeşil* ceketli bir kız da aynı anda bağırmıştı."
+
+  - set: square
+    time: day
+    mood: mystery
+    extras: 14
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.5, 0.3], face: defne, do: read, hold: note, look: hand, expr: curious }
+      - { who: defne, at: [0.5, 0.3], face: kerem, do: read, hold: note, look: hand, expr: curious }
+    cam: { shot: medium, on: kerem, to: defne, angle: 90, move: push, amt: 0.2 }
+    lines:
+      - say: "Elinde bir not vardı. Benimkiyle *aynı* el yazısı."
+
+  - set: square
+    time: day
+    mood: tension
+    extras: 14
+    cast:
+      - { who: defne, at: [0.5, 0.3], face: kerem, do: show, hold: note, look: kerem, expr: suspicious }
+      - { who: kerem, outfit: coat, at: [-0.5, 0.3], face: defne, do: idle, look: defne, expr: curious }
+    cam: { shot: ots, on: kerem, to: defne, move: push, amt: 0.3 }
+    tag: { who: defne, name: "???", sub: "O da cebinde not buluyor" }
+    lines:
+      - say: "Notunu bana çevirdi. Üstünde *benim* adım yazıyordu."
+
+  - set: insert
+    time: day
+    mood: tension
+    prop: { type: note, surface: hand, hand: nuri }
+    cam: { shot: insert, move: push, amt: 0.35 }
+    end: true
+    lines:
+      - say: "Paltolu çocuğun adı Kerem. Onu kaybetme."
+        v: note
+        write: true

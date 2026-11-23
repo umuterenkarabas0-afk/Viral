@@ -1,0 +1,132 @@
+# BÖLÜM 2 — Kilitli Dolap
+episode: 2
+title: "Kilitli Dolap"
+hook: "DOLABI KİLİTLEDİM. NOT YİNE GELDİ."
+cliff: { question: "Fotoğraftaki adam kim?", next: "BÖLÜM 3" }
+seo:
+  title: "Cebimdeki Not · Bölüm 2 — Kilitli Dolap"
+  description: "Paltoyu dolaba kilitledim, kamerayı kurdum. Sabah cepte yine bir not vardı… #2/10"
+
+shots:
+  - set: room
+    time: night
+    mood: mystery
+    label: { place: "EV · MODA", time: "GECE · 23:58" }
+    cast:
+      - { who: kerem, outfit: casual, at: [-1.1, -0.85], face: 180, do: [[0, lock], ["@kamera", idle]], look: [[0, wardrobe], ["@kamera", cam]], expr: determined }
+    props: [ padlock, tripod ]
+    cam: { shot: full, on: kerem, angle: 145, move: orbit, amt: 0.25 }
+    sfx: [ { type: lock, at_word: "kilitledim" } ]
+    lines:
+      - say: "O gece paltoyu dolaba *kilitledim*. Karşısına da bir kamera kurdum."
+
+  - set: room
+    time: night
+    mood: comedy
+    cast:
+      - { who: kerem, outfit: casual, at: [1.1, -1.0], pose: lying, do: lying, expr: suspicious, look: wardrobe }
+    props: [ padlock, tripod ]
+    cam: { shot: high, on: kerem, move: push, amt: 0.2 }
+    sfx: [ { type: clock, at: 0 } ]
+    lines:
+      - say: "Kimse giremezdi. Pencere bile kapalıydı."
+
+  - set: room
+    time: morning
+    mood: mystery
+    cut: flash
+    cast:
+      - { who: kerem, outfit: coat, at: [-1.1, -0.9], face: 180, do: [[0, lock], ["@Cepte", pocket], ["@not", read]], hold: [["@not", note]], look: [[0, wardrobe], ["@not", hand]], expr: [[0, sleepy], ["@not", surprised]] }
+    props: [ padlock_open, tripod ]
+    cam: { shot: medium, on: kerem, angle: 150, move: push, amt: 0.25 }
+    sfx: [ { type: lock, at_word: "açtım" }, { type: paper, at_word: "not" } ]
+    lines:
+      - say: "Sabah kilidi açtım. Cepte yeni bir *not* vardı."
+
+  - set: insert
+    time: morning
+    mood: mystery
+    prop: { type: note, surface: wood, hand: nuri }
+    cam: { shot: insert, move: push, amt: 0.25 }
+    lines:
+      - say: "Kamera güzel fikirdi Kerem. Bugün kırmızı şemsiyeli adama saati sor."
+        v: note
+        write: true
+
+  - set: room
+    time: night
+    grade: nightvision
+    mood: tension
+    cut: glitch
+    cast:
+      - { who: kerem, outfit: casual, at: [1.1, -1.0], pose: lying, do: sleep, expr: sleep }
+    props: [ padlock, tripod ]
+    cam: { shot: custom, pos: [-0.6, 1.25, 0.9], look: [-1.1, 1.1, -1.7], fov: 62, move: static }
+    overlay: { type: rec, from: "03:11:58", glitch_word: "karardı" }
+    fx: [ { type: glitch, at_word: "karardı", dur: 1.4 } ]
+    lines:
+      - say: "Gece {03:12|üçü on iki geçe}, kayıt tam dört saniye *karardı*."
+
+  - set: street
+    time: day
+    mood: comedy
+    cut: whip
+    label: { place: "BAHARİYE CADDESİ", time: "12:30" }
+    extras: 6
+    cast:
+      - { who: kerem, outfit: coat, walk: [[-2.5, -0.6], [0, -0.5]], do: walk, look: around, expr: suspicious }
+    cam: { shot: full, on: kerem, angle: 20, move: track }
+    lines:
+      - say: "Gökyüzünde tek bulut yoktu. Kimsede şemsiye yoktu."
+
+  - set: street
+    time: rain
+    mood: tension
+    cut: flash
+    extras: 5
+    cast:
+      - { who: kerem, outfit: coat, at: [0, -0.5], face: 20, do: [[0, cover]], look: sky, expr: shock }
+    cam: { shot: medium, on: kerem, angle: -15, move: push, amt: 0.2 }
+    fx: [ { type: flash, at: 0 }, { type: rain_start, at: 0 } ]
+    sfx: [ { type: thunder, at: 0 } ]
+    lines:
+      - say: "Derken bir anda sağanak bastırdı."
+
+  - set: street
+    time: rain
+    mood: mystery
+    extras: 4
+    cast:
+      - { who: kerem, outfit: coat, at: [0, -0.5], face: husnu, do: cover, look: husnu, expr: curious }
+      - { who: husnu, walk: [[5.0, -0.9], [1.0, -0.6]], do: walk, hold: umbrella_red, look: kerem, expr: knowing }
+    cam: { shot: wide, on: kerem, to: husnu, angle: 30, move: push, amt: 0.15 }
+    lines:
+      - say: "Ve karşıdan, *kırmızı* şemsiyeli bir adam geldi. Saati sordum."
+
+  - set: street
+    time: rain
+    mood: tension
+    cast:
+      - { who: husnu, at: [1.0, -0.6], face: kerem, do: [[0, talk], ["@fotoğraf", give]], hold: [[0, umbrella_red]], hold2: [["@fotoğraf", photo]], look: kerem, expr: knowing }
+      - { who: kerem, outfit: coat, at: [0, -0.5], face: husnu, do: idle, look: husnu, expr: curious }
+    cam: { shot: ots, on: kerem, to: husnu, move: push, amt: 0.25 }
+    lines:
+      - say: "Tam vaktinde geldin."
+        v: stranger
+        by: husnu
+      - say: "Elime bir *fotoğraf* tutuşturup kayboldu."
+
+  - set: pier
+    time: day
+    grade: sepia
+    mood: reveal
+    cut: flash
+    cast:
+      - { who: selim_young, at: [0, 0.4], face: 10, do: idle, look: cam, expr: smile }
+    cam: { shot: full, on: selim_young, angle: 8, move: push, amt: 0.15 }
+    overlay: { type: photo, half: left, stamp: "1984" }
+    fx: [ { type: flash, at: 0 } ]
+    end: true
+    lines:
+      - say: "Fotoğraf yırtıktı. Ama içindeki genç adam... *benim* paltomu giyiyordu."
+      - say: "Arkasında bir tarih: {1984|bin dokuz yüz seksen dört}."

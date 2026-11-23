@@ -51,6 +51,8 @@ export class Post {
       uSat: { value: 1.12 }, uContrast: { value: 1.06 }, uTint: { value: new THREE.Color(1.0, 1.0, 1.0) },
       uFade: { value: 0 }, uNear: { value: 0.05 }, uFar: { value: 900 }, uFocus: { value: 6 }, uDof: { value: 1.0 },
       uFxaa: { value: msaa > 0 ? 0 : 1 },
+      // hikâye modu derecelendirmeleri (varsayılan 0 → balık renderer'ı etkilenmez)
+      uSepia: { value: 0 }, uNV: { value: 0 }, uGlitch: { value: 0 }, uLift: { value: new THREE.Color(0, 0, 0) },
     };
     const mat = new THREE.ShaderMaterial({
       uniforms: this.u,
@@ -61,6 +63,7 @@ export class Post {
         uniform sampler2D tScene, tD1, tD2, tD3, tDepth; uniform vec2 uRes; uniform float uTime;
         uniform float uBlur, uZoom, uCA, uVig, uGrain, uFlash, uDream, uExposure, uBloom, uSat, uContrast, uFade;
         uniform float uNear, uFar, uFocus, uDof, uFxaa;
+        uniform float uSepia, uNV, uGlitch; uniform vec3 uLift;
         uniform vec2 uBlurDir; uniform vec3 uTint;
         varying vec2 vUv;
         float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
@@ -88,6 +91,11 @@ export class Post {
         }
         void main(){
           vec2 uv = vUv;
+          if (uGlitch > 0.001) {
+            float band = floor(uv.y * 38.0 + floor(uTime * 24.0) * 7.0);
+            float g = step(1.0 - uGlitch * 0.55, hash(vec2(band, floor(uTime * 24.0))));
+            uv.x += (hash(vec2(band, 3.1)) - 0.5) * 0.12 * g * uGlitch;
+          }
           if (uDream > 0.001) uv += uDream * 0.010 * vec2(sin(uv.y * 16.0 + uTime * 2.7), cos(uv.x * 12.0 + uTime * 2.1));
           vec3 col = vec3(0.0);
           bool moving = uBlur > 0.0005 || uZoom > 0.0005;
@@ -134,11 +142,27 @@ export class Post {
             col = mix(col, hueRot(col, a) * 1.25, clamp(uDream, 0.0, 1.0));
           }
           col = aces(col);
+          col = col + uLift * (1.0 - col);
           col = (col - 0.5) * uContrast + 0.5;
           float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
           col = clamp(mix(vec3(l), col, uSat), 0.0, 1.0);
           vec2 q = (vUv - 0.5) * vec2(1.0, 1.25);
           col *= mix(1.0, smoothstep(0.95, 0.25, length(q)), uVig);
+          if (uSepia > 0.001) {
+            float sl = dot(col, vec3(0.299, 0.587, 0.114));
+            vec3 sep = vec3(sl * 1.07 + 0.06, sl * 0.92 + 0.035, sl * 0.70 + 0.01);
+            col = mix(col, clamp(sep, 0.0, 1.0), uSepia);
+          }
+          if (uNV > 0.001) {
+            float nl = dot(col, vec3(0.3, 0.6, 0.1)) * 1.6 + 0.04;
+            vec3 nv = vec3(0.18, 1.0, 0.32) * nl * (0.85 + 0.15 * sin(vUv.y * uRes.y * 1.7));
+            col = mix(col, clamp(nv, 0.0, 1.0), uNV);
+          }
+          if (uGlitch > 0.001) {
+            float sh = (hash(vec2(floor(vUv.y * 90.0), floor(uTime * 30.0))) - 0.5) * 0.02 * uGlitch;
+            col.r = mix(col.r, texture2D(tScene, uv + vec2(sh * 2.0, 0.0)).r, uGlitch * 0.8);
+            col *= 1.0 - 0.35 * uGlitch * step(0.92, hash(vec2(floor(vUv.y * 240.0), floor(uTime * 30.0))));
+          }
           col = toSRGB(col);
           col += (hash(floor(vUv * uRes) + fract(uTime * 13.7) * 100.0) - 0.5) * uGrain;
           col = mix(col, vec3(1.0), uFlash);

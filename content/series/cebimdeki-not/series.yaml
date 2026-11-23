@@ -1,0 +1,175 @@
+# CEBİMDEKİ NOT — 10 bölümlük dikey mini dizi (Reels / TikTok / Shorts)
+# Tür: gizem · komedi · biraz romantik   ·   Bölüm süresi ≈ 45 sn
+#
+# Bölüm dosyaları: ep01.yaml … ep10.yaml (çekim listesi). Ortak tanımlar burada.
+#
+# Ses: Microsoft Edge TTS, tr-TR-AhmetNeural. Anlatıcı Kerem'in kendisi (birinci tekil).
+# Diğer karakterler aynı sesin farklı perde/hız/işlem varyasyonlarıyla konuşur:
+#   n        → Kerem (anlatıcı)
+#   note     → cepten çıkan notların okunuşu (yakın, fısıltıya yakın, oda yankısı)
+#   nuri     → Nuri Amca (yaşlı, yavaş, sıcak)
+#   stranger → yabancılar (simitçi, Hüsnü)
+#   old      → Selim Amca
+#   shout    → bağırma (açık alan yankısı)
+#   twist    → yabancı el yazısıyla gelen son not (derin, karanlık)
+id: cebimdeki-not
+title: "Cebimdeki Not"
+episodes: 10
+voice:
+  engine: edge
+  name: tr-TR-AhmetNeural
+  styles:
+    n:        { rate: "+8%",  pitch: "+0Hz" }
+    note:     { rate: "-2%",  pitch: "-4Hz" }
+    nuri:     { rate: "-6%",  pitch: "-14Hz" }
+    stranger: { rate: "+2%",  pitch: "-8Hz" }
+    old:      { rate: "-4%",  pitch: "-11Hz" }
+    shout:    { rate: "+4%",  pitch: "+6Hz", volume: "+20%" }
+    twist:    { rate: "-14%", pitch: "-20Hz" }
+theme:
+  accent: "#FFC94A"     # hardal sarısı (not kâğıdı / vurgu)
+  accent2: "#7FD4C1"    # Kadıköy deniz yeşili
+  danger: "#FF5A4E"
+  paper: "#F4E9CF"
+  ink: "#1E1A16"
+
+# Karakterler — renderer/story/character.js prosedürel 3D figür parametreleri.
+# outfit alanları: top (kazak/gömlek), coat (uzun palto), jacket (kısa ceket), vest, apron,
+# skirt, pants, shoes, scarf. Bölümlerde `outfit:` ile değiştirilebilir.
+cast:
+  kerem:
+    name: Kerem
+    skin: "#e2a882"
+    hair: { style: messy, color: "#2b1c13" }
+    eyes: "#4a2f1c"
+    stubble: 0.35
+    outfits:
+      coat:    { top: "#3b4a5e", coat: "#b8844e", pants: "#283140", shoes: "#ece7dd" }
+      casual:  { top: "#3b4a5e", jacket: "#4f5a3c", pants: "#283140", shoes: "#ece7dd" }
+      office:  { top: "#aab8c6", pants: "#283140", shoes: "#3a2a20", lanyard: "#d23c3c" }
+      disguise: { top: "#3b4a5e", coat: "#b8844e", pants: "#283140", shoes: "#ece7dd", sunglasses: true, fakeMustache: true }
+    default: coat
+  defne:
+    name: Defne
+    skin: "#efc3a2"
+    hair: { style: bob, color: "#a5452a" }
+    eyes: "#3f6b3a"
+    build: { height: 0.95, width: 0.92 }
+    female: true
+    outfits:
+      main:     { top: "#efe2cc", jacket: "#3f6e4c", pants: "#2a2a33", shoes: "#5b2f1f", scarf: "#d99a32" }
+      disguise: { top: "#efe2cc", jacket: "#3f6e4c", pants: "#2a2a33", shoes: "#5b2f1f", scarf: "#d99a32", sunglasses: true, beret: "#1d1d22" }
+    default: main
+  nuri:
+    name: Nuri Amca
+    skin: "#d49a76"
+    hair: { style: sides, color: "#e9e5df" }
+    brows: { color: "#f1eee9", bushy: 1.5 }
+    mustache: { color: "#f3f0eb", size: 1.25 }
+    eyes: "#3a2a1e"
+    old: 0.8
+    build: { height: 0.94, width: 1.04 }
+    outfits:
+      main: { top: "#a8bccd", vest: "#6b4a32", pants: "#3a3530", shoes: "#2a211b", cap: "#6c5844" }
+    default: main
+  nuri_young:
+    name: Genç Nuri
+    skin: "#d8a07a"
+    hair: { style: side, color: "#1b1410" }
+    mustache: { color: "#1b1410", size: 1.0 }
+    outfits:
+      main: { top: "#d9d0bf", vest: "#6b4a32", pants: "#3a3530", shoes: "#2a211b" }
+    default: main
+  emre:
+    name: Emre
+    skin: "#e6b592"
+    hair: { style: curly, color: "#3a281b" }
+    build: { height: 1.03, width: 1.2 }
+    outfits:
+      main: { top: "#c9524b", stripes: "#f1e7da", pants: "#45587a", shoes: "#7d8aa0" }
+    default: main
+  simitci:
+    name: Simitçi
+    skin: "#cc926b"
+    hair: { style: short, color: "#1c1612" }
+    mustache: { color: "#1c1612", size: 1.1 }
+    build: { width: 1.1 }
+    outfits:
+      main: { top: "#7c3a33", apron: "#f2efe8", pants: "#3a3a40", shoes: "#2a2420", tray: true }
+    default: main
+  husnu:
+    name: Hüsnü
+    skin: "#d6a07e"
+    hair: { style: short, color: "#7d7a76" }
+    beard: { color: "#8d8a86" }
+    build: { height: 1.08, width: 0.95 }
+    outfits:
+      main: { top: "#2a2c33", coat: "#24262d", pants: "#1e2026", shoes: "#15161a", hat: "#1c1d22" }
+    default: main
+  selim:
+    name: Selim Amca
+    skin: "#d8a382"
+    hair: { style: sides, color: "#cfcac3" }
+    glasses: "#2a2420"
+    old: 0.7
+    outfits:
+      main: { top: "#7c6a55", pants: "#4a4540", shoes: "#2a211b" }
+    default: main
+  selim_young:
+    name: Genç Selim
+    skin: "#ddab86"
+    hair: { style: side, color: "#22170f" }
+    outfits:
+      main: { top: "#d9d0bf", coat: "#b8844e", pants: "#3a3530", shoes: "#2a211b" }
+    default: main
+  ayla:
+    name: Ayla Teyze
+    skin: "#e7b99a"
+    hair: { style: bun, color: "#d3cfca" }
+    glasses: "#8a5a3a"
+    female: true
+    old: 0.6
+    build: { height: 0.92 }
+    outfits:
+      main: { top: "#8c4a5e", skirt: "#4a3a48", shoes: "#2a211b", scarf: "#d9c7a0" }
+    default: main
+  ayla_young:
+    name: Genç Ayla
+    skin: "#ecbf9e"
+    hair: { style: long, color: "#2a1a12" }
+    female: true
+    build: { height: 0.93 }
+    outfits:
+      main: { top: "#b8433f", skirt: "#b8433f", shoes: "#3a2219" }
+    default: main
+  leyla_young:
+    name: Leyla
+    skin: "#eec4a5"
+    hair: { style: long, color: "#3a2415" }
+    female: true
+    build: { height: 0.93 }
+    outfits:
+      main: { top: "#e3c25a", skirt: "#e3c25a", shoes: "#5a3a22" }
+    default: main
+  ismet:
+    name: İsmet Bey
+    skin: "#d9a685"
+    hair: { style: bald, color: "#cfcac3" }
+    glasses: "#2a2420"
+    old: 0.75
+    outfits:
+      main: { top: "#5e6e5a", pants: "#3a3d40", shoes: "#2a211b" }
+    default: main
+  nermin:
+    name: Nermin Hanım
+    skin: "#ebbd9e"
+    hair: { style: short_f, color: "#cbc6c0" }
+    female: true
+    old: 0.6
+    build: { height: 0.9 }
+    outfits:
+      main: { top: "#6a4a7a", skirt: "#3e3346", shoes: "#2a211b", beret: "#8e3d6e" }
+    default: main
+
+seo:
+  hashtags_base: ["#cebimdekinot", "#minidizi", "#kadıköy", "#hikaye", "#gizem", "#keşfet", "#animasyon", "#3danimasyon"]

@@ -1,0 +1,126 @@
+# BÖLÜM 1 — 50 Liralık Palto
+# Çekim listesi şeması: content/series/README.md
+episode: 1
+title: "50 Liralık Palto"
+hook: "BU NOT YARINI BİLİYORDU"
+cliff: { question: "Sence parayı kim ödedi?", next: "BÖLÜM 2" }
+seo:
+  title: "Cebimdeki Not · Bölüm 1 — 50 Liralık Palto"
+  description: "Bit pazarından 50 liraya bir palto aldım. Ertesi sabah cebinde geleceği bilen bir not vardı… #1/10"
+
+shots:
+  - set: insert
+    time: night
+    mood: mystery
+    prop: { type: note, surface: coat, hand: nuri, text: "08:47 vapurunu\nkaçıracaksın.", pose: pocket }
+    cam: { shot: insert, move: push, amt: 0.35 }
+    fx: [ { type: flash, at: 0 } ]
+    sfx: [ { type: paper, at: 0.4 } ]
+    lines:
+      - say: "Bu not, *yarın* ne olacağını biliyordu."
+
+  - set: office
+    time: day
+    mood: comedy
+    cut: whip
+    cast:
+      - { who: kerem, outfit: office, at: [0, 0], face: 0, do: [[0, type], ["@heyecanlı", headdesk]], expr: [[0, bored], ["@heyecanlı", dead]] }
+    cam: { shot: medium, on: kerem, angle: 28, move: push, amt: 0.25 }
+    tag: { who: kerem, name: "KEREM · 27", sub: "Hayatı bir Excel tablosu" }
+    sfx: [ { type: thud, at_word: "heyecanlı", delay: 0.35 } ]
+    lines:
+      - say: "Ben Kerem. Yirmi yedi yaşındayım ve hayatım bir *Excel* tablosu kadar heyecanlı."
+
+  - set: market
+    time: day
+    mood: mystery
+    cut: whip
+    label: { place: "KADIKÖY BİT PAZARI", time: "PAZAR · 11:40" }
+    extras: 7
+    cast:
+      - { who: kerem, outfit: casual, walk: [[-3.4, 1.6], [0.15, 0.45]], do: walk, look: around, expr: neutral }
+      - { who: nuri, at: [0, -1.0], face: 0, do: idle, expr: smile }
+    cam: { shot: wide, on: kerem, move: track }
+    lines:
+      - say: "Pazar günü bit pazarında, *elli* liraya eski bir palto aldım."
+
+  - set: market
+    time: day
+    mood: mystery
+    extras: 4
+    cast:
+      - { who: nuri, at: [0, -1.0], face: kerem, do: [[0, give], ["@kırptı", wink], ["@seçer", talk]], hold: coat_folded, expr: smile, look: kerem }
+      - { who: kerem, outfit: casual, at: [0.15, 0.45], face: nuri, do: idle, look: nuri, expr: curious }
+    cam: { shot: ots, on: kerem, to: nuri, move: push, amt: 0.2 }
+    lines:
+      - say: "Beyaz bıyıklı satıcı göz kırptı:"
+      - say: "Bu palto sahibini kendi seçer, evlat."
+        v: nuri
+        by: nuri
+
+  - set: room
+    time: morning
+    mood: mystery
+    cut: flash
+    label: { place: "EV · MODA", time: "PAZARTESİ · 07:58" }
+    cast:
+      - { who: kerem, outfit: coat, at: [-0.3, -0.5], face: 12, do: [[0, idle], ["@cebinde", pocket], ["@kâğıt", read]], hold: [["@kâğıt", note]], expr: [[0, sleepy], ["@kâğıt", surprised]], look: [[0, cam], ["@kâğıt", hand]] }
+    cam: { shot: medium, on: kerem, angle: -22, move: push, amt: 0.3 }
+    sfx: [ { type: paper, at_word: "kâğıt" } ]
+    lines:
+      - say: "Ertesi sabah paltonun cebinde katlanmış bir *kâğıt* buldum."
+
+  - set: insert
+    time: morning
+    mood: mystery
+    prop: { type: note, surface: wood, hand: nuri }
+    cam: { shot: insert, move: push, amt: 0.25 }
+    lines:
+      - say: "{08:47|Sekizi kırk yedi} vapurunu kaçıracaksın. Koşma. Simitçiye 'iki tane' de."
+        v: note
+        write: true
+
+  - set: pier
+    time: morning
+    mood: comedy
+    cut: whip
+    label: { place: "KADIKÖY İSKELESİ", time: "08:47" }
+    extras: 4
+    cast:
+      - { who: kerem, outfit: coat, walk: [[-5.5, 2.2], [-0.8, 0.0]], do: run, expr: [[0, determined], ["@kalktı", shock]], look: ferry }
+    cam: { shot: wide, on: kerem, move: pan }
+    fx: [ { type: ferry_depart, at: 0 }, { type: shake, at_word: "kalktı" } ]
+    sfx: [ { type: horn, at: 0.3 }, { type: gulls, at: 1.0 } ]
+    lines:
+      - say: "Güldüm. Sonra saat tam {08:47|sekizi kırk yedi geçe}, vapur burnumun dibinden *kalktı*."
+
+  - set: pier
+    time: morning
+    mood: mystery
+    cast:
+      - { who: simitci, at: [1.05, 0.55], face: kerem, do: [[0, idle], ["@uzattı", give]], hold: simit2, look: kerem, expr: smile }
+      - { who: kerem, outfit: coat, at: [0.05, 0.95], face: simitci, do: idle, look: simitci, expr: confused }
+    cam: { shot: two, on: kerem, to: simitci, move: push, amt: 0.15 }
+    lines:
+      - say: "Simitçi, ben daha ağzımı açmadan iki simit uzattı."
+
+  - set: pier
+    time: morning
+    mood: tension
+    same: true
+    acts: { simitci: { do: talk, expr: knowing } }
+    cam: { shot: close, on: simitci, angle: 15, move: push, amt: 0.25 }
+    lines:
+      - say: "Parası ödendi *Kerem*. Seni bekliyordu."
+        v: stranger
+        by: simitci
+
+  - set: pier
+    time: morning
+    mood: tension
+    same: true
+    acts: { kerem: { expr: shock, do: idle } }
+    cam: { shot: close, on: kerem, angle: -12, move: push, amt: 0.45 }
+    end: true
+    lines:
+      - say: "Adımı nereden biliyordu? Ve parayı... *kim* ödemişti?"
