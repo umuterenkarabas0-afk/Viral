@@ -11,6 +11,16 @@ on:
       script:
         description: "(İsteğe bağlı) doğrudan üretilecek senaryo yolu, ör. content/scripts/akdeniz-baliklari.yaml"
         default: ""
+      tts:
+        description: "Seslendirme motoru: edge = Microsoft (ücretsiz, anahtarsız), google = Google Cloud TTS (GOOGLE_TTS_API_KEY gerekir)"
+        type: choice
+        options: [edge, google]
+        default: edge
+      edge_voice:
+        description: "Microsoft sesi (yalnızca edge): Ahmet = erkek, Emel = kadın"
+        type: choice
+        options: [tr-TR-AhmetNeural, tr-TR-EmelNeural]
+        default: tr-TR-AhmetNeural
 
 permissions:
   contents: write
@@ -27,6 +37,8 @@ jobs:
       GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       VIRAL_USE_GCLOUD: "0"
+      VIRAL_TTS: ${{ github.event.inputs.tts || 'edge' }}
+      VIRAL_EDGE_VOICE: ${{ github.event.inputs.edge_voice || 'tr-TR-AhmetNeural' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -59,9 +71,9 @@ jobs:
       - name: Video üret
         run: |
           if [ -n "${{ github.event.inputs.script }}" ]; then
-            python -m viral make "${{ github.event.inputs.script }}" --tts google --workers 3
+            python -m viral make "${{ github.event.inputs.script }}" --tts "$VIRAL_TTS" --workers 3
           else
-            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts google --workers 3
+            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts "$VIRAL_TTS" --workers 3
           fi
 
       - name: Çıktıları yükle (artifact)

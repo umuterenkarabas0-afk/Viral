@@ -218,7 +218,7 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
         speech = sum(c.speech_end - c.speech_start for c in clips)
         other = est - speech
         want = max(10.0, target - other)
-        hi = 1.3 if voice.engine == "google" else 1.6
+        hi = 1.3 if voice.engine in ("google", "edge") else 1.6
         new_rate = float(np.clip(rate * speech / want, 0.9, hi))
         if abs(new_rate - rate) < 0.02:
             break

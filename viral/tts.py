@@ -1,4 +1,5 @@
-"""Seslendirme: Google Cloud Text-to-Speech (birincil) + espeak-ng (yalnızca önizleme).
+"""Seslendirme: Google Cloud Text-to-Speech, Microsoft Edge nöral sesleri (edge-tts, anahtarsız)
+ve espeak-ng (yalnızca önizleme).
 
 Kimlik doğrulama (öncelik sırasıyla):
   1. GOOGLE_TTS_API_KEY ortam değişkeni → X-Goog-Api-Key başlığı
@@ -7,10 +8,16 @@ Kimlik doğrulama (öncelik sırasıyla):
 
 Kelime zamanlaması: SSML <mark> destekleyen seslerde (Wavenet/Standard/Neural2)
 Google'ın döndürdüğü zaman noktaları kullanılır; Chirp3-HD gibi seslerde
-align.py hece-ağırlıklı + sessizlik tabanlı hizalama yapar.
+align.py hece-ağırlıklı + sessizlik tabanlı hizalama yapar. Edge seslerinde
+servisin WordBoundary olayları kelimelere eşlenir.
+
+Edge (Microsoft) sesleri: tr-TR-AhmetNeural (erkek, varsayılan), tr-TR-EmelNeural (kadın).
+Ses seçimi: VIRAL_EDGE_VOICE ortam değişkeni > senaryodaki voice.name (…Neural ise) > varsayılan.
+Not: edge-tts WebSocket kullanır; WebSocket geçirmeyen proxy'lerin arkasında çalışmaz.
 """
 from __future__ import annotations
 
+import asyncio
 import base64
 import hashlib
 import io
@@ -18,6 +25,7 @@ import json
 import os
 import shutil
 import subprocess
+import time
 import urllib.error
 import urllib.request
 import wave
@@ -41,6 +49,8 @@ DEFAULT_VOICE_PREFS = [
     "tr-TR-Standard-E",
     "tr-TR-*",
 ]
+
+EDGE_DEFAULT_VOICE = "tr-TR-AhmetNeural"
 
 
 class TTSAuthError(RuntimeError):
@@ -86,7 +96,7 @@ def _request(method: str, path: str, body: dict | None = None) -> dict:
             return json.loads(r.read())
     except urllib.error.HTTPError as e:
         msg = e.read().decode("utf-8", "replace")[:600]
-        if e.code in (401, 403):
+        if e.code in (401, 403) or (e.code == 400 and "API_KEY_INVALID" in msg):
             raise TTSAuthError(
                 f"Google TTS yetkilendirme hatası ({e.code}). GOOGLE_TTS_API_KEY ayarlayın ve projede "
                 f"'Cloud Text-to-Speech API'nin etkin olduğundan emin olun.\n{msg}"
@@ -188,6 +198,113 @@ def synthesize_google(text: str, words: list[str], voice: str, rate: float = 1.1
     return TTSResult(_resample(a, sr), SR, word_starts, voice, "google")
 
 
+def _norm_word(w: str) -> str:
+    """Eşleştirme için: Türkçe küçük harf + yalnızca harf/rakam."""
+    w = w.replace("İ", "i").replace("I", "ı").lower()
+    return "".join(ch for ch in w if ch.isalnum())
+
+
+def map_word_boundaries(words: list[str], boundaries: list[tuple[float, float, str]]) -> list[float] | None:
+    """Edge'in (başlangıç sn, süre sn, metin) kelime sınırlarını senaryonun kelimelerine eşler.
+
+    Eşleme harf düzeyinde yapılır; böylece servis bir kelimeyi bölse ("Akdeniz" + "de") ya da
+    birleştirse de doğru zaman bulunur. Metinler uyuşmazsa ve sayılar eşit değilse None döner
+    (align.py kendi hizalamasına düşer).
+    """
+    bnd = [(s, d, _norm_word(t)) for s, d, t in boundaries]
+    bnd = [b for b in bnd if b[2]]
+    wn = [_norm_word(w) for w in words]
+    if not bnd or not words:
+        return None
+    if "".join(wn) != "".join(b[2] for b in bnd):
+        return [b[0] for b in bnd] if len(bnd) == len(words) else None
+    starts: list[float] = []
+    k, kpos, pos = 0, 0, 0  # k: sınır indeksi, kpos: sınırın ilk harf konumu, pos: kelimenin ilk harf konumu
+    for w in wn:
+        while k < len(bnd) - 1 and pos >= kpos + len(bnd[k][2]):
+            kpos += len(bnd[k][2])
+            k += 1
+        s, d, t = bnd[k]
+        frac = min(1.0, (pos - kpos) / len(t))
+        starts.append(s + frac * d)
+        pos += len(w)
+    return starts
+
+
+async def _edge_stream(text: str, voice: str, rate: str) -> tuple[bytes, list[tuple[float, float, str]]]:
+    import edge_tts
+
+    com = edge_tts.Communicate(text, voice, rate=rate, boundary="WordBoundary")
+    audio = bytearray()
+    bounds: list[tuple[float, float, str]] = []
+    async for ch in com.stream():
+        if ch["type"] == "audio":
+            audio += ch["data"]
+        elif ch["type"] == "WordBoundary":
+            bounds.append((ch["offset"] / 1e7, ch["duration"] / 1e7, ch["text"]))
+    return bytes(audio), bounds
+
+
+def _decode_mp3(b: bytes, sr: int = SR) -> np.ndarray:
+    if not shutil.which("ffmpeg"):
+        raise RuntimeError("MP3 çözmek için ffmpeg gerekli (apt-get install ffmpeg)")
+    r = subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-f", "f32le", "-ac", "1", "-ar", str(sr), "pipe:1"],
+                       input=b, capture_output=True, check=True)
+    return np.frombuffer(r.stdout, dtype=np.float32).copy()
+
+
+def edge_rate(rate: float) -> str:
+    """1.1 → '+10%' (edge-tts hız biçimi)."""
+    return f"{round((rate - 1.0) * 100):+d}%"
+
+
+def synthesize_edge(text: str, words: list[str], voice: str = EDGE_DEFAULT_VOICE, rate: float = 1.1) -> TTSResult:
+    try:
+        import edge_tts  # noqa: F401
+    except ImportError:
+        raise RuntimeError("edge-tts kurulu değil: pip install edge-tts") from None
+    CACHE.mkdir(parents=True, exist_ok=True)
+    key = _cache_key("edge1", text, voice, edge_rate(rate))
+    mp3_p, meta_p = CACHE / f"{key}.mp3", CACHE / f"{key}.json"
+    if mp3_p.exists() and meta_p.exists():
+        bounds = [tuple(b) for b in json.loads(meta_p.read_text())["boundaries"]]
+        audio = mp3_p.read_bytes()
+    else:
+        err: Exception | None = None
+        for attempt in range(4):
+            try:
+                audio, bounds = asyncio.run(_edge_stream(text, voice, edge_rate(rate)))
+                if audio:
+                    break
+                err = RuntimeError("Edge TTS boş ses döndürdü")
+            except Exception as e:  # ağ / servis hataları: kısa bekleyip yeniden dene
+                err = e
+            time.sleep(2 * (attempt + 1))
+        else:
+            raise RuntimeError(f"Edge TTS başarısız ({voice}): {err}") from err
+        mp3_p.write_bytes(audio)
+        meta_p.write_text(json.dumps({"voice": voice, "boundaries": bounds}, ensure_ascii=False))
+    return TTSResult(_decode_mp3(audio), SR, map_word_boundaries(words, bounds), voice, "edge")
+
+
+def list_edge_voices(lang: str = "tr-TR", timeout: float = 20.0) -> list[dict]:
+    import edge_tts
+
+    voices = asyncio.run(asyncio.wait_for(edge_tts.list_voices(), timeout))
+    return [v for v in voices if v.get("Locale") == lang]
+
+
+def _edge_usable() -> bool:
+    try:
+        import edge_tts  # noqa: F401
+    except ImportError:
+        return False
+    try:
+        return bool(list_edge_voices())
+    except Exception:
+        return False
+
+
 def synthesize_espeak(text: str, rate: float = 1.1, voice: str = "tr") -> TTSResult:
     """Yalnızca anahtarsız önizleme içindir (robotik ses)."""
     exe = shutil.which("espeak-ng") or shutil.which("espeak")
@@ -220,11 +337,17 @@ class Voice:
             except TTSAuthError:
                 if engine == "google":
                     raise
-                self.engine = "espeak"
-                self.voice = "tr"
+                # anahtar yok: önce ücretsiz Microsoft seslerini dene, olmazsa espeak
+                self.engine = "edge" if _edge_usable() else "espeak"
+        if self.engine == "edge":
+            self.voice = os.environ.get("VIRAL_EDGE_VOICE") or (voice if voice and voice.endswith("Neural") else EDGE_DEFAULT_VOICE)
+        elif self.engine == "espeak":
+            self.voice = "tr"
         print(f"[tts] motor={self.engine} ses={self.voice}")
 
     def say(self, text: str, words: list[str], rate: float) -> TTSResult:
         if self.engine == "google":
             return synthesize_google(text, words, self.voice, rate, self.pitch, self.lang)
+        if self.engine == "edge":
+            return synthesize_edge(text, words, self.voice, rate)
         return synthesize_espeak(text, rate)
