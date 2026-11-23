@@ -5,6 +5,7 @@
   python -m viral write "Uzayın en tuhaf 10 gezegeni"              # Claude ile senaryo yaz
   python -m viral auto                                             # kuyruktan sıradaki konuyu üret
   python -m viral voices                                           # Türkçe Google seslerini listele
+  python -m viral mcp                                              # Google TTS MCP sunucusu (stdio)
 """
 from __future__ import annotations
 
@@ -41,6 +42,7 @@ def main(argv=None):
     a.add_argument("--handle")
 
     sub.add_parser("voices", help="Türkçe Google TTS seslerini listele")
+    sub.add_parser("mcp", help="Google TTS MCP sunucusunu başlat (stdio)")
 
     args = ap.parse_args(argv)
     if args.cmd == "make":
@@ -60,6 +62,9 @@ def main(argv=None):
         from .tts import list_voices
         for v in list_voices():
             print(v["name"], v.get("ssmlGender"), v.get("naturalSampleRateHertz"))
+    elif args.cmd == "mcp":
+        from .tts_mcp import main as serve
+        serve()
     return 0
 
 

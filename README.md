@@ -131,8 +131,60 @@ Görsel kit şu an **okyanus ortamı + prosedürel balık** üzerine kurulu (den
 türleri için `renderer/src/` altına yeni bir özne (ör. `planet.js`) ve ortam (ör. `space.js`) ekleyip
 `main.js`'deki özne kaydına bağlamak yeterli; senaryo/ses/altyazı/otomasyon hattı değişmeden çalışır.
 
+## Google TTS MCP sunucusu
+
+`viral/tts_mcp.py`, Google Cloud Text-to-Speech'i bir **MCP sunucusu** (stdio) olarak sunar; böylece Claude Code,
+Claude Desktop veya başka bir MCP istemcisi doğrudan seslendirme yapabilir. Kimlik doğrulama yukarıdakiyle aynıdır
+(`GOOGLE_TTS_API_KEY` → `GOOGLE_TTS_ACCESS_TOKEN` → `gcloud`).
+
+```bash
+pip install -r requirements-mcp.txt
+python -m viral mcp          # stdio üzerinden çalışır; istemci başlatır
+```
+
+**Claude Code**: repodaki [`.mcp.json`](.mcp.json) sunucuyu `google-tts` adıyla tanımlar. Repo kökünde `claude` açınca
+onay istenir; anahtar ortamdan (`GOOGLE_TTS_API_KEY`) okunur. **Claude Desktop** gibi ortamı aktarmayan istemciler için:
+
+```json
+{
+  "mcpServers": {
+    "google-tts": {
+      "command": "python3",
+      "args": ["-m", "viral", "mcp"],
+      "env": {
+        "PYTHONPATH": "/repo/yolu/Viral",
+        "GOOGLE_TTS_API_KEY": "…",
+        "GOOGLE_TTS_MCP_OUTPUT_DIR": "/repo/yolu/Viral/output/tts"
+      }
+    }
+  }
+}
+```
+
+| Araç | Ne yapar |
+|---|---|
+| `list_voices` | Sesleri listeler (varsayılan `tr-TR`; `name_contains`, `gender`, `limit` filtreleri). Her ses için aile (Chirp3-HD, Wavenet…), cinsiyet, örnekleme hızı ve kelime zamanlaması desteği |
+| `list_languages` | Desteklenen dil kodları ve her dildeki ses sayısı |
+| `synthesize_speech` | `text` veya `ssml` → MP3 / LINEAR16 (WAV) / OGG_OPUS dosyası. `voice`, `speaking_rate`, `pitch`, `volume_gain_db`, `sample_rate_hertz`, `effects_profile`, `filename`. Dosya yolu, süre ve kullanılan sesi döndürür |
+
+- **Ses seçimi**: `voice` boşsa dile göre seçilir (Türkçe: `tr-TR-Chirp3-HD-Charon` → … aynı tercih listesi).
+- **Kelime zamanları**: `word_timings: true` düz metinde her kelimenin başlangıç saniyesini, SSML'de kendi
+  `<mark name="…"/>` etiketlerinizin zamanlarını döndürür. Yalnızca Wavenet/Neural2/Standard seslerde çalışır;
+  `voice` boşsa uygun ses (Türkçe: `tr-TR-Wavenet-E`) otomatik seçilir.
+- **Uzun metin**: Google'ın istek başına 5000 bayt sınırını aşan düz metin cümle sınırlarından bölünür, parçalar tek
+  dosyada birleştirilir ve kelime zamanları kaydırılır (MP3 ve LINEAR16; OGG_OPUS tek istekle sınırlı).
+- **Dosyalar** yalnızca çıkış klasörü altına yazılır (`filename` göreli olmalı, `..` reddedilir). Aynı istek
+  `.cache/tts-mcp/` önbelleğinden gelir, tekrar ücretlendirilmez.
+
+| Ortam değişkeni | Varsayılan |
+|---|---|
+| `GOOGLE_TTS_MCP_OUTPUT_DIR` | `output/tts` (çalışma klasörüne göre) |
+| `GOOGLE_TTS_MCP_LANGUAGE` | `tr-TR` |
+| `GOOGLE_TTS_MCP_VOICE` | tercih listesi |
+| `GOOGLE_TTS_ENDPOINT` | `https://texttospeech.googleapis.com` (bölgesel: `https://eu-texttospeech.googleapis.com`) |
+
 ## Testler
 
 ```bash
-python -m unittest discover -s tests
+python -m unittest discover -s tests      # MCP uçtan uca testi için: pip install -r requirements-mcp.txt
 ```

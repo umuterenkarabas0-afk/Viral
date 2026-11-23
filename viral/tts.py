@@ -19,6 +19,7 @@ import os
 import shutil
 import subprocess
 import urllib.error
+import urllib.parse
 import urllib.request
 import wave
 from dataclasses import dataclass
@@ -27,7 +28,8 @@ from xml.sax.saxutils import escape
 
 import numpy as np
 
-API = "https://texttospeech.googleapis.com"
+# Bölgesel uç nokta için (ör. https://eu-texttospeech.googleapis.com) GOOGLE_TTS_ENDPOINT ayarlanabilir.
+API = os.environ.get("GOOGLE_TTS_ENDPOINT", "https://texttospeech.googleapis.com").rstrip("/")
 CACHE = Path(os.environ.get("VIRAL_CACHE", ".cache")) / "tts"
 SR = 48000
 
@@ -63,7 +65,9 @@ def _auth_headers() -> dict[str, str]:
     tok = os.environ.get("GOOGLE_TTS_ACCESS_TOKEN")
     if not tok and shutil.which("gcloud") and os.environ.get("VIRAL_USE_GCLOUD", "1") == "1":
         try:
-            tok = subprocess.run(["gcloud", "auth", "print-access-token"], capture_output=True, text=True, timeout=20).stdout.strip()
+            # stdin kapalı: MCP sunucusunda stdin protokol kanalıdır, gcloud bir şey sorarsa onu okumamalı
+            tok = subprocess.run(["gcloud", "auth", "print-access-token"], capture_output=True, text=True, timeout=20,
+                                 stdin=subprocess.DEVNULL).stdout.strip()
         except Exception:
             tok = None
     if tok and len(tok) > 20:
@@ -94,18 +98,21 @@ def _request(method: str, path: str, body: dict | None = None) -> dict:
         raise RuntimeError(f"Google TTS HTTP {e.code}: {msg}") from None
 
 
-_VOICES: list[dict] | None = None
+_VOICES: dict[str, list[dict]] = {}
 
 
 def list_voices(lang: str = "tr-TR") -> list[dict]:
-    global _VOICES
-    if _VOICES is None:
-        _VOICES = _request("GET", f"/v1/voices?languageCode={lang}").get("voices", [])
-    return _VOICES
+    """`lang` boşsa tüm diller. Sonuç süreç boyunca dil başına önbelleklenir."""
+    if lang not in _VOICES:
+        q = f"?languageCode={urllib.parse.quote(lang)}" if lang else ""
+        _VOICES[lang] = _request("GET", f"/v1/voices{q}").get("voices", [])
+    return _VOICES[lang]
 
 
-def pick_voice(prefs: list[str] | None = None, lang: str = "tr-TR") -> str:
+def pick_voice(prefs: list[str] | None = None, lang: str = "tr-TR", require_marks: bool = False) -> str:
     names = [v["name"] for v in list_voices(lang)]
+    if require_marks:
+        names = [n for n in names if supports_marks(n)]
     for p in prefs or DEFAULT_VOICE_PREFS:
         if p.endswith("*"):
             cands = sorted(n for n in names if n.startswith(p[:-1]))
@@ -114,7 +121,7 @@ def pick_voice(prefs: list[str] | None = None, lang: str = "tr-TR") -> str:
         elif p in names:
             return p
     if not names:
-        raise RuntimeError(f"{lang} için ses bulunamadı")
+        raise RuntimeError(f"{lang} için {'SSML <mark> destekleyen ' if require_marks else ''}ses bulunamadı")
     return names[0]
 
 
