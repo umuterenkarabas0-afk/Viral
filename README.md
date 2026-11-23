@@ -131,6 +131,18 @@ Görsel kit şu an **okyanus ortamı + prosedürel balık** üzerine kurulu (den
 türleri için `renderer/src/` altına yeni bir özne (ör. `planet.js`) ve ortam (ör. `space.js`) ekleyip
 `main.js`'deki özne kaydına bağlamak yeterli; senaryo/ses/altyazı/otomasyon hattı değişmeden çalışır.
 
+## Hızlı Türkçe MP3 (gTTS)
+
+Anahtar gerektirmeyen basit seslendirme için bağımsız bir araç (video hattından ayrıdır):
+
+```bash
+pip install gTTS
+python tools/gtts_tr.py "Merhaba, bugün hava çok güzel."    # → merhaba-bugun-hava-cok-guzel.mp3
+python tools/gtts_tr.py -f metin.txt -o anlatim.mp3 --slow
+```
+
+Metin argüman, `-f` dosyası ya da stdin'den okunur; uzun metinler otomatik parçalanıp tek MP3'te birleştirilir.
+
 ## Testler
 
 ```bash
