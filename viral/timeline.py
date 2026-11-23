@@ -95,7 +95,7 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
             raw_words.extend([u.spoken[-1]] if u.spoken else [u.display])
         for j, w in enumerate(seg_words):
             L = len(w["text"])
-            if group and (len(group) >= 3 or chars + L > 17):
+            if group and (len(group) >= 3 or chars + L > 14):
                 flush()
             group.append(base + j)
             chars += L + 1

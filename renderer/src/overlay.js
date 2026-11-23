@@ -285,6 +285,14 @@ export class Overlay {
         });
         this.capEl.appendChild(line);
         this.capLine = line;
+        // tek satıra sığdır: taşarsa yazı boyutunu küçült
+        const maxW = 940;
+        let fs = cap.style === 'hook' ? 96 : 84;
+        line.style.flexWrap = 'nowrap';
+        for (let i = 0; i < 12 && line.scrollWidth > maxW && fs > 56; i++) {
+          fs -= 4;
+          for (const { el: e } of this.capWords) e.style.fontSize = fs + 'px';
+        }
       }
     }
     if (idx < 0) return;
