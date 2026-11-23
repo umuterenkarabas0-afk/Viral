@@ -4,7 +4,7 @@ Merak uyandıran **Türkçe bilgi videolarını** (YouTube Shorts · Instagram R
 
 - **3D animasyon**: Three.js ile tamamen prosedürel sahne: su altı ortamı, kostik ışıklar, ışık huzmeleri, Posidonia çayırları, kabarcıklar ve parametrelerle üretilen, yüzme animasyonlu 3D balıklar
 - **Motion graphics**: sıralama vurgusu (#10 → #1), harf harf isim animasyonu, bilgi kartları, 3D noktaya bağlı callout çizgileri, ilerleme çubuğu, geçişlerde hareket bulanıklığı, "rüya" (halüsinasyon) efekti
-- **Türkçe seslendirme**: Google Cloud Text-to-Speech (Chirp3-HD / WaveNet)
+- **Türkçe seslendirme**: Microsoft nöral sesleri (edge-tts, ücretsiz, anahtarsız) veya Google Cloud Text-to-Speech (Chirp3-HD / WaveNet)
 - **Altyazı**: kelime kelime senkronlu, vurgulu, videoya gömülü + ayrıca `captions.srt`
 - **Ses tasarımı tamamen kodla sentezlenir**: müzik (pluck arpej, pad, bas, davullar), su altı atmosferi, whoosh geçişleri, impact vurguları, riser, kabarcık/pop/sparkle efektleri; seslendirmeye göre ducking, -14 LUFS mastering
 - **Süre**: ~60 sn (konuşma hızı otomatik ayarlanır), 1080×1920, 30 fps, H.264 + AAC
@@ -39,13 +39,28 @@ npx playwright install --with-deps chromium   # (Chromium yoksa)
 sudo apt-get install -y ffmpeg
 ```
 
+### Seslendirme motorları
+
+| `--tts` | Ses | Anahtar | Not |
+|---|---|---|---|
+| `edge` | Microsoft `tr-TR-AhmetNeural` (erkek) / `tr-TR-EmelNeural` (kadın) | Gerekmez | Doğal ses, kelime zamanları servisten gelir. WebSocket kullanır |
+| `google` | Google Chirp3-HD / WaveNet | `GOOGLE_TTS_API_KEY` | Aşağıya bakın |
+| `espeak` | espeak-ng | Gerekmez | Robotik; yalnızca önizleme |
+| `auto` | google → edge → espeak | | İlk çalışanı seçer |
+
+Microsoft sesini değiştirmek için: `VIRAL_EDGE_VOICE=tr-TR-EmelNeural` ortam değişkeni ya da senaryoda
+`voice: { name: tr-TR-EmelNeural }`. Sesleri listelemek için: `python -m viral voices --engine edge`.
+
+> edge-tts, Microsoft Edge'in sesli okuma servisini kullanır; resmî ve garantili bir API değildir.
+> WebSocket'e izin vermeyen kurumsal proxy'lerin arkasında çalışmaz.
+
 ### Google TTS anahtarı
 
 1. Google Cloud'da bir projede **Cloud Text-to-Speech API**'yi etkinleştirin, bir **API anahtarı** oluşturun.
 2. Anahtarı `GOOGLE_TTS_API_KEY` ortam değişkeni olarak verin (GitHub Actions'ta repo secret olarak).
    Alternatif: `gcloud auth print-access-token` ile alınan token (`GOOGLE_TTS_ACCESS_TOKEN`).
 
-Anahtar yoksa `--tts auto` yalnızca **önizleme** için `espeak-ng`'ye düşer (robotik ses); üretim için `--tts google` kullanın.
+Anahtar yoksa ya da geçersizse `--tts auto` önce Microsoft seslerine (`edge`), o da olmazsa yalnızca **önizleme** için `espeak-ng`'ye düşer (robotik ses).
 
 ```bash
 python -m viral voices     # kullanılabilir Türkçe sesleri listeler
@@ -60,7 +75,7 @@ Türkçe hece sayısı + sessizlik analizine dayalı hizalama kullanılır.
 
 ```bash
 # Senaryodan video üret
-python -m viral make content/scripts/akdeniz-baliklari.yaml --tts google
+python -m viral make content/scripts/akdeniz-baliklari.yaml --tts edge     # veya --tts google
 
 # Hızlı önizleme: ses + timeline + belirli saniyelerden kareler (render yok)
 python -m viral make content/scripts/akdeniz-baliklari.yaml --no-render --stills 1.5,10,30
@@ -110,14 +125,15 @@ hem görüntü hem ses tasarımı aynı zamanlamayı kullanır.
 
 ## Otomatik üretim (GitHub Actions)
 
-`.github/workflows/produce.yml` her gün 05:17 UTC'de (ve elle "Run workflow" ile) çalışır:
+`.github/workflows/produce.yml` her gün 05:17 UTC'de (ve elle "Run workflow" ile) çalışır. Elle çalıştırırken
+senaryo yolu, seslendirme motoru (`edge` varsayılan / `google`) ve Microsoft sesi (Ahmet / Emel) seçilebilir:
 
 1. `content/topics.yaml` kuyruğundan sıradaki konuyu alır (kuyruk boşalırsa Claude yeni konular önerir)
 2. Senaryo yoksa Claude ile yazar ve doğrular (geçersizse otomatik onarım ister)
 3. Videoyu üretir; MP4 + kapak + SRT + paylaşım metnini **Artifact** ve **GitHub Release** olarak yayınlar
 4. Güncellenen kuyruğu ve yeni senaryoyu repoya commit'ler
 
-Gerekli repo secret'ları: `GOOGLE_TTS_API_KEY`, `ANTHROPIC_API_KEY`.
+Gerekli repo secret'ları: `ANTHROPIC_API_KEY` (senaryo yazımı); `GOOGLE_TTS_API_KEY` yalnızca `google` motoru için.
 
 Senaryo yazımı `claude-opus-5-5` ile yapılır; modelin reddettiği nadir isteklerde sunucu tarafı yedek model
 (`fallbacks: "default"`) devreye girer.
