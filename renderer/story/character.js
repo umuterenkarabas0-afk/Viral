@@ -138,7 +138,7 @@ export const POSES = {
   hang: (t, st) => { const s = Math.sin(t * 1.8); return breathe(P({ sRx: -2.1 + 0.15 * s, sRz: -0.1, eR: -0.45, sLx: -0.7, eL: -0.9, spX: -0.06, nkX: -0.15 }), t); },
   fold: (t, st) => { const s = Math.sin(t * 4) * 0.12; return breathe(P({ sLx: -0.75, sRx: -0.75, eL: -1.1 + s, eR: -1.1 - s, sLz: 0.0, sRz: 0.0, nkX: 0.22 }), t); },
   slip: (t, st) => { const k = ease.inOutCubic(clamp(t / 0.6)); return breathe(P({ sRx: -0.9 * k, sRz: -0.12, eR: -0.4, spX: 0.12 * k, nkX: 0.18 }), t); },
-  write: (t, st) => { const p = sitBase({ sRx: -0.75, eR: -1.15, sRz: -0.18, sLx: -0.6, eL: -1.1, sLz: 0.15, spX: 0.28, nkX: 0.3 }); p.wR = Math.sin(t * 9) * 0.15; p.eR += Math.sin(t * 6.5) * 0.06; return p; },
+  write: (t, st) => { const p = sitBase({ sRx: -0.75, eR: -1.15, sRz: -0.18, sLx: -0.6, eL: -1.1, sLz: 0.15, spX: 0.16, nkX: 0.18 }); p.wR = Math.sin(t * 9) * 0.15; p.eR += Math.sin(t * 6.5) * 0.06; return p; },
   write_stuck: (t, st) => { const p = sitBase({ sRx: -0.8, eR: -1.4, sRz: -0.15, sLx: -0.9, eL: -2.3, sLz: 0.4, spX: 0.25, nkX: 0.15, nkZ: 0.15, hdZ: 0.12 }); p.wR = Math.max(0, Math.sin(t * 5)) * 0.3; return p; },
   headhands: (t, st) => sitBase({ sLx: -1.2, sRx: -1.2, eL: -2.35, eR: -2.35, sLz: 0.35, sRz: -0.35, spX: 0.42, nkX: 0.25, hdX: Math.sin(t * 0.8) * 0.04 }),
   shy: (t, st) => breathe(P({ sLx: -0.32, sRx: -0.32, sLz: -0.12, sRz: 0.12, eL: -0.95, eR: -0.95, nkX: 0.18, hdZ: 0.12 + 0.04 * Math.sin(t * 1.5), spY: 0.06 * Math.sin(t * 1.2) }), t),
@@ -525,7 +525,7 @@ export class Character {
     let p = A(Math.max(0, st.actionT), st);
     if (st.blend < 1) p = mixPose(B(Math.max(0, st.prevT), st), p, st.blend);
     // otururken ayakta pozlara (konuşma vb.) oturma tabanını uygula
-    if (st.pose === 'sit' && !SEATED.has(st.action) && !['laugh', 'whisper', 'reach', 'give', 'lean'].includes(st.action)) {
+    if (st.pose === 'sit' && !SEATED.has(st.action) && !['laugh', 'whisper', 'reach', 'lean'].includes(st.action)) {
       const s = sitBase();
       for (const k of ['hipY', 'tLx', 'tRx', 'kL', 'kR', 'fL', 'fR', 'tLz', 'tRz']) p[k] = s[k];
     }

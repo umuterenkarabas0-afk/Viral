@@ -37,7 +37,7 @@ shots:
     cast:
       - { who: kerem, outfit: coat, at: [-0.35, -1.0], face: 0, do: talk, look: cam, expr: smile }
       - { who: defne, at: [0.45, -1.0], face: -15, do: give, hold: coat_folded, look: kerem, expr: smile }
-    cam: { shot: medium, on: kerem, to: defne, angle: 0, move: push, amt: 0.2 }
+    cam: { shot: two, on: kerem, to: defne, move: push, amt: 0.12 }
     label: { place: "BİT PAZARI", time: "HER PAZAR" }
     lines:
       - say: "O günden beri pazar günleri tezgâhı *ben* açıyorum. Defne de hep yanımda."
@@ -47,7 +47,7 @@ shots:
     mood: warm
     extras: 8
     crowd: readnotes
-    cam: { shot: wide, move: orbit, amt: 0.3 }
+    cam: { shot: custom, pos: [-3.0, 1.75, 1.95], look: [0.5, 1.3, 1.6], fov: 40, move: push, amt: 0.15 }
     lines:
       - say: "Her hafta yeni bir cep, yeni bir not. Kadıköy artık biraz daha *az yalnız*."
 
@@ -58,7 +58,7 @@ shots:
     cast:
       - { who: kerem, outfit: coat, at: [-0.3, -1.0], face: 180, do: rail, look: sea, expr: smile }
       - { who: defne, at: [0.3, -1.0], face: 180, do: rail, look: kerem, expr: smile }
-    cam: { shot: two, on: kerem, to: defne, angle: 160, move: crane }
+    cam: { shot: custom, pos: [0.0, 1.7, 1.7], look: [0.0, 1.45, -3.0], fov: 40, move: crane, amt: 0.12 }
     fx: [ { type: holdhands, at_word: "Diyelim" } ]
     lines:
       - say: "Defne'yle aramızda ne var diye soruyorsunuz. Diyelim ki... haritadaki *kırk birinci* nokta biziz."
@@ -101,7 +101,7 @@ shots:
     mood: tension
     cast:
       - { who: kerem, outfit: coat, at: [-0.3, -0.5], face: 12, do: read, hold: note_twist, look: cam, expr: horror }
-    cam: { shot: ecu, on: kerem, angle: -5, move: push, amt: 0.35 }
+    cam: { shot: close, on: kerem, angle: -5, move: push, amt: 0.3 }
     end: true
     lines:
       - say: "Nuri Amca bize yalan mı söylemişti? Ve bu notu... *kim* yazmıştı?"

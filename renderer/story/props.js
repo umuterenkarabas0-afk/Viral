@@ -113,7 +113,7 @@ function paperGeo(w, h, curl = 0.012, seg = 16) {
   const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i), y = p.getY(i);
-    p.setZ(i, curl * Math.pow((x / (w / 2)), 2) + curl * 0.6 * Math.sin((y / h) * PI * 1.3) + 0.004 * Math.abs(y) / h);
+    p.setZ(i, 0.002 + curl * Math.pow((x / (w / 2)), 2) + curl * 0.3 * (1 + Math.sin((y / h) * PI * 1.3)) + 0.004 * Math.abs(y) / h);
   }
   g.computeVertexNormals();
   return g;
@@ -234,6 +234,7 @@ function surface(kind) {
     default: m = mat('#ffffff', { map: TEX.wood('#6a4630', [3, 3], 8), rough: 0.6 });
   }
   const p = new THREE.Mesh(G.plane(3, 3), m); p.rotation.x = -PI / 2; p.receiveShadow = true; g.add(p);
+  if (kind === 'hand') p.position.y = -0.09;
   if (kind === 'coat') {
     // cep ağzı + dikiş
     const lip = new THREE.Mesh(G.rbox(0.32, 0.02, 0.05, 0.01), mat('#ffffff', { map: TEX.wool('#a87444', [1, 1]), rough: 0.95 }));
@@ -243,20 +244,21 @@ function surface(kind) {
   }
   if (kind === 'hand') {
     const skin = mat('#e2a882', { rough: 0.6, em: '#e2a882', emI: 0.05 });
-    const palm = new THREE.Mesh(G.sph(0.11, 20, 14), skin); palm.scale.set(1.0, 0.28, 1.15); palm.position.set(0.02, 0.025, 0.06); palm.castShadow = true; g.add(palm);
-    for (let i = 0; i < 4; i++) { const f = new THREE.Mesh(G.cap(0.022, 0.08, 4, 8), skin); f.rotation.x = PI / 2 - 0.15; f.position.set(-0.06 + i * 0.04, 0.03, -0.09 - (i === 1 || i === 2 ? 0.015 : 0)); f.castShadow = true; g.add(f); }
-    const th = new THREE.Mesh(G.cap(0.025, 0.07, 4, 8), skin); th.rotation.set(PI / 2, 0, -1.0); th.position.set(0.13, 0.03, 0.05); g.add(th);
+    const palm = new THREE.Mesh(G.sph(0.12, 20, 14), skin); palm.scale.set(1.0, 0.25, 1.15); palm.position.set(0.0, 0.0, 0.03); palm.castShadow = true; g.add(palm);
+    for (let i = 0; i < 4; i++) { const f = new THREE.Mesh(G.cap(0.022, 0.08, 4, 8), skin); f.rotation.x = PI / 2 + 0.25; f.position.set(-0.075 + i * 0.05, 0.005, -0.15 - (i === 1 || i === 2 ? 0.015 : 0)); f.castShadow = true; g.add(f); }
+    const th = new THREE.Mesh(G.cap(0.025, 0.07, 4, 8), skin); th.rotation.set(PI / 2, 0, -1.0); th.position.set(0.12, 0.01, 0.02); g.add(th);
   }
   return g;
 }
 
-function decor(g, kind, seed = 1) {
-  // odak dışında kalacak çevre nesneleri: çay bardağı, anahtar, gözlük, kalem
+function decor(g, kind, seed = 1, spread = 1) {
+  // odak dışında kalacak çevre nesneleri: çay bardağı, anahtar, kalem
   const r = mulberry32(seed);
-  const tea = makeHandProp('tea'); tea.scale.setScalar(1.6); tea.position.set(-0.32 - r() * 0.1, 0.0, -0.22); g.add(tea);
+  if (kind === 'hand') return;
+  const tea = makeHandProp('tea'); tea.scale.setScalar(1.6); tea.position.set((-0.3 - r() * 0.08) * spread, 0.0, -0.3 * spread); g.add(tea);
   if (kind !== 'coat') {
-    const pen = makeHandProp('pen'); pen.scale.setScalar(1.4); pen.position.set(0.28, 0.01, 0.12); pen.rotation.y = 0.8; g.add(pen);
-    const key = new THREE.Mesh(G.tor(0.022, 0.005, 6, 16), mat('#c9a24a', { metal: 1, rough: 0.3 })); key.rotation.x = PI / 2; key.position.set(0.3, 0.006, -0.25); g.add(key);
+    const pen = makeHandProp('pen'); pen.scale.setScalar(1.4); pen.position.set(0.27 * spread, 0.01, 0.2 * spread); pen.rotation.y = 0.8; g.add(pen);
+    const key = new THREE.Mesh(G.tor(0.022, 0.005, 6, 16), mat('#c9a24a', { metal: 1, rough: 0.3 })); key.rotation.x = PI / 2; key.position.set(0.3 * spread, 0.006, -0.3 * spread); g.add(key);
   }
 }
 
@@ -309,8 +311,9 @@ export function buildInsert(prop, timeline) {
   const kind = prop.type;
   const surf = prop.surface || 'wood';
   g.add(surface(surf));
-  decor(g, surf, hashString(kind + surf));
-  const st = { focus: new THREE.Vector3(0, 0, 0), update: () => {} };
+  const DIST = { note: 0.64, pen_write: 0.64, pen_shake: 0.6, book_margin: 0.8, notes_many: 0.78, notes_pair: 0.74, map: 1.0, book: 0.74 };
+  decor(g, surf, hashString(kind + surf), kind === 'map' ? 1.6 : kind === 'book' || kind === 'book_margin' ? 1.25 : 1);
+  const st = { focus: new THREE.Vector3(0, 0, 0), update: () => {}, dist: DIST[kind] || 0.65 };
   const paperM = (tex) => mat('#ffffff', { map: tex, rough: 0.92, side: THREE.DoubleSide, unique: true });
 
   if (kind === 'note' || kind === 'book_margin' || kind === 'pen_write' || kind === 'pen_shake') {
@@ -334,7 +337,9 @@ export function buildInsert(prop, timeline) {
       });
       const pm = new THREE.Mesh(paperGeo(W, W / 2, 0.006), paperM(printed)); pm.rotation.x = -PI / 2; pm.position.set(0, 0.003, -H / 2 - W / 4 + 0.005); pm.receiveShadow = true; holder.add(pm);
       holder.position.z = 0.03;
+      st.focus.set(0, 0, -0.03);
     }
+    if (surf === 'hand') holder.position.y = 0.035;
     if (prop.pose === 'pocket') { holder.rotation.set(-0.15, 0.25, 0.05); holder.position.set(0, 0.02, 0.0); }
     else holder.rotation.y = (hashString(text) % 100) / 100 * 0.3 - 0.15;
     let pen = null;
@@ -355,7 +360,7 @@ export function buildInsert(prop, timeline) {
         pen.position.add(new THREE.Vector3(0.0, 0, 0));
       }
     };
-    st.focus.set(0, 0, 0);
+    if (kind !== 'book_margin') st.focus.set(0, 0, 0);
     st.hw = hw;
   } else if (kind === 'notes_many') {
     const texts = ['08:47 vapurunu kaçıracaksın.', 'Kamera güzel fikirdi Kerem.', 'Kediye dokunma.', 'Kırmızı balık!', 'Paltolu çocuğun adı Kerem.', 'Simitçiye iki tane de.', 'Yalnız olmayacaksın.', 'Bugün kırmızı şemsiyeli adama saati sor.'];
@@ -426,7 +431,7 @@ export function buildInsert(prop, timeline) {
       x.drawImage(paperTexture('plain', '#f1e8d2').userData.canvas, 0, 0, w, h);
       x.fillStyle = 'rgba(30,25,20,0.75)';
       const r = mulberry32(n);
-      for (let i = 0; i < 22; i++) x.fillRect(50, 60 + i * 28, (w - 100) * (0.75 + r() * 0.25), 9);
+      x.fillStyle = 'rgba(30,25,20,0.35)'; for (let i = 0; i < 22; i++) { let px = 50; const ww = (w - 100) * (0.75 + r() * 0.25); while (px < 50 + ww) { const wl = 14 + r() * 40; x.fillRect(px, 62 + i * 28, Math.min(wl, 50 + ww - px), 4); px += wl + 8; } }
       x.font = '700 34px "Playfair Display"'; x.fillStyle = 'rgba(30,25,20,0.9)'; x.fillText(String(n), side < 0 ? 50 : w - 90, h - 30);
     });
     const curve = (side) => { const gg = new THREE.PlaneGeometry(0.17, 0.24, 20, 2); const p = gg.attributes.position; for (let i = 0; i < p.count; i++) { const xx = p.getX(i) + 0.085; p.setX(i, side * xx); p.setZ(i, Math.sin((xx / 0.17) * PI) * 0.012 + Math.pow(1 - xx / 0.17, 6) * 0.02); } gg.computeVertexNormals(); return gg; };

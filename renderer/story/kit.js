@@ -423,8 +423,9 @@ export function tree(b, x, z, { h = 4.5, seed = 1, leaf = '#4f6e3a', trunk = '#5
   b.add(xf(G.cyl(0.09, 0.16, h * 0.6, 8), x, h * 0.3, z), tm);
   const lm = mat(leaf, { rough: 0.95, flat: true });
   for (let i = 0; i < 6; i++) {
-    const s = 0.8 + r() * 0.7;
-    b.add(xf(new THREE.IcosahedronGeometry(s, 1), x + (r() - 0.5) * 1.4, h * 0.65 + r() * h * 0.35, z + (r() - 0.5) * 1.4, r(), r(), r()), lm);
+    const k = Math.min(1, h / 4.5);
+    const s = (0.8 + r() * 0.7) * k;
+    b.add(xf(new THREE.IcosahedronGeometry(s, 1), x + (r() - 0.5) * 1.4 * k, h * 0.65 + r() * h * 0.35, z + (r() - 0.5) * 1.4 * k, r(), r(), r()), lm);
   }
 }
 

@@ -27,7 +27,7 @@ shots:
       - { who: kerem, outfit: disguise, at: [2.6, 1.95], face: 200, pose: crouch, do: crouch, look: [[0, cam], ["@düşüyordu", floor]], expr: [[0, determined], ["@düşüyordu", annoyed]] }
       - { who: defne, outfit: disguise, at: [3.3, 2.05], face: 200, pose: crouch, do: crouch, look: kerem, expr: smile }
     props: [ crates ]
-    cam: { shot: medium, on: kerem, to: defne, angle: 180, move: push, amt: 0.2 }
+    cam: { shot: custom, pos: [2.15, 1.55, 0.25], look: [2.95, 0.95, 2.0], fov: 40, move: push, amt: 0.12 }
     fx: [ { type: mustache_fall, at_word: "düşüyordu" } ]
     sfx: [ { type: boing, at_word: "düşüyordu", delay: 0.2 } ]
     lines:
@@ -50,7 +50,7 @@ shots:
     cast:
       - { who: nuri, at: [-1.05, -0.65], face: -100, do: hang, hold: coat_hanger, look: rack, expr: neutral }
     props: [ crates, cart_parked ]
-    cam: { shot: full, on: nuri, angle: 40, move: push, amt: 0.2 }
+    cam: { shot: custom, pos: [-0.15, 1.6, 1.7], look: [-1.1, 1.25, -0.65], fov: 40, move: push, amt: 0.15 }
     lines:
       - say: "Gelen, paltoyu bana satan o *beyaz bıyıklı* adamdı. Askılara ceketler dizdi."
 
@@ -60,7 +60,7 @@ shots:
     cast:
       - { who: nuri, at: [0, -1.0], face: 0, pose: sit, do: [[0, sit], ["@kalem", write]], hold: [["@kalem", pen]], look: table, expr: focused }
     props: [ crates, cart_parked ]
-    cam: { shot: medium, on: nuri, angle: -25, move: push, amt: 0.25 }
+    cam: { shot: custom, pos: [-0.7, 1.12, 0.45], look: [0.0, 1.02, -0.85], fov: 38, move: push, amt: 0.12 }
     lines:
       - say: "Sonra cebinden bir *dolma kalem* çıkardı ve yazmaya başladı."
 
@@ -93,7 +93,7 @@ shots:
       - { who: kerem, outfit: disguise, at: [2.6, 1.95], face: 200, pose: crouch, do: crouch, look: stall, expr: shock }
       - { who: defne, outfit: disguise, at: [3.15, 2.0], face: 220, pose: crouch, do: grip, look: stall, expr: excited }
     props: [ crates, cart_parked ]
-    cam: { shot: close, on: defne, to: kerem, angle: 185, move: push, amt: 0.25 }
+    cam: { shot: close, on: defne, angle: 10, move: push, amt: 0.2 }
     lines:
       - say: "Defne kolumu sıktı. *Bulmuştuk*."
 

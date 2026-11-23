@@ -157,7 +157,7 @@ export class StoryOverlay {
     if (k < 0 || out >= 1) { this.tagEl.style.opacity = 0; return; }
     const hp = D.projectChar(T.who, 0.25);
     let x = 70, y = 860;
-    if (hp) { y = clamp(hp.y + 120, 620, 1060); x = hp.x > 540 ? 70 : 70; }
+    if (hp) { y = clamp(hp.y + 250, 760, 1080); }
     this.tagEl.style.left = x + 'px'; this.tagEl.style.top = y + 'px';
     const e = ease.outBack(clamp(k / 0.35), 1.8);
     this.tagEl.style.opacity = clamp(k * 5) * (1 - out);

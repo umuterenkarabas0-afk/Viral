@@ -23,7 +23,7 @@ shots:
     cam: { shot: insert, move: push, amt: 0.45 }
     sfx: [ { type: tick, at_word: "Selim" } ]
     lines:
-      - say: "En eskisi: Selim ve Ayla. *{1984|Bin dokuz yüz seksen dört}*."
+      - say: "En eskisi: *Selim ve Ayla*. {1984|Bin dokuz yüz seksen dört}."
 
   - set: deck
     time: night

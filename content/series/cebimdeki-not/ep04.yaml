@@ -46,7 +46,7 @@ shots:
     mood: reveal
     extras: 14
     cast:
-      - { who: kerem, outfit: coat, at: [-0.55, 0.3], face: 0, do: [[0, breathe], ["@Kırmızı", shout]], look: up, expr: [[0, nervous], ["@Kırmızı", shout]] }
+      - { who: kerem, outfit: coat, at: [-0.55, 0.3], face: 0, do: [[0, breathe], ["@Kırmızı", shout]], look: cam, expr: [[0, nervous], ["@Kırmızı", shout]] }
     cam: { shot: low, on: kerem, angle: -10, move: push, amt: 0.2 }
     fx: [ { type: shake, at_word: "Kırmızı", dur: 1.2 }, { type: pigeons, at_word: "Kırmızı" } ]
     overlay: { type: bigtext, text: "KIRMIZI BALIK!", at_word: "Kırmızı" }
@@ -64,7 +64,7 @@ shots:
     crowd: stare
     cast:
       - { who: kerem, outfit: coat, at: [-0.55, 0.3], face: 0, do: idle, look: around, expr: embarrassed }
-    cam: { shot: wide, on: kerem, angle: 160, move: pull, amt: 0.2 }
+    cam: { shot: wide, on: kerem, move: pull, amt: 0.2 }
     sfx: [ { type: spill, at_word: "döktü" } ]
     lines:
       - say: "Herkes durdu. Bir amca çayını döktü. Güvercinler kaçtı."
@@ -99,7 +99,7 @@ shots:
     cast:
       - { who: kerem, outfit: coat, at: [-0.5, 0.3], face: defne, do: read, hold: note, look: hand, expr: curious }
       - { who: defne, at: [0.5, 0.3], face: kerem, do: read, hold: note, look: hand, expr: curious }
-    cam: { shot: medium, on: kerem, to: defne, angle: 90, move: push, amt: 0.2 }
+    cam: { shot: two, on: kerem, to: defne, move: push, amt: 0.15 }
     lines:
       - say: "Elinde bir not vardı. Benimkiyle *aynı* el yazısı."
 

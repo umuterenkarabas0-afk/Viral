@@ -14,7 +14,7 @@ shots:
     cast:
       - { who: kerem, outfit: casual, at: [-1.4, 0.6], face: -90, pose: sit, do: [[0, write_stuck]], hold: pen, look: desk, expr: tired }
     props: [ crumpled ]
-    cam: { shot: medium, on: kerem, angle: -50, move: push, amt: 0.2 }
+    cam: { shot: custom, pos: [-2.0, 1.35, -0.05], look: [-1.45, 1.0, 0.65], fov: 42, move: push, amt: 0.12 }
     lines:
       - say: "Kalemi aldım. Ama üç gün boyunca *tek kelime* yazamadım."
 
@@ -24,7 +24,7 @@ shots:
     cast:
       - { who: kerem, outfit: casual, at: [-1.4, 0.6], face: -90, pose: sit, do: headhands, look: desk, expr: worried }
     props: [ crumpled ]
-    cam: { shot: close, on: kerem, angle: -70, move: push, amt: 0.25 }
+    cam: { shot: custom, pos: [-2.0, 1.25, 0.1], look: [-1.45, 0.98, 0.62], fov: 34, move: push, amt: 0.15 }
     sfx: [ { type: crumple, at: 0.3 } ]
     lines:
       - say: "Kime, ne yazacaktım? Ya birinin hayatını *mahvedersem*?"
@@ -36,7 +36,7 @@ shots:
       - { who: defne, walk: [[2.0, 1.6], [0.5, 0.9]], do: walk, hold: tea2, look: kerem, expr: smile }
       - { who: kerem, outfit: casual, at: [-1.4, 0.6], face: 30, pose: sit, do: sit, look: defne, expr: surprised }
     props: [ crumpled ]
-    cam: { shot: wide, on: defne, angle: -30, move: push, amt: 0.15 }
+    cam: { shot: custom, pos: [-1.7, 1.6, 2.7], look: [0.6, 1.15, 0.7], fov: 42, move: push, amt: 0.1 }
     sfx: [ { type: door, at: 0 } ]
     lines:
       - say: "Dördüncü gece Defne geldi. Elinde iki *çay* vardı."
@@ -95,7 +95,7 @@ shots:
       - { who: ismet, at: [-0.62, 0], face: nermin, pose: sit, do: laugh, look: nermin, expr: laugh }
       - { who: nermin, at: [0.62, 0], face: ismet, pose: sit, do: [[0, sit_talk], ["@güldüler", laugh]], look: ismet, expr: laugh }
     props: [ chess ]
-    cam: { shot: medium, on: ismet, to: nermin, angle: 90, move: orbit, amt: 0.25 }
+    cam: { shot: two, on: ismet, to: nermin, move: orbit, amt: 0.2 }
     lines:
       - say: "Üç saat satranç oynadılar. Üç saat *güldüler*."
 
@@ -108,7 +108,7 @@ shots:
       - { who: ismet, at: [-0.62, 0], face: nermin, pose: sit, do: laugh, look: nermin, expr: laugh }
       - { who: nermin, at: [0.62, 0], face: ismet, pose: sit, do: sit, look: ismet, expr: laugh }
     props: [ chess, bench_far ]
-    cam: { shot: two, on: kerem, to: defne, angle: 0, move: push, amt: 0.2 }
+    cam: { shot: two, on: kerem, to: defne, angle: 180, move: push, amt: 0.15 }
     lines:
       - say: "Defne başını omzuma koydu. Hayatım ilk defa bir tablo değil, bir *hikâyeydi*."
 

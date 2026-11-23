@@ -86,9 +86,9 @@ shots:
     cast:
       - { who: nuri_young, at: [-0.4, 0.3], face: 190, do: idle, look: ferry, expr: sad }
       - { who: leyla_young, at: [2.5, 0, -3.15], face: 0, do: wave, look: nuri_young, expr: sad, onFerry: true }
-    cam: { shot: ots, on: nuri_young, to: ferry, move: push, amt: 0.15 }
-    fx: [ { type: ferry_depart, at: 0.8 } ]
-    sfx: [ { type: horn, at: 0.5 } ]
+    cam: { shot: ots, on: nuri_young, to: leyla_young, move: push, amt: 0.1 }
+    fx: [ { type: ferry_depart, at_word: "Vapur" } ]
+    sfx: [ { type: horn, at_word: "Vapur" } ]
     lines:
       - say: "Gençken birini sevdim. Ona tek kelime söyleyemedim. Vapur kalktı, *gitti*."
         v: nuri

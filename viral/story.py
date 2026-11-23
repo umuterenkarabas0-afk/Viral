@@ -382,7 +382,7 @@ def build_timeline(series: dict, ep: dict, shots: list[dict], clips: list[LineCl
         if sh.get("label"):
             rec["label"] = dict(sh["label"], t=round(start + 0.15, 3))
         if sh.get("tag"):
-            rec["tag"] = dict(sh["tag"], t=round(start + 0.35, 3))
+            rec["tag"] = dict(sh["tag"], t=round(max(start + 0.35, 2.75 if k == 0 else 0), 3))
         if sh.get("bubble"):
             b = dict(sh["bubble"])
             b["t"] = tr("@" + b["at_word"]) if b.get("at_word") else round(start + 0.3, 3)

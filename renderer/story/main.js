@@ -114,7 +114,7 @@ class Director {
     this.sky.mesh.visible = !set.isInsert;
     this.scene.background = set.isInsert ? new THREE.Color(lp.bg || '#1a1410') : null;
     this.scene.environment = this._env(set, lp);
-    this.scene.environmentIntensity = sk.env ?? 1;
+    this.scene.environmentIntensity = lp.envI ?? sk.env ?? 1;
     const [fc, fd] = lp.fog || [sk.fog, sk.fogD];
     this.fog.color.set(fc); this.fog.density = shot.grade === 'sepia' ? fd * 0.6 : fd;
     this.sun.color.set(lp.sun?.color || '#ffffff'); this.sun.intensity = lp.sun?.I ?? 2;
@@ -160,6 +160,14 @@ class Director {
     for (const cc of this.cast) if (cc.c.at) avoid.push([cc.c.at[0], cc.c.at[1], 1.1]);
     for (const cc of this.cast) if (cc.c.walk) cc.c.walk.forEach(([x, z]) => avoid.push([x, z, 0.9]));
     const placed = [];
+    // kamera → hedef koridoru (çekim ortasındaki kamera)
+    this._camera(shot, (shot.start + shot.end) / 2);
+    const cp = this.camera.position.clone(), lp = this._look.clone();
+    const corridor = (x, z) => {
+      const ax = cp.x, az = cp.z, bx = lp.x, bz = lp.z; const dx = bx - ax, dz = bz - az; const L2 = dx * dx + dz * dz || 1;
+      const k = clamp(((x - ax) * dx + (z - az) * dz) / L2); const px = ax + dx * k, pz = az + dz * k;
+      return Math.hypot(x - px, z - pz) < 0.9 && k < 0.98;
+    };
     const seats = set.crowd.seated ? [...set.crowd.seated] : null;
     this.extraState = [];
     for (let i = 0; i < n; i++) {
@@ -169,7 +177,7 @@ class Director {
       else {
         let tries = 0;
         do { x = lerp(x0, x1, r()); z = lerp(z0, z1, r()); tries++; }
-        while (tries < 40 && (avoid.some(([ax, az, ar]) => Math.hypot(x - ax, z - az) < ar) || placed.some(([px, pz]) => Math.hypot(x - px, z - pz) < 0.75)));
+        while (tries < 60 && (avoid.some(([ax, az, ar]) => Math.hypot(x - ax, z - az) < ar) || placed.some(([px, pz]) => Math.hypot(x - px, z - pz) < 0.75) || corridor(x, z)));
         face = r() * PI * 2;
       }
       placed.push([x, z]);
@@ -366,14 +374,14 @@ class Director {
         const f = this.set.focus || V();
         const az = ang;
         look = f.clone().add(V(0, 0, 0.0));
-        const dd = c.dist || 0.62;
+        const dd = c.dist || this.set.insertDist || 0.64;
         pos = look.clone().add(V(Math.sin(az) * dd * 0.42, dd * 0.9, Math.cos(az) * dd * 0.42));
         fov = c.fov || 34;
         break;
       }
-      case 'close': look = A.clone().add(V(0, -0.02, 0)); pos = orbitPos(look, c.dist || 0.95, Ft + ang, 0.03); fov = c.fov || 30; break;
-      case 'ecu': look = A.clone().add(V(0, 0.0, 0)); pos = orbitPos(look, c.dist || 0.62, Ft + ang, 0.02); fov = c.fov || 28; break;
-      case 'medium': look = A.clone().add(V(0, -0.2, 0)); pos = orbitPos(look, c.dist || 1.75, Ft + ang, 0.05); fov = c.fov || 34; break;
+      case 'close': look = A.clone().add(V(0, -0.02, 0)); pos = orbitPos(look, c.dist || 1.12, Ft + ang, 0.03); fov = c.fov || 30; break;
+      case 'ecu': look = A.clone().add(V(0, 0.0, 0)); pos = orbitPos(look, c.dist || 0.82, Ft + ang, 0.02); fov = c.fov || 28; break;
+      case 'medium': look = A.clone().add(V(0, -0.2, 0)); pos = orbitPos(look, c.dist || 1.95, Ft + ang, 0.05); fov = c.fov || 34; break;
       case 'full': look = A.clone().add(V(0, -0.62, 0)); pos = orbitPos(look, c.dist || 3.3, Ft + ang, 0.15); fov = c.fov || 36; break;
       case 'low': look = A.clone().add(V(0, -0.05, 0)); pos = orbitPos(A.clone().setY(0.45), c.dist || 1.5, Ft + ang, 0); fov = c.fov || 42; break;
       case 'high': look = A.clone().add(V(0, -0.25, 0)); pos = orbitPos(A.clone(), c.dist || 1.1, Ft + ang, 1.5); fov = c.fov || 42; break;
@@ -418,13 +426,16 @@ class Director {
     // hareketler
     const amt = c.amt ?? 0.25;
     switch (c.move) {
-      case 'push': pos.lerp(look, amt * e); break;
+      case 'push': pos.lerp(look, amt * e * (c.shot === 'insert' ? 0.5 : 1)); break;
       case 'pull': pos = look.clone().add(pos.clone().sub(look).multiplyScalar(1 + amt * e)); break;
       case 'orbit': { const off = pos.clone().sub(look); off.applyAxisAngle(V(0, 1, 0), (e - 0.5) * amt * 1.8); pos = look.clone().add(off); break; }
       case 'crane': pos.y += (e - 0.3) * amt * 3.0; break;
       case 'track': if (on && c.shot === 'wide') { const w = this.set.wide; const off = w.pos.clone().sub(w.look); pos = A.clone().setY(w.look.y).add(off.multiplyScalar(0.8)); } break;
       case 'pan': break;
     }
+    // minimum mesafe (aşırı yakın itmeleri sınırla)
+    const MIN = { close: 0.92, ecu: 0.66, medium: 1.5, full: 2.5, low: 1.15 };
+    if (MIN[c.shot] && pos.distanceTo(look) < MIN[c.shot]) pos = look.clone().add(pos.clone().sub(look).normalize().multiplyScalar(MIN[c.shot]));
     // kadraj: özneyi altyazının üstüne it
     const dist = pos.distanceTo(look);
     const SHIFT = { close: 0.08, ecu: 0.05, medium: 0.05, full: 0.03, two: 0.06, ots: 0.06, low: 0, high: 0.02 };

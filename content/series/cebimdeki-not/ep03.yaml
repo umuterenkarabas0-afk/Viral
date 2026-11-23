@@ -35,7 +35,7 @@ shots:
     time: night
     mood: mystery
     props: [ cat_top ]
-    cam: { shot: custom, pos: [-0.7, 1.05, -0.2], look: [-1.1, 2.3, -1.65], fov: 42, move: push, amt: 0.25 }
+    cam: { shot: custom, pos: [-0.55, 1.95, -0.45], look: [-1.1, 2.25, -1.72], fov: 30, move: push, amt: 0.2 }
     overlay: { type: suspects, items: ["EMRE", "PAMUK", "ANNEM"], show: 2, strike: 1 }
     sfx: [ { type: meow, at_word: "uyanık" } ]
     lines:
@@ -72,7 +72,7 @@ shots:
     cast:
       - { who: kerem, outfit: coat, walk: [[-1.0, 1.6], [0.0, 0.25]], do: walk, look: cat, expr: curious }
     props: [ cat_counter ]
-    cam: { shot: wide, on: kerem, move: push, amt: 0.2 }
+    cam: { shot: custom, pos: [-0.9, 1.6, 2.5], look: [0.55, 1.0, -0.4], fov: 40, move: push, amt: 0.15 }
     lines:
       - say: "Sahafın tezgâhında dev gibi, *turuncu* bir kedi uyuyordu."
 
@@ -80,9 +80,9 @@ shots:
     time: day
     mood: comedy
     cast:
-      - { who: kerem, outfit: coat, at: [0.35, 0.05], face: 110, do: pet, look: cat, expr: [[0, sneaky], ["@dokundum", smile]] }
+      - { who: kerem, outfit: coat, at: [0.4, 0.05], face: 124, do: pet, look: cat, expr: [[0, suspicious], ["@dokundum", smile]] }
     props: [ cat_counter ]
-    cam: { shot: medium, on: kerem, angle: 70, move: push, amt: 0.3 }
+    cam: { shot: custom, pos: [0.05, 1.45, 1.35], look: [0.85, 1.08, -0.4], fov: 36, move: push, amt: 0.2 }
     hold: 0.3
     sfx: [ { type: purr, at_word: "dokundum" } ]
     lines:

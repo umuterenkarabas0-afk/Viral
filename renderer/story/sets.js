@@ -57,6 +57,7 @@ function stall(b, x, z, seed, { face = 1, awn = ['#efe3c6', '#b8322c'], items = 
     const pal = ['#c9a24a', '#2e4a6a', '#7a2e2e', '#3a5a3a', '#d9cbb2', '#5a3a5a', '#1f1f1f', '#b87333'];
     for (let i = 0; i < 9; i++) {
       const ix = x - 0.75 + i * 0.19 + (r() - 0.5) * 0.05, iz = fz(-0.45 + (r() - 0.5) * 0.35);
+      if (seed === 1 && Math.abs(ix - x) < 0.32) continue;
       const c = mat(pal[Math.floor(r() * pal.length)], { rough: 0.4 + r() * 0.4, metal: r() < 0.3 ? 0.7 : 0 });
       const k = Math.floor(r() * 6);
       if (k === 0) { b.add(xf(G.lathe([[0.001, 0], [0.06, 0.01], [0.07, 0.1], [0.03, 0.2], [0.045, 0.26], [0.001, 0.26]], 14), ix, 0.805, iz), c); }
@@ -189,7 +190,7 @@ export function market(ctx) {
   stall(b, 0, 0, 1, { awn: ['#efe3c6', '#2e6a5a'] });
   coatRack(b, -1.35, -0.85, 1.0);
   for (const [x, s, aw] of [[-4.3, 2, ['#efe3c6', '#b8322c']], [4.3, 3, ['#f2d27a', '#3a5a7a']], [8.6, 4, ['#efe3c6', '#7a3a5a']], [-8.6, 5, ['#efe3c6', '#c9802a']]]) stall(b, x, 0, s, { awn: aw });
-  for (const [x, s, aw] of [[-3.2, 6, ['#efe3c6', '#3a6a3a']], [1.8, 7, ['#efe3c6', '#b8322c']], [6.6, 8, ['#f2d27a', '#2e4a6a']]]) stall(b, x, 3.6, s, { face: -1, awn: aw });
+  for (const [x, s, aw] of [[-4.0, 6, ['#efe3c6', '#3a6a3a']], [3.8, 7, ['#efe3c6', '#b8322c']], [8.2, 8, ['#f2d27a', '#2e4a6a']]]) stall(b, x, 3.6, s, { face: -1, awn: aw });
   const walls = ['#d9c3a0', '#c9a888', '#b8c0b0', '#e0cfb0', '#c8b8a8', '#d0b090'];
   for (let i = 0; i < 7; i++) building(b, -18 + i * 6, -3.4, { w: 6, floors: 4 + (i % 3), seed: 20 + i, wall: walls[i % 6], facing: 1, lit: 0.35, shop: true });
   for (let i = 0; i < 7; i++) building(b, -18 + i * 6, 6.6, { w: 6, floors: 4 + ((i + 1) % 3), seed: 40 + i, wall: walls[(i + 2) % 6], facing: -1, lit: 0.35 });
@@ -214,7 +215,7 @@ export function market(ctx) {
   return {
     group: g, interior: false, shadowExt: 6,
     anchors: { stall: V(0, 1.1, -0.6), rack: V(-1.35, 1.4, -0.85), table: V(0, 0.8, -0.45), crates: V(2.9, 0.8, 1.3) },
-    wide: { pos: V(2.6, 2.0, 6.2), look: V(-0.4, 1.0, -0.2) },
+    wide: { pos: V(-0.4, 2.0, 6.3), look: V(0.0, 1.0, -0.3) },
     crowd: { zone: [-7.5, 7.5, 0.9, 2.9], avoid: [[0, 0.4, 1.3], [2.8, 1.3, 1.2]] },
     stools,
     onShot(shot) {
@@ -222,7 +223,7 @@ export function market(ctx) {
       crates.visible = pr.has('crates');
       cart.visible = pr.has('cart') || pr.has('cart_parked');
       cart.userData.follow = pr.has('cart');
-      if (pr.has('cart_parked')) { cart.position.set(-2.1, 0, 0.45); cart.rotation.y = 0.3; }
+      if (pr.has('cart_parked')) { cart.position.set(-2.6, 0, -1.5); cart.rotation.y = 0.3; }
       loneCoat.visible = pr.has('empty_stall');
       tableNote.visible = shot.cast.some((c) => c.who === 'nuri' && (c.do || []).some(([, a]) => a === 'write'));
     },
@@ -356,7 +357,7 @@ export function room() {
     light: (time) => ({
       morning: L('morning', { interiorEnv: { wall: '#6a7a70', window: '#ffe2b8', winI: 2.6, lampI: 0.6 }, sun: { pos: V(2.8, 3.6, -5), color: '#ffd29a', I: 3.2 }, points: [{ pos: V(1.0, 1.6, -1.6), color: '#ffd8a8', I: 2.0, d: 4 }], fog: ['#3a2f28', 0], exp: 1.05 }),
       day: L('day', { interiorEnv: { wall: '#6a7a70', window: '#f2f6ff', winI: 2.4, lampI: 0.6 }, sun: { pos: V(2.8, 4.2, -5), color: '#fff4e4', I: 2.6 }, points: [{ pos: V(1.0, 1.6, -1.6), color: '#e8f0ff', I: 1.6, d: 4 }], fog: ['#3a2f28', 0], exp: 1.05 }),
-      night: L('night', { interiorEnv: { wall: '#3a3a44', window: '#6a80b0', winI: 0.6, lampI: 1.8 }, sun: { pos: V(3, 4, -5), color: '#8aa0d8', I: 0.5 }, points: [{ pos: V(-1.95, 1.12, 1.05), color: '#ffc478', I: 3.2, d: 4.5 }, { pos: V(1.0, 1.5, -1.7), color: '#7f9ad0', I: 0.8, d: 3.5 }, { pos: V(-1.9, 0.95, 0.75), color: '#8fb6e8', I: 0.6, d: 1.8 }], fog: ['#141b30', 0], exp: 1.12 }),
+      night: L('night', { envI: 0.7, fillI: 2.2, interiorEnv: { wall: '#4a4a54', window: '#6a80b0', winI: 0.8, lampI: 2.4 }, sun: { pos: V(3, 4, -5), color: '#8aa0d8', I: 0.7 }, points: [{ pos: V(-1.95, 1.12, 1.05), color: '#ffc478', I: 6.0, d: 5 }, { pos: V(1.0, 1.5, -1.7), color: '#7f9ad0', I: 0.8, d: 3.5 }, { pos: V(-1.9, 0.95, 0.75), color: '#8fb6e8', I: 0.6, d: 1.8 }], fog: ['#141b30', 0], exp: 1.12 }),
     }[time] || null),
   };
 }
@@ -589,7 +590,7 @@ export function square(ctx) {
   // boğa heykeli
   b.add(xf(G.rbox(2.4, 1.25, 1.3, 0.05), 0, 0.625, -2.9), mat('#8a8680', { rough: 0.6 }));
   b.add(xf(G.rbox(2.6, 0.12, 1.5, 0.03), 0, 1.3, -2.9), mat('#7a766f', { rough: 0.6 }));
-  const br = mat('#4a3a26', { rough: 0.35, metal: 0.85 });
+  const br = mat('#9a7442', { rough: 0.32, metal: 0.75 });
   const bull = (x, y, z) => {
     b.add(xf(G.cap(0.38, 0.9, 6, 16), x, y + 0.85, z, 0, 0, PI / 2), br);
     b.add(xf(G.sph(0.5, 18, 14), x + 0.45, y + 0.95, z, 0, 0, 0, 1, 1.05, 0.95), br);
@@ -720,7 +721,7 @@ export function deck(ctx) {
       gulls.update(t);
     },
     light: (time) => ({
-      night: L('night', { sun: { pos: V(-6, 8, -10), color: '#9fb4ff', I: 0.55 }, points: [{ pos: V(-2.2, 2.6, 2.2), color: '#ffcf8a', I: 2.6, d: 6 }, { pos: V(3.4, 2.6, 2.2), color: '#ffcf8a', I: 2.6, d: 6 }], fog: ['#141b30', 0.012], exp: 1.12 }),
+      night: L('night', { envI: 0.55, fillI: 1.8, sun: { pos: V(-6, 8, -10), color: '#9fb4ff', I: 0.8 }, points: [{ pos: V(-2.2, 2.6, 2.2), color: '#ffcf8a', I: 5.5, d: 7 }, { pos: V(3.4, 2.6, 2.2), color: '#ffcf8a', I: 5.5, d: 7 }, { pos: V(0.3, 2.4, 1.2), color: '#ffd8a8', I: 2.5, d: 4 }], fog: ['#141b30', 0.012], exp: 1.15 }),
       sunset: L('sunset', { sun: { pos: V(0, 2.2, -12), color: '#ffa060', I: 2.8 }, points: [{ pos: V(0, 2.6, 2.2), color: '#ffcf8a', I: 0.8, d: 6 }], fog: ['#e8906c', 0.01], exp: 1.05, sat: 1.1, tint: [1.06, 0.98, 0.9] }),
     }[time] || null),
   };
@@ -745,7 +746,7 @@ export function insert(ctx) {
         g.add(cur.group); curKey = key;
       }
       bokeh.visible = shot.time === 'night' || shot.time === 'dawn';
-      this.focus = cur.focus;
+      this.focus = cur.focus; this.insertDist = cur.dist;
     },
     update(t, shot) { if (cur) cur.update(t, t - shot.start); },
     light: (time) => {

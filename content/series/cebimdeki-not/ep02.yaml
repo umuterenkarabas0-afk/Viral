@@ -99,7 +99,7 @@ shots:
     cast:
       - { who: kerem, outfit: coat, at: [0, -0.5], face: husnu, do: cover, look: husnu, expr: curious }
       - { who: husnu, walk: [[5.0, -0.9], [1.0, -0.6]], do: walk, hold: umbrella_red, look: kerem, expr: knowing }
-    cam: { shot: wide, on: kerem, to: husnu, angle: 30, move: push, amt: 0.15 }
+    cam: { shot: two, on: kerem, to: husnu, move: push, amt: 0.1 }
     lines:
       - say: "Ve karşıdan, *kırmızı* şemsiyeli bir adam geldi. Saati sordum."
 
