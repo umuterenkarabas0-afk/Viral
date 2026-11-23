@@ -40,7 +40,7 @@ def synth_voice(segments, voice: Voice, rate: float) -> list[VoiceClip]:
     for seg in segments:
         spoken = [w for u in seg.units for w in u.spoken]
         r = voice.say(seg.speak_text, spoken, rate)
-        spans = align_words(r.audio, r.sr, spoken, r.word_starts)
+        spans = align_words(r.audio, r.sr, spoken, r.word_starts, r.word_ends)
         s, e = speech_bounds(r.audio, r.sr)
         clips.append(VoiceClip(seg, r.audio, r.sr, spans, s, e))
     return clips
@@ -67,6 +67,7 @@ def design_audio(timeline: dict, placements, out_dir: Path) -> Path:
     vox_st = S.process_voice(vox)
 
     log("Ses tasarımı: müzik sentezleniyor")
+    space = timeline.get("environment") == "space"
     items = [s for s in segs if s["kind"] == "item"]
     first_item = items[0]["start"] if items else 0
     top = next((s for s in items if s.get("rank") == 1), None)
@@ -82,16 +83,66 @@ def design_audio(timeline: dict, placements, out_dir: Path) -> Path:
         last_voice = outro["voiceEnd"]
         sections += [(outro["start"], last_voice + 0.3, "final"), (last_voice + 0.3, dur + 5, "end")]
     plan = S.MusicPlan(duration=dur, bpm=bpm, sections=sections)
-    music, drums = S.render_music(plan)
-    # son akor: uzun kuyruk
-    if outro:
-        root, chord = S.PROG[0]
-        tail = S._pad([S.midi_hz(m) for m in chord] + [S.midi_hz(chord[0] + 12)], dur - outro["voiceEnd"] + 0.5, 6)
-        S.add_at(music, S.reverb(tail, 0.5, 3.0), outro["voiceEnd"] - 0.2, 1.2)
+    if space:
+        from . import sound_space as SP
+        music, drums = SP.render_music(plan)
+        if outro:
+            root, chord = SP.PROG[0]
+            tail = SP.supersaw_pad([S.midi_hz(m) for m in chord] + [S.midi_hz(chord[0] + 12)], dur - outro["voiceEnd"] + 0.8, 5, 1.2, 1.5, seed=99)
+            S.add_at(music, S.reverb(tail, 0.6, 4.0), outro["voiceEnd"] - 0.2, 1.1)
+        log("Ses tasarımı: uzay atmosferi + efektler")
+        sfx = np.zeros((n, 2))
+        amb = SP.render_ambience(dur, segs)
+        SP.place_sfx(timeline, sfx, bar)
+    else:
+        music, drums = S.render_music(plan)
+        # son akor: uzun kuyruk
+        if outro:
+            root, chord = S.PROG[0]
+            tail = S._pad([S.midi_hz(m) for m in chord] + [S.midi_hz(chord[0] + 12)], dur - outro["voiceEnd"] + 0.5, 6)
+            S.add_at(music, S.reverb(tail, 0.5, 3.0), outro["voiceEnd"] - 0.2, 1.2)
+        log("Ses tasarımı: efektler yerleştiriliyor")
+        sfx = np.zeros((n, 2))
+        amb = S.render_ambience(dur)
+        _place_ocean_sfx(timeline, sfx, bar)
 
-    log("Ses tasarımı: efektler yerleştiriliyor")
-    sfx = np.zeros((n, 2))
-    amb = S.render_ambience(dur)
+    log("Miks: ducking, pompalama, limiter")
+    env = S.envelope_follow(vox, 0.03, 0.4)
+    vthr = np.percentile(env[env > 1e-4], 60) if np.any(env > 1e-4) else 0.05
+    # tema başına miks kazançları (uzay müziği daha yoğun: yatak daha geride)
+    g = {"duck": 0.7, "music": 0.17, "drums": 0.15, "amb": 0.36, "sfx": 0.5, "pump": 0.2} if space else \
+        {"duck": 0.55, "music": 0.34, "drums": 0.32, "amb": 0.35, "sfx": 0.62, "pump": 0.28}
+    duck = 1 - g["duck"] * np.clip(env / (vthr + 1e-9), 0, 1)
+    tt = np.arange(n) / S.SR
+    beat = 60 / bpm
+    pump = 1 - g["pump"] * np.exp(-((tt % beat) / 0.11))
+    music_bus = music * (duck * pump)[:, None] * g["music"] + drums * (0.55 + 0.45 * duck)[:, None] * g["drums"]
+    amb_bus = amb * (0.6 + 0.4 * duck)[:, None] * g["amb"]
+    sfx_bus = sfx * g["sfx"]
+    mix = vox_st * 1.0 + music_bus + amb_bus + sfx_bus
+    mix = S.hp(mix, 30, 2)
+    # fade in/out
+    fi = int(0.3 * S.SR)
+    mix[:fi] *= np.linspace(0, 1, fi)[:, None]
+    fo = int(0.6 * S.SR)
+    mix[-fo:] *= np.linspace(1, 0, fo)[:, None]
+    mix = S.limiter(mix * 0.9, 0.9)
+    raw = out_dir / "audio_raw.wav"
+    write_wav(raw, mix)
+    # stem'ler (yeniden miks için)
+    stems = out_dir / "stems"
+    stems.mkdir(exist_ok=True)
+    write_wav(stems / "voice.wav", np.clip(vox_st, -1, 1))
+    write_wav(stems / "music.wav", np.clip(music_bus, -1, 1))
+    write_wav(stems / "sfx.wav", np.clip(sfx_bus + amb_bus, -1, 1))
+    # platform standardı: -14 LUFS, -1 dBTP
+    final = out_dir / "audio.wav"
+    loudnorm(raw, final)
+    return final
+
+
+def _place_ocean_sfx(timeline: dict, sfx: np.ndarray, bar: float):
+    segs = timeline["segments"]
     S.add_at(sfx, S.sfx_splash(), 0.0, 0.75)
     for k, s in enumerate(segs):
         if s["kind"] == "hook" and s.get("title"):
@@ -124,37 +175,6 @@ def design_audio(timeline: dict, placements, out_dir: Path) -> Path:
             S.add_at(sfx, S.sfx_dream(c.get("dur", 1.5) + 1.2), c["t"] - 0.1, 0.7)
         elif c["type"] == "flash":
             S.add_at(sfx, S.sfx_sparkle(seed=9), c["t"], 0.5)
-
-    log("Miks: ducking, pompalama, limiter")
-    env = S.envelope_follow(vox, 0.03, 0.4)
-    vthr = np.percentile(env[env > 1e-4], 60) if np.any(env > 1e-4) else 0.05
-    duck = 1 - 0.55 * np.clip(env / (vthr + 1e-9), 0, 1)
-    tt = np.arange(n) / S.SR
-    beat = 60 / bpm
-    pump = 1 - 0.28 * np.exp(-((tt % beat) / 0.11))
-    music_bus = music * (duck * pump)[:, None] * 0.34 + drums * (0.6 + 0.4 * duck)[:, None] * 0.32
-    amb_bus = amb * (0.6 + 0.4 * duck)[:, None] * 0.35
-    sfx_bus = sfx * 0.62
-    mix = vox_st * 1.0 + music_bus + amb_bus + sfx_bus
-    mix = S.hp(mix, 30, 2)
-    # fade in/out
-    fi = int(0.3 * S.SR)
-    mix[:fi] *= np.linspace(0, 1, fi)[:, None]
-    fo = int(0.6 * S.SR)
-    mix[-fo:] *= np.linspace(1, 0, fo)[:, None]
-    mix = S.limiter(mix * 0.9, 0.9)
-    raw = out_dir / "audio_raw.wav"
-    write_wav(raw, mix)
-    # stem'ler (yeniden miks için)
-    stems = out_dir / "stems"
-    stems.mkdir(exist_ok=True)
-    write_wav(stems / "voice.wav", np.clip(vox_st, -1, 1))
-    write_wav(stems / "music.wav", np.clip(music_bus, -1, 1))
-    write_wav(stems / "sfx.wav", np.clip(sfx_bus + amb_bus, -1, 1))
-    # platform standardı: -14 LUFS, -1 dBTP
-    final = out_dir / "audio.wav"
-    loudnorm(raw, final)
-    return final
 
 
 def loudnorm(src: Path, dst: Path, target=-14.0):
@@ -218,7 +238,7 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
         speech = sum(c.speech_end - c.speech_start for c in clips)
         other = est - speech
         want = max(10.0, target - other)
-        hi = 1.3 if voice.engine == "google" else 1.6
+        hi = voice.max_rate
         new_rate = float(np.clip(rate * speech / want, 0.9, hi))
         if abs(new_rate - rate) < 0.02:
             break

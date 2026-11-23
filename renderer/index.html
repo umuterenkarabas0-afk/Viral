@@ -36,6 +36,7 @@
     -webkit-text-stroke: 10px var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 rgba(0,0,0,.35), 0 0 40px rgba(0,0,0,.35); }
   .name .ch { display: inline-block; }
   .latin { margin-top: 14px; font: italic 700 42px 'Montserrat'; color: #bff4ff; text-shadow: 0 3px 10px rgba(0,0,0,.7); white-space: nowrap; }
+  .latin.sub { font: 800 38px 'Montserrat'; font-style: normal; letter-spacing: 1px; color: #d9f6ff; text-transform: none; }
   .chips { position: absolute; top: 270px; left: 0; right: 0; display: flex; gap: 16px; justify-content: flex-start; flex-wrap: nowrap; }
   .chip { display: flex; align-items: center; gap: 12px; padding: 14px 24px 14px 18px; border-radius: 999px;
     background: rgba(4, 22, 38, .72); border: 2px solid rgba(255,255,255,.22);
@@ -46,6 +47,8 @@
 
   /* hook başlığı */
   .hooktitle { position: absolute; top: 330px; left: 0; right: 0; text-align: center; opacity: 0; }
+  .hooktitle::before { content: ''; position: absolute; left: -120px; right: -120px; top: -140px; height: 640px; z-index: -1;
+    background: radial-gradient(ellipse at 50% 48%, rgba(0,0,0,.72) 0%, rgba(0,0,0,.45) 42%, rgba(0,0,0,0) 70%); }
   .hooktitle .kicker { font: 900 66px 'Montserrat'; letter-spacing: 10px; color: #fff; -webkit-text-stroke: 8px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 0 rgba(0,0,0,.3); }
   .hooktitle .big { display: inline-block; font: 400 230px/1.05 'Anton'; white-space: nowrap;
     background: linear-gradient(180deg, #FFFBD6 0%, var(--accent) 50%, #FF7A00 100%); -webkit-background-clip: text; background-clip: text; color: transparent;

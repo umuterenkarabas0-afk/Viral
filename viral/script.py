@@ -37,7 +37,7 @@ class Segment:
 
 _SWAP = re.compile(r"\{([^{}|]+)\|([^{}]+)\}")
 _EMPH = re.compile(r"\*([^*]+)\*")
-_DANGER = re.compile(r"(?<![\w!])!([^!\s][^!]*?)!(?=[\s.,;:?]|$)")
+_DANGER = re.compile(r"(?<![\w!])!([^!\s][^!]*?)!(?=[\s.,;:?!]|$)")
 _PUNCT_STRIP = ".,;:!?\"“”«»()…—–"
 
 
@@ -88,7 +88,7 @@ def parse_markup(say: str) -> tuple[list[Unit], str]:
     # Önce işaretleri yer tutuculara çevir: (display, spoken, style) parçaları
     tokens: list[tuple[str, str | None, str | None]] = []  # (text, speak_alt, style)
     pos = 0
-    pattern = re.compile(r"\{[^{}|]+\|[^{}]+\}|\*[^*]+\*|(?<![\w!])![^!\s][^!]*?!(?=[\s.,;:?]|$)")
+    pattern = re.compile(r"\{[^{}|]+\|[^{}]+\}|\*[^*]+\*|(?<![\w!])![^!\s][^!]*?!(?=[\s.,;:?!]|$)")
     for m in pattern.finditer(say):
         if m.start() > pos:
             tokens.append((say[pos:m.start()], None, None))
@@ -162,7 +162,17 @@ def validate_script(script: dict[str, Any]) -> list[str]:
         if it.get("id") in ids:
             errs.append(f"items[{i}].id tekrar ediyor: {it.get('id')}")
         ids.add(it.get("id"))
+    bodies = set((script.get("bodies") or {}).keys())
     hook = script.get("hook") or {}
-    if hook.get("subject") and hook["subject"] not in ids:
-        errs.append(f"hook.subject '{hook['subject']}' bir item id'si değil")
+    if hook.get("subject") and hook["subject"] not in ids | bodies:
+        errs.append(f"hook.subject '{hook['subject']}' bir item ya da bodies id'si değil")
+    env = script.get("environment", "ocean")
+    for i, it in enumerate(items):
+        if env == "space" and not isinstance(it.get("planet"), dict):
+            errs.append(f"items[{i}].planet eksik (uzay ortamı)")
+        if env == "ocean" and not isinstance(it.get("fish"), dict):
+            errs.append(f"items[{i}].fish eksik (okyanus ortamı)")
+        comp = ((it.get("scene") or {}).get("companion") or {}).get("ref")
+        if comp and comp not in ids | bodies:
+            errs.append(f"items[{i}].scene.companion.ref '{comp}' tanımlı değil")
     return errs

@@ -46,7 +46,7 @@ async function openPage(port, timeline, gpu, opts = {}) {
   await page.addInitScript(([tl, ro]) => { window.__TIMELINE__ = tl; window.__RENDER_OPTS__ = ro; }, [timeline, opts]);
   await page.goto(`http://127.0.0.1:${port}/renderer/index.html`);
   try {
-    await page.waitForFunction('window.__ready === true || !!window.__initError', null, { timeout: 180000 });
+    await page.waitForFunction('window.__ready === true || !!window.__initError', null, { timeout: 900000 });
   } catch (e) { throw new Error('Sayfa hazır olmadı: ' + errors.join('\n')); }
   const initErr = await page.evaluate('window.__initError || null');
   if (initErr) throw new Error('Renderer init hatası: ' + initErr + '\n' + errors.join('\n'));

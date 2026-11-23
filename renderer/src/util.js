@@ -31,6 +31,7 @@ export const ease = {
   inCubic: (t) => t * t * t,
   outCubic: (t) => 1 - Math.pow(1 - t, 3),
   inOutCubic: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  inOutSine: (t) => -(Math.cos(Math.PI * t) - 1) / 2,
   outQuart: (t) => 1 - Math.pow(1 - t, 4),
   inOutQuart: (t) => (t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2),
   outExpo: (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)),

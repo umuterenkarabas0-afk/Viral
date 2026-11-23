@@ -1,0 +1,338 @@
+# Güneş Sistemi'nin en tuhaf 10 yeri — uzay kanalının ilk videosu
+# Söz dizimi (say alanlarında):
+#   *kelime*        → altyazıda vurgulu
+#   !kelime!        → altyazıda tehlike rengi
+#   {göster|oku}    → altyazıda "göster", seslendirmede "oku"
+# Bilgi kaynakları: NASA Solar System Exploration (Merkür, Uranüs, Iapetus, Mars, Satürn,
+# Enceladus, Io, Titan, Neptün, Venüs sayfaları); sayılar yuvarlanmış/temkinli ifade edilmiştir.
+id: gunes-sistemi-tuhaf-yerler
+title: "Güneş Sistemi'nin En Tuhaf 10 Yeri"
+format: countdown
+language: tr-TR
+environment: space
+theme: { accent: "#FFD60A", accent2: "#7DF9FF", danger: "#FF4D5E", brand_icon: planet }
+voice: { name: tr-TR-EmelNeural, speaking_rate: 1.12 }
+
+hook:
+  say: "Bir gezegende Güneş *batıdan* doğuyor! İşte Güneş Sistemi'nin en tuhaf {10|on} yeri."
+  subject: sun
+  env: { palette: warm }
+  title: { kicker: "Güneş Sistemi'nin", big: "En tuhaf 10 yeri", at_word: "İşte" }
+  cues:
+    - { type: sfx, name: sun, at_word: "Bir" }
+
+bodies:
+  sun:
+    type: star
+  jupiter:
+    type: gas
+    seed: 5
+    colors: ["#7a4a30", "#c49a72", "#e6d6bc", "#f6efe2"]
+    bands: { count: 18, turbulence: 0.75, contrast: 0.95, streaks: 0.6, flow: 0.006 }
+    storms:
+      - { lat: -22, lon: 0, size: 9, aspect: 1.7, swirl: 2.6, color: "#c25a34", amount: 0.95 }
+      - { lat: -33, lon: 70, size: 2.6, aspect: 1.4, swirl: 2.0, color: "#f2ece0", amount: 0.8 }
+      - { lat: -33, lon: 110, size: 2.2, aspect: 1.4, swirl: 2.0, color: "#f2ece0", amount: 0.8 }
+    atmosphere: { color: "#ffe8c8", intensity: 0.3, thickness: 0.03, rim: 0.25 }
+    tilt: 3
+    spin: 0.02
+
+items:
+  - id: merkur
+    rank: 10
+    name: Merkür
+    subtitle: "Güneş'e en yakın gezegen"
+    say: "Onuncu sırada Merkür. Güneş'e en yakın gezegen, ama kutup kraterlerinde *buz* var!"
+    chips: [ { icon: flame, text: "Gündüz 430°C" }, { icon: snowflake, text: "Gece -180°C" } ]
+    callout: { anchor: north_pole, text: "Gölgedeki buz", at_word: "kraterlerinde", icon: snowflake, zoom: 0.55 }
+    env: { palette: warm }
+    focus: { lat: 40, lon: 20 }
+    camera: { yaw: [0.28, 0.05], pitch: [0.02, 0.1], dist: [1.5, 1.25] }
+    scene: { sun: { show: true, x: -0.72, y: 0.3, size: 0.55, dist: 4, az: -72, el: 24 } }
+    cues: [ { type: sfx, name: ice, at_word: "buz" } ]
+    planet:
+      type: rocky
+      seed: 11
+      colors: ["#34312e", "#67625c", "#958f87", "#cfc9c0"]
+      albedo: { scale: 2.6, contrast: 0.85, accent: 0.6, heightTint: 5, ejecta: 0.8 }
+      terrain: { scale: 1.8, amount: 0.008, ridged: 0.2 }
+      craters: { density: 1.0, size: 1.0, depth: 0.6 }
+      relief: 1.2
+      spots:
+        - { lat: 86, lon: 30, size: 2.8, color: "#d6f1ff", soft: 0.4, emissive: 0.25 }
+        - { lat: 83.5, lon: 115, size: 2.2, color: "#d6f1ff", soft: 0.4, emissive: 0.25 }
+        - { lat: 87.5, lon: 210, size: 2.4, color: "#d6f1ff", soft: 0.4, emissive: 0.25 }
+        - { lat: 84, lon: 300, size: 1.8, color: "#d6f1ff", soft: 0.4, emissive: 0.25 }
+      emissive: { color: "#9fdcff", strength: 0.8 }
+      spin: 0.01
+
+  - id: uranus
+    rank: 9
+    name: Uranüs
+    subtitle: "Yan yatmış buz devi"
+    say: "Dokuzda Uranüs. *Yan yatmış* dönüyor; kutuplarında {42|kırk iki} yıl hiç gece olmuyor!"
+    chips: [ { icon: rotate, text: "98° eksen eğikliği" }, { icon: calendar, text: "1 yılı = 84 yıl" } ]
+    env: { palette: cool }
+    focus: { lat: 0, lon: 90 }
+    camera: { yaw: [0.62, 0.42], pitch: [0.12, 0.05], dist: [1.6, 1.4] }
+    scene: { sun: { az: -50, el: 20 } }
+    cues:
+      - { type: axis, at_word: "Yan", attack: 1.2, dur: 3.2, release: 0.4 }
+      - { type: sfx, name: whirl, at_word: "Yan" }
+    planet:
+      type: gas
+      seed: 3
+      colors: ["#7fc6d2", "#93d6de", "#a9e2e6", "#c4eef0"]
+      bands: { count: 10, turbulence: 0.25, contrast: 0.35, streaks: 0.25, flow: 0.003 }
+      caps: { north: 62, south: 90, color: "#d6f5f5", soft: 10, amount: 0.4 }
+      rings: { style: thin, inner: 1.62, outer: 2.05, color: "#7a7f84", color2: "#55595e", opacity: 0.9 }
+      atmosphere: { color: "#a6f2ff", intensity: 0.7, thickness: 0.05, rim: 0.55 }
+      tilt: 98
+      spin: 0.14
+
+  - id: iapetus
+    rank: 8
+    name: Iapetus
+    subtitle: "Satürn'ün iki renkli uydusu"
+    say: "Sekizde {Iapetus|Yapetus}. Bir yüzü kömür gibi *kapkara*, öbür yüzü kar gibi bembeyaz!"
+    chips: [ { icon: mountain, text: "20 km'lik ekvator sırtı" } ]
+    callout: { anchor: ridge, text: "Ekvator sırtı", at_word: "kömür", icon: mountain, zoom: 0.45 }
+    env: { palette: gold }
+    focus: { lat: 6, lon: 178 }
+    camera: { yaw: [0.3, -0.05], pitch: [0.12, 0.04], dist: [1.5, 1.28] }
+    scene:
+      sun: { az: -48, el: 18 }
+      companion: { ref: saturn-altigen, x: 0.5, y: 0.62, size: 0.62, dist: 8, rot: [-72, 0, 14] }
+    cues: [ { type: sfx, name: chime, at_word: "kapkara" } ]
+    planet:
+      type: rocky
+      seed: 21
+      colors: ["#8a8276", "#b2a99b", "#d3cbbd", "#f2ece2"]
+      albedo: { scale: 2.4, contrast: 0.6, accent: 0.4, heightTint: 4, ejecta: 0.5 }
+      terrain: { scale: 1.6, amount: 0.007, ridged: 0.2 }
+      craters: { density: 0.85, size: 1.0, depth: 0.6 }
+      twotone: { lat: 0, lon: 90, color: "#3a2716", threshold: 0.02, soft: 0.09 }
+      ridge: { height: 0.028, width: 2.2, lon0: 105, lon1: 265 }
+      displace: 1.0
+      relief: 1.1
+      spin: 0.02
+
+  - id: olympus
+    rank: 7
+    name: Olympus Dağı
+    subtitle: "Mars · dev bir volkan"
+    say: "Yedide Mars'taki Olympus Dağı: *Everest'in* iki buçuk katı yüksekliğinde bir volkan!"
+    chips: [ { icon: mountain, text: "~22 km" }, { icon: ruler, text: "Tabanı ~600 km" } ]
+    callout: { anchor: volcano, text: "Olympus Mons", at_word: "Everest'in", icon: mountain, zoom: 0.8 }
+    env: { palette: warm }
+    focus: { lat: 16, lon: 226 }
+    camera: { yaw: [-0.25, 0.08], pitch: [0.1, 0.18], dist: [1.5, 1.22] }
+    scene: { sun: { az: -78, el: 14 } }
+    cues: [ { type: sfx, name: rumble, at_word: "volkan" } ]
+    planet:
+      type: rocky
+      seed: 7
+      colors: ["#4e2416", "#9c4a2a", "#c26e44", "#e0a274"]
+      albedo: { scale: 1.6, contrast: 1.05, accent: 0.5, heightTint: 3, ejecta: 0.3 }
+      terrain: { scale: 1.5, amount: 0.012, ridged: 0.45, warp: 0.8 }
+      craters: { density: 0.3, size: 1.0, depth: 0.45 }
+      caps: { north: 79, south: 77, color: "#f3ede4", soft: 2.5 }
+      volcanoes:
+        - { lat: 18.6, lon: 226, size: 9, height: 0.06, caldera: 0.15, color: "#c47a4e" }
+        - { lat: 11.9, lon: 255.5, size: 3.6, height: 0.02, caldera: 0.16 }
+        - { lat: 1.5, lon: 247, size: 3.6, height: 0.019, caldera: 0.16 }
+        - { lat: -8.3, lon: 240, size: 4.0, height: 0.021, caldera: 0.16 }
+      canyons:
+        - { from: [-6, 262], to: [-12, 306], width: 1.4, depth: 0.02 }
+        - { from: [-9, 270], to: [-4, 292], width: 0.8, depth: 0.013 }
+      spots:
+        - { lat: 8, lon: 70, size: 15, color: "#43201a", soft: 0.8, opacity: 0.6 }
+        - { lat: 45, lon: 330, size: 14, color: "#4a261a", soft: 0.8, opacity: 0.5 }
+        - { lat: -20, lon: 130, size: 18, color: "#4a2418", soft: 0.9, opacity: 0.45 }
+      atmosphere: { color: "#f0a878", intensity: 0.45, thickness: 0.03, rim: 0.3 }
+      displace: 1.0
+      relief: 1.6
+      spin: 0.012
+
+  - id: saturn-altigen
+    rank: 6
+    name: Satürn'ün Altıgeni
+    subtitle: "Kuzey kutbundaki dev fırtına"
+    say: "Altıda Satürn'ün kutbundaki *altıgen* fırtına. Her kenarı Dünya'dan daha geniş!"
+    chips: [ { icon: ruler, text: "Kenarı ~14.500 km" }, { icon: wind, text: "~320 km/sa jet akımı" } ]
+    callout: { anchor: hexagon, text: "Altıgen jet akımı", at_word: "altıgen", icon: sparkle, zoom: 0.35 }
+    env: { palette: default }
+    focus: { lat: 62, lon: 30 }
+    camera: { yaw: [0.25, -0.12], pitch: [0.3, 0.42], dist: [1.75, 1.45] }
+    scene: { sun: { az: -40, el: 35 } }
+    cues: [ { type: sfx, name: storm, at_word: "altıgen" } ]
+    planet:
+      type: gas
+      seed: 9
+      colors: ["#b89462", "#d2b27e", "#e2cc9e", "#efe1c0"]
+      bands: { count: 24, turbulence: 0.35, contrast: 0.6, streaks: 0.6, flow: 0.003 }
+      hexagon: { size: 13, color: "#5f8190", edgeColor: "#f1e4c2", edge: 0.7 }
+      rings: { style: saturn, inner: 1.24, outer: 2.27, color: "#e4d5b2", color2: "#a4937a", opacity: 0.95 }
+      atmosphere: { color: "#ffe2b0", intensity: 0.35, thickness: 0.03, rim: 0.3 }
+      tilt: 26.7
+      spin: 0.015
+
+  - id: enceladus
+    rank: 5
+    name: Enceladus
+    subtitle: "Satürn'ün buzlu uydusu"
+    say: "Beşte Enceladus. Uzaya fışkırttığı *su*, Satürn'ün bir halkasını besliyor!"
+    chips: [ { icon: drop, text: "Gizli okyanus" }, { icon: snowflake, text: "Buz gayzerleri" } ]
+    callout: { anchor: plume, text: "Su gayzerleri", at_word: "fışkırttığı", icon: drop, zoom: 0.35 }
+    env: { palette: teal }
+    focus: { lat: -52, lon: 0 }
+    camera: { yaw: [0.25, 0.0], pitch: [0.05, 0.12], dist: [1.6, 1.38], roll: 180 }
+    scene:
+      sun: { az: -108, el: 22 }
+      companion: { ref: saturn-altigen, x: -0.5, y: -0.6, size: 0.75, dist: 9, rot: [-70, 0, -12] }
+    cues: [ { type: sfx, name: geyser, at_word: "fışkırttığı" } ]
+    planet:
+      type: rocky
+      seed: 31
+      colors: ["#c3ced6", "#d9e3ea", "#ecf2f6", "#ffffff"]
+      albedo: { scale: 2.2, contrast: 0.45, accent: 0.3, heightTint: 3, ejecta: 0.3 }
+      terrain: { scale: 1.8, amount: 0.006, ridged: 0.3 }
+      craters: { density: 0.5, size: 0.9, depth: 0.5 }
+      stripes: { count: 4, spacing: 0.085, length: 0.22, width: 0.011, depth: 0.006, angle: 25, color: "#4f9ee0" }
+      fractures: { amount: 0.6, scale: 3.5, color: "#9cc4e2", height: 0.001 }
+      specular: { amount: 0.15, power: 30 }
+      plumes:
+        - { along: stripes, vents: 4, kind: jet, height: 1.35, spread: 0.26, color: "#d8ecff", count: 12000, size: 0.03, rate: 0.14, opacity: 0.2 }
+      relief: 1.0
+      spin: 0.01
+
+  - id: io
+    rank: 4
+    name: Io
+    subtitle: "Jüpiter'in volkanik uydusu"
+    say: "Dörtte Io. {400'ü|dört yüzü} aşkın aktif *volkanıyla* Güneş Sistemi'nin en volkanik yeri!"
+    chips: [ { icon: volcano, text: "400+ aktif volkan" }, { icon: ruler, text: "400 km'lik püskürmeler" } ]
+    callout: { anchor: plume, text: "Pele püskürmesi", at_word: "volkanıyla", icon: volcano, zoom: 0.4 }
+    env: { palette: warm }
+    focus: { lat: -12, lon: 200 }
+    camera: { yaw: [0.15, -0.08], pitch: [0.06, 0.12], dist: [1.55, 1.32] }
+    scene:
+      offset: [0, -0.18]
+      sun: { az: -62, el: 16 }
+      companion: { ref: jupiter, x: 0.2, y: 0.55, size: 1.3, dist: 10, rot: [0, 0, 8] }
+    cues: [ { type: sfx, name: lava, at_word: "volkanıyla" } ]
+    planet:
+      type: rocky
+      seed: 41
+      colors: ["#a2722a", "#d1a845", "#e6cf78", "#f4ecc6"]
+      albedo: { scale: 3.0, contrast: 1.2, accent: 0.8, heightTint: 2, ejecta: 0 }
+      terrain: { scale: 2.0, amount: 0.004, ridged: 0.3 }
+      craters: { density: 0 }
+      caps: { north: 58, south: 58, color: "#7d4a2c", soft: 12, amount: 0.65 }
+      spots:
+        - { lat: -19, lon: 255, size: 12, color: "#b5422a", soft: 0.5, ring: 0.62, opacity: 0.8 }
+        - { lat: -19, lon: 255, size: 1.4, color: "#140b06", emissive: 4.0 }
+        - { lat: 13, lon: 309, size: 4.2, color: "#1d120c", emissive: 1.2, soft: 0.5 }
+        - { lat: -1.5, lon: 153, size: 2.2, color: "#2e1a0e", emissive: 2.0 }
+        - { lat: 63, lon: 124, size: 2.2, color: "#241509", emissive: 2.2 }
+        - { lat: 28, lon: 200, size: 2.6, color: "#3d2412", soft: 0.5 }
+        - { lat: -40, lon: 300, size: 3.0, color: "#3a2213", soft: 0.5 }
+        - { lat: -6, lon: 220, size: 1.8, color: "#1c110a", emissive: 1.4 }
+        - { lat: 10, lon: 280, size: 10, color: "#f2efe0", soft: 0.9, opacity: 0.5 }
+        - { lat: -30, lon: 190, size: 2.0, color: "#2a170c", emissive: 1.6 }
+        - { lat: 22, lon: 240, size: 1.6, color: "#1a0f08", emissive: 1.8 }
+      emissive: { color: "#ff5512", strength: 2.4 }
+      plumes:
+        - { lat: -19, lon: 255, kind: umbrella, height: 0.2, spread: 0.33, color: "#bcd4ff", count: 14000, size: 0.016, rate: 0.22, opacity: 0.14 }
+        - { lat: -1.5, lon: 153, kind: umbrella, height: 0.07, spread: 0.1, color: "#d7e4ff", count: 1800, size: 0.008, rate: 0.3, opacity: 0.3 }
+      relief: 1.0
+      spin: 0.012
+
+  - id: titan
+    rank: 3
+    name: Titan
+    subtitle: "Satürn'ün en büyük uydusu"
+    say: "Üçte Titan. Gölleri var, ama içlerindeki su değil, sıvı *metan*!"
+    chips: [ { icon: drop, text: "Metan yağmurları" }, { icon: thermo, text: "-179°C" } ]
+    callout: { anchor: lakes, text: "Metan denizleri", at_word: "Gölleri", icon: drop, zoom: 0.45 }
+    env: { palette: gold }
+    focus: { lat: 42, lon: 0 }
+    camera: { yaw: [0.25, -0.05], pitch: [0.08, 0.14], dist: [1.6, 1.34] }
+    scene:
+      sun: { az: -66, el: 20 }
+      companion: { ref: saturn-altigen, x: -0.55, y: 0.6, size: 0.7, dist: 9, rot: [-80, 0, -10] }
+    cues:
+      - { type: reveal, at_word: "Gölleri", dur: 1.6 }
+      - { type: sfx, name: rain, at_word: "Gölleri" }
+    planet:
+      type: rocky
+      seed: 51
+      colors: ["#5e4c36", "#85704f", "#a8916a", "#cdb88e"]
+      albedo: { scale: 2.0, contrast: 1.1, accent: 0.5, heightTint: 2, ejecta: 0.2 }
+      terrain: { scale: 1.6, amount: 0.006, ridged: 0.3 }
+      craters: { density: 0.08 }
+      lakes: { lat: 50, coverage: 0.12, scale: 4.0, color: "#06101c" }
+      haze: { color: "#d08c3c", amount: 0.96 }
+      atmosphere: { color: "#86b4ff", intensity: 1.2, thickness: 0.09, scatter: 1.6, rim: 0.3 }
+      specular: { amount: 0.7, power: 80 }
+      wrap: 0.35
+      spin: 0.012
+
+  - id: neptun
+    rank: 2
+    name: Neptün
+    subtitle: "Güneş'ten en uzak gezegen"
+    say: "İkide Neptün. Rüzgarları saatte {2000|iki bin} kilometreyi aşıyor, *ses hızından* bile hızlı!"
+    chips: [ { icon: wind, text: "2.000+ km/sa" }, { icon: thermo, text: "-214°C" } ]
+    callout: { anchor: storm, text: "Karanlık fırtına", at_word: "Rüzgarları", icon: wind, zoom: 0.35 }
+    env: { palette: deep }
+    focus: { lat: -12, lon: 30 }
+    camera: { yaw: [0.38, -0.15], pitch: [0.08, 0.02], dist: [1.58, 1.24] }
+    scene: { sun: { az: -55, el: 18 } }
+    cues: [ { type: sfx, name: wind, at_word: "Rüzgarları" } ]
+    planet:
+      type: gas
+      seed: 13
+      colors: ["#173a92", "#2550bc", "#3768d4", "#5a8ce6"]
+      bands: { count: 16, turbulence: 0.5, contrast: 0.55, streaks: 0.5, flow: 0.012 }
+      storms: [ { lat: -22, lon: 40, size: 9, aspect: 1.8, swirl: 1.5, color: "#0c1a4e", amount: 0.85 } ]
+      clouds: { color: "#f4f8ff", coverage: 0.62, scale: 3, stretch: 7, speed: 0.02, opacity: 0.95, lat: [12, 20, 46, 56] }
+      streaks: { color: "#c6e6ff", speed: 0.5, intensity: 0.45, count: 56 }
+      atmosphere: { color: "#6fa8ff", intensity: 1.0, thickness: 0.05, rim: 0.7 }
+      tilt: 28
+      spin: 0.12
+
+  - id: venus
+    rank: 1
+    name: Venüs
+    subtitle: "Cehennem gezegen"
+    say: "Ve bir numara: Venüs! Ters döndüğü için Güneş *batıdan* doğuyor ve yüzeyi kurşunu !eritiyor!!"
+    chips: [ { icon: flame, text: "465°C", tone: danger }, { icon: rotate, text: "Ters yönde döner" } ]
+    env: { palette: violet }
+    focus: { lat: 10, lon: 0 }
+    camera: { yaw: [0.4, 0.05], pitch: [0.1, 0.04], dist: [1.6, 1.3] }
+    scene: { sun: { az: -48, el: 16 } }
+    cues:
+      - { type: axis, at_word: "Ters", attack: 1.0, dur: 2.6, release: 0.4 }
+      - { type: sfx, name: whirl, at_word: "Ters" }
+      - { type: shake, at_word: "kurşunu", dur: 0.5, attack: 0.08, release: 0.5, amount: 0.6 }
+      - { type: sfx, name: heat, at_word: "kurşunu" }
+    planet:
+      type: gas
+      seed: 17
+      colors: ["#b38a46", "#cfa860", "#e2c388", "#efdab0"]
+      bands: { count: 8, turbulence: 0.9, contrast: 0.55, streaks: 0.6, flow: -0.012 }
+      vshape: 0.9
+      caps: { north: 62, south: 62, color: "#ecdcb8", soft: 12, amount: 0.4 }
+      atmosphere: { color: "#ffd9a0", intensity: 1.1, thickness: 0.06, scatter: 1.6, rim: 0.6 }
+      wrap: 0.25
+      spin: -0.08
+
+outro:
+  say: "Sence en tuhafı hangisi? Hemen yorumlara yaz!"
+  cta: { question: "Sence en tuhafı hangisi?", comment: "Yorumlara yaz", follow: "Takip et" }
+
+seo:
+  title: "Güneş Sistemi'nin En Tuhaf 10 Yeri 🪐 #1 inanılmaz!"
+  description: "Merkür'ün buzlarından Venüs'ün cehennemine: Güneş Sistemi'nin en tuhaf 10 yeri. Sence en tuhafı hangisi?"
+  hashtags: ["#uzay", "#güneşsistemi", "#bilim", "#astronomi", "#gezegenler", "#nasa", "#bilgi", "#shorts", "#keşfet", "#reels"]

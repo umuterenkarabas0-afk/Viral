@@ -4,12 +4,14 @@ import * as THREE from 'three';
 import { Fish } from './fish.js';
 import { OceanEnv } from './ocean.js';
 import { Post } from './post.js';
+import { SpaceStage } from './spacestage.js';
 import { Overlay } from './overlay.js';
 import { clamp, lerp, ease, noise3, smoothstep } from './util.js';
 
 const W = 1080, H = 1920;
 const TRANS = 0.32; // geçiş yarı süresi (sn)
 const TRANSITIONS = ['whip', 'zoom', 'rise', 'whip', 'spin'];
+const SPACE_TRANSITIONS = ['zoom', 'whip', 'spin', 'zoom', 'rise'];
 
 async function loadTimeline() {
   if (window.__TIMELINE__) return window.__TIMELINE__;
@@ -38,8 +40,22 @@ class Director {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(38, W / H, 0.05, 900);
     this.camera.setViewOffset(W, H, 0, 105, W, H); // özneyi kadrajda biraz yukarı al (altyazıya yer)
-    this.env = new OceanEnv(r, this.scene, { quality: this.q });
     this.post = new Post(r, Math.round(W * this.scale), Math.round(H * this.scale), { msaa: ro.msaa ?? 0 });
+    this.space = this.tl.environment === 'space';
+    if (this.space) {
+      this.camera.far = 1200; this.camera.updateProjectionMatrix();
+      this.stage = new SpaceStage(r, this.scene, this.camera, this.tl, { scale: this.scale, quality: this.q });
+      this.stage.init();
+      const pu = this.post.u;
+      pu.uDof.value = 0; pu.uBloom.value = 0.8; pu.uBT.value.set(0.9, 0.75, 0.62);
+      pu.uVig.value = 0.5; pu.uGrain.value = 0.028; pu.uSat.value = 1.1; pu.uContrast.value = 1.07; pu.uExposure.value = 1.0;
+      this.overlay = new Overlay(document.getElementById('ui'), this.tl);
+      this.bounds = [];
+      for (let i = 0; i < this.segs.length - 1; i++) this.bounds.push(this.segs[i].end);
+      this.activeIdx = -1;
+      return;
+    }
+    this.env = new OceanEnv(r, this.scene, { quality: this.q });
 
     // Özneler
     this.subjects = {};
@@ -74,7 +90,8 @@ class Director {
       const b = this.bounds[i];
       if (Math.abs(t - b) < TRANS) {
         const next = this.segs[i + 1];
-        const style = next.transition || (next.kind === 'outro' ? 'zoom' : TRANSITIONS[i % TRANSITIONS.length]);
+        const list = this.space ? SPACE_TRANSITIONS : TRANSITIONS;
+        const style = next.transition || (next.kind === 'outro' ? 'zoom' : list[i % list.length]);
         return { k: (t - b) / TRANS, style, b, idx: i };
       }
     }
@@ -100,7 +117,37 @@ class Director {
     return Math.max(2.0, apparent / (tanH * 0.98));
   }
 
+  frameSpace(t) {
+    const segIdx = this.segIndexAt(t);
+    const seg = this.segs[segIdx];
+    const tr = this.transitionState(t);
+    const info = this.stage.frame(t, seg, segIdx, tr, (type) => this.cueValue(t, type));
+    const pu = this.post.u;
+    pu.uTime.value = t;
+    const tk = tr ? Math.pow(1 - Math.abs(tr.k), 1.6) : 0;
+    pu.uBlur.value = 0; pu.uZoom.value = 0;
+    if (tr) {
+      if (tr.style === 'zoom') pu.uZoom.value = 0.26 * tk;
+      else if (tr.style === 'rise') { pu.uBlur.value = 0.12 * tk; pu.uBlurDir.value.set(0, 1); }
+      else { pu.uBlur.value = 0.14 * tk; pu.uBlurDir.value.set(1, 0.1); }
+    }
+    const shake = this.cueValue(t, 'shake');
+    pu.uFlash.value = Math.max(tr ? 0.14 * Math.pow(tk, 6) : 0, this.cueValue(t, 'flash') * 0.85);
+    pu.uCA.value = 0.0018 + 0.012 * tk + shake * 0.01;
+    pu.uDream.value = this.cueValue(t, 'dream');
+    pu.uFade.value = 0;
+    const fl = info.flare || { k: 0 };
+    pu.uFlare.value = fl.k || 0;
+    if (fl.k) pu.uFlarePos.value.set(fl.x, fl.y);
+    pu.uNear.value = this.camera.near; pu.uFar.value = this.camera.far;
+    pu.uFocus.value = info.focusDist || 6;
+    pu.uBloom.value = info.bloom ?? 0.8;
+    this.post.render(this.scene, this.camera);
+    this.overlay.update(t, { segment: seg, transOut: 0, anchorScreen: info.anchorScreen || null });
+  }
+
   frame(t) {
+    if (this.space) return this.frameSpace(t);
     const segIdx = this.segIndexAt(t);
     const seg = this.segs[segIdx];
     if (segIdx !== this.activeIdx) {

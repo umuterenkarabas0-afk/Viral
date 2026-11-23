@@ -64,7 +64,8 @@ def _ends_phrase(word: str) -> bool:
     return word.rstrip("\"'”»)").endswith((",", ".", ";", ":", "!", "?", "…"))
 
 
-def align_words(audio: np.ndarray, sr: int, spoken: list[str], mark_starts: list[float] | None = None) -> list[tuple[float, float]]:
+def align_words(audio: np.ndarray, sr: int, spoken: list[str], mark_starts: list[float] | None = None,
+                mark_ends: list[float] | None = None) -> list[tuple[float, float]]:
     """Her konuşulan kelime için (başlangıç, bitiş) saniye döndürür."""
     n = len(spoken)
     s, e = speech_bounds(audio, sr)
@@ -74,7 +75,8 @@ def align_words(audio: np.ndarray, sr: int, spoken: list[str], mark_starts: list
         starts = [max(0.0, float(x)) for x in mark_starts]
         out = []
         for i in range(n):
-            end = starts[i + 1] - 0.02 if i + 1 < n else e
+            nxt = starts[i + 1] - 0.02 if i + 1 < n else e
+            end = min(nxt, float(mark_ends[i])) if mark_ends and len(mark_ends) == n else nxt
             out.append((starts[i], max(starts[i] + 0.06, end)))
         # ilk kelime gerçek konuşma başlangıcından önce başlamasın
         out[0] = (max(out[0][0], s - 0.02), out[0][1])

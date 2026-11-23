@@ -51,6 +51,8 @@ export class Post {
       uSat: { value: 1.12 }, uContrast: { value: 1.06 }, uTint: { value: new THREE.Color(1.0, 1.0, 1.0) },
       uFade: { value: 0 }, uNear: { value: 0.05 }, uFar: { value: 900 }, uFocus: { value: 6 }, uDof: { value: 1.0 },
       uFxaa: { value: msaa > 0 ? 0 : 1 },
+      uBT: { value: new THREE.Vector3(0.6, 0.5, 0.38) },
+      uFlare: { value: 0 }, uFlarePos: { value: new THREE.Vector2(0.5, 0.5) },
     };
     const mat = new THREE.ShaderMaterial({
       uniforms: this.u,
@@ -61,7 +63,8 @@ export class Post {
         uniform sampler2D tScene, tD1, tD2, tD3, tDepth; uniform vec2 uRes; uniform float uTime;
         uniform float uBlur, uZoom, uCA, uVig, uGrain, uFlash, uDream, uExposure, uBloom, uSat, uContrast, uFade;
         uniform float uNear, uFar, uFocus, uDof, uFxaa;
-        uniform vec2 uBlurDir; uniform vec3 uTint;
+        uniform vec2 uBlurDir; uniform vec3 uTint; uniform vec3 uBT;
+        uniform float uFlare; uniform vec2 uFlarePos;
         varying vec2 vUv;
         float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
         vec3 aces(vec3 x){ const float a=2.51, b=0.03, c=2.43, d=0.59, e=0.14; return clamp((x*(a*x+b))/(x*(c*x+d)+e), 0.0, 1.0); }
@@ -126,8 +129,29 @@ export class Post {
           }
           // bloom
           vec3 g1 = texture2D(tD1, uv).rgb, g2 = texture2D(tD2, uv).rgb, g3 = texture2D(tD3, uv).rgb;
-          vec3 bloom = max(g1 - 0.6, 0.0) * 0.45 + max(g2 - 0.5, 0.0) * 0.6 + max(g3 - 0.38, 0.0) * 0.85;
+          vec3 bloom = max(g1 - uBT.x, 0.0) * 0.45 + max(g2 - uBT.y, 0.0) * 0.6 + max(g3 - uBT.z, 0.0) * 0.85;
           col += bloom * uBloom;
+          if (uFlare > 0.001) {
+            // sahte lens parlaması: merkezden yansıyan hayaletler + halo + anamorfik çizgi
+            vec2 asp = vec2(uRes.x / uRes.y, 1.0);
+            vec2 toC = vec2(0.5) - uFlarePos;
+            vec3 fl = vec3(0.0);
+            for (int i = 0; i < 6; i++) {
+              float fi = float(i);
+              float k = -0.35 + fi * 0.42;
+              vec2 gp = uFlarePos + toC * (1.0 + k);
+              float sz = 0.025 + 0.03 * fract(fi * 0.618 + 0.2);
+              float d = length((uv - gp) * asp);
+              vec3 tint = 0.6 + 0.4 * cos(6.2831 * (fi * 0.17 + vec3(0.0, 0.33, 0.67)));
+              fl += tint * smoothstep(sz, sz * 0.4, d) * (0.03 + 0.02 * fract(fi * 0.37));
+              fl += tint * exp(-pow((d - sz * 2.2) * 90.0, 2.0)) * 0.025;
+            }
+            float ds = length((uv - uFlarePos) * asp);
+            fl += vec3(1.0, 0.85, 0.6) * exp(-pow((ds - 0.16) * 30.0, 2.0)) * 0.06;
+            fl += vec3(0.75, 0.85, 1.0) * exp(-abs(uv.y - uFlarePos.y) * 320.0) * exp(-abs(uv.x - uFlarePos.x) * 4.0) * 0.18;
+            fl += vec3(1.0, 0.9, 0.75) * exp(-ds * 9.0) * 0.25;
+            col += fl * uFlare;
+          }
           col *= uExposure * uTint;
           if (uDream > 0.001) {
             float a = uDream * (2.2 * sin(uv.y * 5.0 + uTime * 1.3) + 1.4 * cos(uv.x * 4.0 - uTime));

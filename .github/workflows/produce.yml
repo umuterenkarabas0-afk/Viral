@@ -9,7 +9,7 @@ on:
         description: "Bu çalıştırmada üretilecek video sayısı"
         default: "1"
       script:
-        description: "(İsteğe bağlı) doğrudan üretilecek senaryo yolu, ör. content/scripts/akdeniz-baliklari.yaml"
+        description: "(İsteğe bağlı) doğrudan üretilecek senaryo yolu, ör. content/scripts/gunes-sistemi-tuhaf-yerler.yaml"
         default: ""
 
 permissions:
@@ -24,8 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     env:
-      GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
+      # Seslendirme: Microsoft Edge TTS (Emel) — anahtar gerekmez.
+      # İsteğe bağlı Google yedeği için GOOGLE_TTS_API_KEY secret'ı eklenebilir.
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
       VIRAL_USE_GCLOUD: "0"
     steps:
       - uses: actions/checkout@v4
@@ -59,9 +61,9 @@ jobs:
       - name: Video üret
         run: |
           if [ -n "${{ github.event.inputs.script }}" ]; then
-            python -m viral make "${{ github.event.inputs.script }}" --tts google --workers 3
+            python -m viral make "${{ github.event.inputs.script }}" --tts edge --workers 3
           else
-            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts google --workers 3
+            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts edge --workers 3
           fi
 
       - name: Çıktıları yükle (artifact)

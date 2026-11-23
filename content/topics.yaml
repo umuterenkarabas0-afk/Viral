@@ -1,17 +1,43 @@
 # Otomatik üretim kuyruğu. `python -m viral auto` sıradaki 'pending' konuyu alır,
 # Claude ile senaryosunu yazar (script verilmemişse), videoyu üretir ve durumu günceller.
-# Kuyruk boşalınca Claude yeni konular önerip buraya ekler.
+# world: space | ocean  → görsel dünya (yazılmazsa konudan otomatik seçilir).
+# Kuyruk boşalınca Claude her iki dünyadan yeni konular önerip buraya ekler.
 topics:
+  - title: "Güneş Sistemi'nin en tuhaf 10 yeri"
+    world: space
+    status: done
+    script: content/scripts/gunes-sistemi-tuhaf-yerler.yaml
+  - title: "Güneş Sistemi'nin en ilginç 10 uydusu"
+    world: space
+    status: pending
   - title: "Akdeniz'e özgü 10 balık çeşidi"
+    world: ocean
     status: pending
     script: content/scripts/akdeniz-baliklari.yaml
-  - title: "Karadeniz'in en ilginç 10 balığı"
+  - title: "Keşfedilmiş en tuhaf 7 ötegezegen"
+    world: space
     status: pending
   - title: "Okyanusun en zehirli 7 balığı"
+    world: ocean
+    status: pending
+  - title: "Mars hakkında az bilinen 10 gerçek"
+    world: space
     status: pending
   - title: "Derin denizin en tuhaf 10 balığı"
+    world: ocean
     status: pending
-  - title: "Ege'de dalışta görebileceğin 10 renkli balık"
+  - title: "Güneş Sistemi'nin en sıcak ve en soğuk 7 yeri"
+    world: space
+    status: pending
+  - title: "Karadeniz'in en ilginç 10 balığı"
+    world: ocean
+    status: pending
+  - title: "Jüpiter'in en şaşırtıcı 7 özelliği"
+    world: space
     status: pending
   - title: "Cinsiyet değiştirebilen 7 balık"
+    world: ocean
+    status: pending
+  - title: "Güneş Sistemi'ndeki en yüksek 7 dağ"
+    world: space
     status: pending

@@ -2,7 +2,7 @@
 
 content/topics.yaml biçimi:
   topics:
-    - { title: "Karadeniz'in en ilginç 10 balığı", status: pending }
+    - { title: "Karadeniz'in en ilginç 10 balığı", world: ocean, status: pending }
     - { title: "...", status: done, script: content/scripts/x.yaml, video: output/x/x.mp4, date: 2026-11-23 }
 Kuyruk boşalırsa Claude yeni konular önerir. Senaryo yolu verilmiş (script:) bir konu doğrudan üretilir.
 """
@@ -27,7 +27,7 @@ def _save(p: Path, q: dict):
     p.write_text(yaml.safe_dump(q, allow_unicode=True, sort_keys=False, width=140), encoding="utf-8")
 
 
-def run(queue: str = "content/topics.yaml", *, count: int = 1, tts: str = "google", workers: int | None = None,
+def run(queue: str = "content/topics.yaml", *, count: int = 1, tts: str = "edge", workers: int | None = None,
         handle: str | None = None, out_root: str = "output") -> list[dict]:
     qp = Path(queue)
     q = _load(qp)
@@ -40,14 +40,14 @@ def run(queue: str = "content/topics.yaml", *, count: int = 1, tts: str = "googl
             done = [t["title"] for t in q["topics"]]
             new = propose_topics(10, done)
             log(f"Kuyruk boştu; {len(new)} yeni konu eklendi")
-            q["topics"] += [{"title": t, "status": "pending"} for t in new]
+            q["topics"] += [{"title": t["title"], "world": t["world"], "status": "pending"} for t in new]
             _save(qp, q)
             pending = [t for t in q["topics"] if t.get("status") == "pending"]
         topic = pending[0]
         try:
             if not topic.get("script") or not Path(topic["script"]).exists():
                 from .writer import write_script
-                topic["script"] = str(write_script(topic["title"]))
+                topic["script"] = str(write_script(topic["title"], world=topic.get("world")))
                 topic["status"] = "scripted"
                 _save(qp, q)
             r = make(topic["script"], out_root, tts=tts, workers=workers, handle=handle)

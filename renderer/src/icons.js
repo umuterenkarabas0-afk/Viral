@@ -25,6 +25,20 @@ const P = {
   temple: '<path d="M3 9 12 4l9 5"/><path d="M5 9v9M9.5 9v9M14.5 9v9M19 9v9M3 20h18"/>',
   crown: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
   swap: '<path d="M7 4 3 8l4 4"/><path d="M3 8h13a4 4 0 0 1 0 8h-2"/><path d="m17 20 4-4-4-4"/>',
+  planet: '<circle cx="12" cy="12" r="5.5"/><path d="M4.2 15.8C1.8 17.6 1 19.2 1.7 20c1.3 1.5 7.4-1.4 13.6-6.5S24.8 4 23.5 2.6c-.7-.8-2.6-.3-5 1.2"/>',
+  moon: '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',
+  sun: '<circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/>',
+  rocket: '<path d="M12 2c3 2.5 4.5 6 4.5 10.5L14 16h-4l-2.5-3.5C7.5 8 9 4.5 12 2z"/><circle cx="12" cy="9" r="1.6"/><path d="M8 14l-3 3 1 3 3-2M16 14l3 3-1 3-3-2M10.5 18.5 12 22l1.5-3.5"/>',
+  wind: '<path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h16a3 3 0 1 1-3 3"/><path d="M3 16h7"/>',
+  volcano: '<path d="M2 21h20l-6-9h-2l-1.2-2h-1.6L10 12H8z"/><path d="M12 7V3M9 5 7.5 3M15 5l1.5-2"/>',
+  snowflake: '<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2M4 10.5l3-.5 1-3M20 13.5l-3 .5-1 3M4 13.5l3 .5 1 3M20 10.5l-3-.5-1-3"/>',
+  drop: '<path d="M12 2.5S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5z"/><path d="M9 15a3 3 0 0 0 3 3"/>',
+  flame: '<path d="M12 22c4.4 0 7-2.9 7-6.6 0-3.8-2.6-6-4.2-9.4-.4 2.4-1.6 3.7-2.8 4.4.3-3.3-1.2-6.4-4-8.4.3 3.4-3 6-3 10.6C5 19.1 7.6 22 12 22z"/>',
+  rotate: '<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 3.5v4.5h-4.5"/>',
+  mountain: '<path d="M2 20 9 7l4 6 2.5-3.5L22 20z"/><path d="m7.3 10.2 1.7 1.3 1.6-1.6"/>',
+  orbit: '<circle cx="12" cy="12" r="2.6"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(-25 12 12)"/><circle cx="20" cy="8" r="1.2" fill="currentColor"/>',
+  telescope: '<path d="m3 13 13-7 2 4-13 7z"/><path d="m16 6 3-1.5 2 4-3 1.5M9 15l-3 7M10 14l3 8"/>',
+  gauge: '<path d="M4 18a9 9 0 1 1 16 0"/><path d="m12 14 4-5"/><circle cx="12" cy="14" r="1.3" fill="currentColor"/>',
 };
 
 export function icon(name, size = 40, stroke = 2.2) {

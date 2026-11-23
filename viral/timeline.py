@@ -116,8 +116,13 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
             seg_rec["camera"] = d["camera"]
         if d.get("transition"):
             seg_rec["transition"] = d["transition"]
+        for k in ("scene", "focus"):
+            if d.get(k):
+                seg_rec[k] = d[k]
         if seg.kind == "item":
             seg_rec.update({"rank": d.get("rank"), "name": d.get("name"), "latin": d.get("latin"), "chips": d.get("chips", [])})
+            if d.get("subtitle"):
+                seg_rec["subtitle"] = d["subtitle"]
             seg_rec["subject"] = {"ref": seg.id, **(d.get("subject") or {})}
             co = d.get("callout")
             if co:
@@ -162,6 +167,12 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
     for it in script.get("items", []):
         if it.get("fish"):
             subjects[it["id"]] = {"kind": "fish", "params": it["fish"]}
+        elif it.get("planet"):
+            subjects[it["id"]] = {"kind": "planet", "params": it["planet"]}
+    # ek gök cisimleri (ör. açılıştaki Güneş, arka plandaki Jüpiter)
+    for bid, b in (script.get("bodies") or {}).items():
+        kind = "star" if (b or {}).get("type") == "star" else "planet"
+        subjects[bid] = {"kind": kind, "params": b or {}}
     timeline = {
         "meta": {"title": script.get("title"), "id": script.get("id"), "fps": fps, "width": 1080, "height": 1920,
                  "duration": round(duration, 3), "bpm": bpm, "handle": handle},

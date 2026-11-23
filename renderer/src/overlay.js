@@ -81,7 +81,8 @@ export class Overlay {
     this.hName.style.fontSize = '';
     fitText(this.hName, 650, 104, 52);
     this.nameChars = [...this.hName.querySelectorAll('.ch')];
-    this.hLatin.textContent = seg.latin || '';
+    this.hLatin.textContent = seg.subtitle || seg.latin || '';
+    this.hLatin.classList.toggle('sub', !!seg.subtitle && !seg.latin);
     this.hChips.innerHTML = '';
     this.chipEls = (seg.chips || []).slice(0, 3).map((c) => {
       const e = el('div', 'chip' + (c.tone ? ' ' + c.tone : ''), `${icon(c.icon || 'sparkle', 38)}<span>${esc(c.text)}</span>`);
@@ -143,7 +144,8 @@ export class Overlay {
   _buildBrand() {
     const h = this.tl.meta && this.tl.meta.handle;
     if (!h) return;
-    const b = el('div', 'brand', `${icon('wave', 30)}<span>${esc(h)}</span>`);
+    const bi = (this.tl.theme && this.tl.theme.brand_icon) || (this.tl.environment === 'space' ? 'planet' : 'wave');
+    const b = el('div', 'brand', `${icon(bi, 30)}<span>${esc(h)}</span>`);
     this.root.appendChild(b);
     this.brand = b;
   }
