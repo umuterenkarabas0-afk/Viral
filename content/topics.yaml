@@ -7,6 +7,8 @@ topics:
     world: space
     status: done
     script: content/scripts/gunes-sistemi-tuhaf-yerler.yaml
+    date: '2026-11-23'
+    duration: 60.6
   - title: "Güneş Sistemi'nin en ilginç 10 uydusu"
     world: space
     status: pending
