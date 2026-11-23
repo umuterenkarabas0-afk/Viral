@@ -1,0 +1,393 @@
+# Akdeniz'e özgü 10 balık — örnek senaryo
+# Söz dizimi (say alanlarında):
+#   *kelime*        → altyazıda vurgulu (turkuaz)
+#   !kelime!        → altyazıda tehlike rengi (kırmızı)
+#   {göster|oku}    → altyazıda "göster", seslendirmede "oku" (örn. {600|altı yüz})
+id: akdeniz-baliklari
+title: "Akdeniz'e Özgü 10 Balık"
+format: countdown
+language: tr-TR
+environment: ocean
+theme: { accent: "#FFD60A", accent2: "#2EE6D6", danger: "#FF4D5E" }
+
+hook:
+  say: "Akdeniz'de, yiyenlere *halüsinasyon* gördüren bir balık var! Peki hangisi? İşte Akdeniz'e özgü {10|on} balık."
+  subject: sarpa
+  env: { habitat: meadow, palette: default }
+  title: { kicker: "Akdeniz'e özgü", big: "10 balık", at_word: "İşte" }
+  cues:
+    - { type: dream, at_word: "halüsinasyon", dur: 1.6, amount: 0.9 }
+
+items:
+  - id: barbunya
+    rank: 10
+    name: Barbunya
+    latin: Mullus barbatus
+    say: "Onuncu sırada barbunya. Çenesindeki iki *bıyıkla* kumu adeta tadarak avını bulur."
+    chips: [ { icon: ruler, text: "~20 cm" }, { icon: pin, text: "Kumlu dipler" } ]
+    callout: { anchor: barbels, text: "Tat alan bıyıklar", at_word: "bıyıkla", icon: eye }
+    env: { habitat: sand, palette: warm }
+    camera: { yaw: [0.9, 0.35], pitch: [0.02, 0.1] }
+    fish:
+      height: 0.12
+      width: 0.065
+      maxAt: 0.32
+      noseTop: 2.8
+      noseBottom: 1.2
+      belly: -0.05
+      peduncle: 0.26
+      eye: { u: 0.11, y: 0.55, size: 0.3, iris: "#d9b04a" }
+      mouth: { y: -0.45, len: 0.06, depth: 0.3 }
+      colors: { back: "#c63c3f", side: "#e8857a", belly: "#f8e6df", split: 0.25, bellyStart: -0.3 }
+      patterns:
+        - { type: hstripes, color: "#f2c46a", count: 2, width: 0.25, y0: -0.2, y1: 0.25, u0: 0.2, u1: 0.95, alpha: 0.35 }
+      material: { roughness: 0.35, metalness: 0.15, clearcoat: 0.8, iridescence: 0.35 }
+      fins:
+        color: "#f19a8a"
+        dorsal:
+          - { u0: 0.27, u1: 0.42, height: 1.05, shape: spiny, rake: 22, rays: 7 }
+          - { u0: 0.56, u1: 0.72, height: 0.6, shape: triangle, rake: 22, rays: 9 }
+        anal: [ { u0: 0.58, u1: 0.74, height: 0.55, shape: triangle, rake: 25 } ]
+        pectoral: { u: 0.26, y: -0.15, size: 0.13, spread: 25 }
+        pelvic: { u: 0.3, size: 0.09 }
+        caudal: { type: forked, span: 1.3, color: "#e98a7a" }
+      barbels: { length: 0.09, color: "#f7e2d2", u: 0.03 }
+      swim: { amp: 0.05, waves: 0.85, freq: 1.6 }
+
+  - id: kirlangic
+    rank: 9
+    name: Kırlangıç Balığı
+    latin: Chelidonichthys lucerna
+    say: "Dokuzda kırlangıç balığı. Kanat gibi açılan yüzgeçleriyle deniz dibinde adeta *yürür*, üstelik homurtuya benzer sesler çıkarır."
+    chips: [ { icon: ruler, text: "75 cm'ye kadar" }, { icon: sound, text: "Ses çıkarır" } ]
+    callout: { anchor: pectoral, text: "Kanat gibi yüzgeçler", at_word: "Kanat", icon: sparkle }
+    env: { habitat: sand, palette: default }
+    camera: { yaw: [0.55, 0.15], pitch: [0.45, 0.32], dist: [1.15, 1.0] }
+    fish:
+      height: 0.1
+      width: 0.085
+      maxAt: 0.22
+      noseTop: 3.2
+      noseBottom: 1.6
+      peduncle: 0.2
+      tailPow: 0.9
+      keel: 1.0
+      eye: { u: 0.1, y: 0.68, size: 0.36, iris: "#c58a3a" }
+      mouth: { y: -0.35, len: 0.07, depth: 0.25 }
+      gill: { u: 0.25, strength: 1.6 }
+      colors: { back: "#b9432b", side: "#de7a52", belly: "#f5dccb", split: 0.3, bellyStart: -0.25 }
+      patterns:
+        - { type: spots, color: "#8f2a1a", count: 50, size: 0.008, u0: 0.2, u1: 0.9, y0: 0.2, y1: 0.85, alpha: 0.5 }
+      material: { roughness: 0.4, metalness: 0.1, clearcoat: 0.6, iridescence: 0.2 }
+      fins:
+        color: "#d9785a"
+        dorsal:
+          - { u0: 0.24, u1: 0.4, height: 0.9, shape: spiny, rake: 25, rays: 8 }
+          - { u0: 0.44, u1: 0.8, height: 0.55, shape: long, rake: 20, rays: 16 }
+        anal: [ { u0: 0.45, u1: 0.8, height: 0.45, shape: long, rake: 20 } ]
+        pectoral: { u: 0.24, y: -0.25, size: 0.3, spread: 55, droop: -4, roll: 75, fan: 80, rays: 14, color: "#1c6d8a", edgeBand: "#3fd6ff", spots: 24, spotColor: "#7ff0ff", opacity: 0.95, flap: 0.025, flapFreq: 0.9 }
+        pelvic: { u: 0.27, size: 0.08 }
+        caudal: { type: emarginate, span: 1.2, color: "#c96a4a" }
+      barbels: { length: 0.06, color: "#e9a888", u: 0.2 }
+      swim: { amp: 0.035, waves: 0.8, freq: 1.2 }
+
+  - id: dulger
+    rank: 8
+    name: Dülger Balığı
+    latin: Zeus faber
+    say: "Sekizde dülger balığı. Yanındaki siyah lekenin, efsaneye göre bir azizin *parmak izi* olduğuna inanılır."
+    chips: [ { icon: ruler, text: "~40 cm" }, { icon: eye, text: "Gizemli leke" } ]
+    callout: { anchor: spot, text: "Efsanevi leke", at_word: "parmak", icon: star }
+    env: { habitat: reef, palette: default }
+    camera: { yaw: [0.5, 0.1], pitch: [0.08, 0.12] }
+    fish:
+      height: 0.25
+      width: 0.04
+      maxAt: 0.45
+      noseTop: 1.25
+      noseBottom: 1.3
+      peduncle: 0.1
+      tailPow: 0.85
+      keel: 1.5
+      eye: { u: 0.13, y: 0.5, size: 0.17, iris: "#e2c45a" }
+      mouth: { y: 0.05, len: 0.1, depth: 0.5 }
+      colors: { back: "#6a6748", side: "#b5a676", belly: "#d8cca8", split: 0.4, bellyStart: -0.5 }
+      patterns:
+        - { type: wavy, color: "#7a6a40", count: 7, width: 3, amp: 0.05, freq: 30, alpha: 0.35, u0: 0.2, u1: 0.95 }
+        - { type: ocellus, u: 0.43, y: 0.02, r: 0.05, color: "#15130f", ring: "#efe6b8", ringWidth: 0.28 }
+      material: { roughness: 0.32, metalness: 0.3, clearcoat: 0.6, iridescence: 0.5 }
+      fins:
+        color: "#6f6a52"
+        dorsal:
+          - { u0: 0.14, u1: 0.5, height: 1.0, shape: tall, rake: 30, rays: 10, spiny: true, scallop: 0.55, color: "#4a473a", spineColor: "#d8d0b0" }
+          - { u0: 0.53, u1: 0.88, height: 0.32, shape: long, rake: 15, rays: 18 }
+        anal:
+          - { u0: 0.5, u1: 0.88, height: 0.3, shape: long, rake: 15, rays: 18 }
+        pectoral: { u: 0.2, y: -0.2, size: 0.09, spread: 20 }
+        pelvic: { u: 0.28, size: 0.16, color: "#3a3830" }
+        caudal: { type: rounded, span: 0.95, length: 0.16 }
+      swim: { amp: 0.03, waves: 0.7, freq: 1.0, style: labriform }
+
+  - id: hani
+    rank: 7
+    name: Hani Balığı
+    latin: Serranus scriba
+    say: "Yedide hani balığı. Bu balık, aynı anda hem *dişi* hem de *erkek*."
+    chips: [ { icon: ruler, text: "~25 cm" }, { icon: dna, text: "Çift cinsiyetli" } ]
+    env: { habitat: reef, palette: warm }
+    camera: { yaw: [-0.2, 0.5], pitch: [0.15, 0.05] }
+    fish:
+      height: 0.13
+      width: 0.065
+      maxAt: 0.33
+      noseTop: 1.5
+      noseBottom: 1.5
+      eye: { u: 0.1, y: 0.42, size: 0.24, iris: "#c9963a" }
+      mouth: { y: -0.12, len: 0.11, depth: 0.4 }
+      colors: { back: "#7c4325", side: "#c98a58", belly: "#efdcb6", split: 0.35, bellyStart: -0.4 }
+      patterns:
+        - { type: vbars, color: "#4a1f12", count: 6, u0: 0.22, u1: 0.98, width: 0.42, y0: -0.35, y1: 0.95, alpha: 0.55, blur: 4 }
+        - { type: patch, color: "#2f5fe0", u: 0.48, y: -0.52, ru: 0.08, ry: 0.22, alpha: 0.9, blur: 10 }
+        - { type: scribble, color: "#3b78ff", count: 14, u0: 0.01, u1: 0.22, y0: -0.4, y1: 0.7, width: 4, alpha: 0.85 }
+        - { type: scribble, color: "#ff9c3a", count: 10, u0: 0.01, u1: 0.22, y0: -0.6, y1: 0.4, width: 3, alpha: 0.7 }
+      material: { roughness: 0.38, metalness: 0.1, clearcoat: 0.7, iridescence: 0.25 }
+      fins:
+        color: "#c98a4a"
+        dorsal: [ { u0: 0.26, u1: 0.82, height: 0.55, shape: long, rake: 18, rays: 22, spiny: true, scallop: 0.25, spots: 14, spotColor: "#8a3a1a" } ]
+        anal: [ { u0: 0.62, u1: 0.82, height: 0.45, shape: rounded, rake: 22, rays: 9 } ]
+        pectoral: { u: 0.27, y: -0.2, size: 0.13, spread: 30, color: "#e0a050" }
+        pelvic: { u: 0.31, size: 0.1 }
+        caudal: { type: truncate, span: 1.15, spots: 10, spotColor: "#8a3a1a" }
+
+  - id: papagan
+    rank: 6
+    name: Papağan Balığı
+    latin: Sparisoma cretense
+    say: "Altıda papağan balığı. Akdeniz'in tek yerli papağan balığı; üstelik dişileri, erkeklerden çok daha *renkli*."
+    chips: [ { icon: ruler, text: "50 cm'ye kadar" }, { icon: crown, text: "Tek yerli tür", tone: gold } ]
+    env: { habitat: reef, palette: default }
+    camera: { yaw: [0.8, 0.25], pitch: [0.1, 0.12] }
+    fish:
+      height: 0.15
+      width: 0.08
+      maxAt: 0.38
+      noseTop: 2.2
+      noseBottom: 1.7
+      peduncle: 0.3
+      eye: { u: 0.11, y: 0.4, size: 0.2, iris: "#d24a2a", ring: "#f0c040" }
+      mouth: { y: -0.15, len: 0.05, depth: 0.5, color: "#efe2c8" }
+      colors: { back: "#6b5a66", side: "#cf3134", belly: "#e8644f", split: 0.45, bellyStart: -0.45 }
+      patterns:
+        - { type: patch, color: "#5f6a78", u: 0.04, y: 0.2, ru: 0.12, ry: 0.85, alpha: 0.85, blur: 22 }
+        - { type: patch, color: "#f6c62c", u: 0.31, y: 0.32, ru: 0.06, ry: 0.28, alpha: 0.95, blur: 10 }
+        - { type: ocellus, u: 0.25, y: 0.3, r: 0.016, color: "#1a1210" }
+      scales: { size: 1.7, strength: 1.2 }
+      material: { roughness: 0.35, metalness: 0.05, clearcoat: 0.8, iridescence: 0.3 }
+      fins:
+        color: "#c7414a"
+        dorsal: [ { u0: 0.3, u1: 0.83, height: 0.4, shape: long, rake: 15, rays: 20 } ]
+        anal: [ { u0: 0.62, u1: 0.83, height: 0.38, shape: long, rake: 15 } ]
+        pectoral: { u: 0.29, y: -0.05, size: 0.14, spread: 30, color: "#d0606a" }
+        pelvic: { u: 0.33, size: 0.09, color: "#d23a3a" }
+        caudal: { type: truncate, span: 1.0, color: "#b43a40", edge: "#e85a5a" }
+      swim: { amp: 0.035, freq: 1.3, style: labriform }
+
+  - id: trakonya
+    rank: 5
+    name: Trakonya
+    latin: Trachinus draco
+    say: "Beşte trakonya. Kuma gömülüp pusuya yatar; sırtındaki !zehirli! dikenlere basanlar, korkunç bir acı yaşar."
+    chips: [ { icon: ruler, text: "~30 cm" }, { icon: warning, text: "Zehirli diken", tone: danger } ]
+    callout: { anchor: dorsal, text: "Zehirli dikenler", at_word: "dikenlere", icon: warning }
+    env: { habitat: sand, palette: warm, floorY: -0.34 }
+    subject: { y: -0.08 }
+    camera: { yaw: [0.6, 0.2], pitch: [0.38, 0.3], dist: [1.05, 0.95] }
+    fish:
+      height: 0.085
+      width: 0.05
+      maxAt: 0.3
+      noseTop: 1.1
+      noseBottom: 1.8
+      peduncle: 0.3
+      tailPow: 1.2
+      eye: { u: 0.08, y: 0.72, size: 0.32, iris: "#88c050" }
+      mouth: { y: 0.15, len: 0.08, depth: 0.45 }
+      colors: { back: "#857a52", side: "#cdbb86", belly: "#f1ecda", split: 0.4, bellyStart: -0.35 }
+      patterns:
+        - { type: diagonal, color: "#2f68b2", count: 22, width: 4, slope: 0.07, u0: 0.18, u1: 0.98, y0: -0.35, y1: 0.75, alpha: 0.7 }
+        - { type: diagonal, color: "#f2d24a", count: 22, width: 3, slope: 0.07, u0: 0.2, u1: 1.0, y0: -0.35, y1: 0.75, alpha: 0.5 }
+        - { type: spots, color: "#3a3220", count: 40, size: 0.006, u0: 0.1, u1: 0.95, y0: 0.5, y1: 0.95, alpha: 0.6 }
+      material: { roughness: 0.4, metalness: 0.2, clearcoat: 0.6, iridescence: 0.3 }
+      fins:
+        color: "#c8b47a"
+        dorsal:
+          - { u0: 0.16, u1: 0.26, height: 1.15, shape: spiny, rake: 15, rays: 6, color: "#0d0d0d", spineColor: "#2a2a2a", scallop: 0.4, opacity: 0.98 }
+          - { u0: 0.3, u1: 0.96, height: 0.55, shape: long, rake: 12, rays: 26 }
+        anal: [ { u0: 0.36, u1: 0.96, height: 0.45, shape: long, rake: 12, rays: 26 } ]
+        pectoral: { u: 0.24, y: -0.3, size: 0.13, spread: 40, color: "#d8c070" }
+        pelvic: { u: 0.22, size: 0.08 }
+        caudal: { type: truncate, span: 1.0, color: "#a89460" }
+      swim: { amp: 0.02, waves: 0.8, freq: 0.7 }
+
+  - id: muren
+    rank: 4
+    name: Müren
+    latin: Muraena helena
+    say: "Dördüncü sırada müren. Boğazında *ikinci bir çene* saklar; Antik Romalılar onları havuzlarda beslerdi."
+    chips: [ { icon: ruler, text: "1,5 m'ye kadar" }, { icon: temple, text: "Roma'nın gözdesi" } ]
+    callout: { anchor: head, text: "İkinci çene burada", at_word: "çene", icon: eye }
+    env: { habitat: reef, palette: deep }
+    subject: { scale: 1.0 }
+    camera: { yaw: [0.75, 0.35], pitch: [0.12, 0.08], dist: [0.95, 0.85] }
+    fish:
+      length: 2.6
+      eel: true
+      bodyFrac: 0.985
+      height: 0.04
+      width: 0.034
+      maxAt: 0.25
+      noseTop: 1.6
+      noseBottom: 1.3
+      peduncle: 0.4
+      pedWidth: 0.25
+      tailPow: 1.8
+      keel: 1.0
+      belly: 0.0
+      eye: { u: 0.035, y: 0.45, size: 0.5, iris: "#d9c25a" }
+      mouth: { y: -0.15, len: 0.07, depth: 0.8, color: "#1a1008" }
+      gill: { u: 0.0, strength: 0 }
+      lateralLine: { alpha: 0 }
+      colors: { back: "#241a12", side: "#33261a", belly: "#5d4c33", split: 0.2, bellyStart: -0.5 }
+      patterns:
+        - { type: blotches, color: "#7c5c34", count: 60, size: 0.012, alpha: 0.7, u0: 0.03, u1: 1.0, y0: -0.8, y1: 0.95 }
+        - { type: spots, color: "#f0cf6c", count: 220, size: 0.0075, sizeVar: 0.6, u0: 0.04, u1: 1.0, y0: -0.85, y1: 0.95, alpha: 0.95 }
+      scales: { size: 0 }
+      material: { roughness: 0.22, metalness: 0.05, clearcoat: 1.0, iridescence: 0.15 }
+      fins:
+        color: "#2c2118"
+        dorsal: [ { u0: 0.14, u1: 1.0, height: 0.55, shape: long, rake: 5, rays: 60, opacity: 0.95 } ]
+        anal: [ { u0: 0.5, u1: 1.0, height: 0.45, shape: long, rake: 5, rays: 40, opacity: 0.95 } ]
+        pectoral: null
+        pelvic: null
+        caudal: { type: pointed, span: 0.8, length: 0.02 }
+      swim: { amp: 0.06, waves: 1.3, freq: 0.75, style: anguilliform }
+
+  - id: orfoz
+    rank: 3
+    name: Orfoz
+    latin: Epinephelus marginatus
+    say: "Üçte orfoz. *Dişi* olarak doğar, yıllar sonra *erkeğe* dönüşür ve elli yıldan fazla yaşayabilir."
+    chips: [ { icon: clock, text: "50+ yıl" }, { icon: swap, text: "Dişi → Erkek" } ]
+    env: { habitat: rocky, palette: deep }
+    subject: { scale: 1.1 }
+    camera: { yaw: [0.95, 0.4], pitch: [0.05, 0.1] }
+    fish:
+      height: 0.15
+      width: 0.09
+      maxAt: 0.33
+      noseTop: 1.7
+      noseBottom: 1.4
+      peduncle: 0.3
+      belly: 0.12
+      eye: { u: 0.09, y: 0.45, size: 0.2, iris: "#a07a35" }
+      mouth: { y: -0.2, len: 0.14, depth: 0.6, color: "#1f120c" }
+      gill: { u: 0.3, strength: 1.4 }
+      colors: { back: "#3c2519", side: "#6a4632", belly: "#c49a62", split: 0.3, bellyStart: -0.45 }
+      patterns:
+        - { type: blotches, color: "#d2c0a2", count: 26, size: 0.04, alpha: 0.55, u0: 0.08, u1: 0.95, y0: -0.4, y1: 0.9, blur: 3 }
+        - { type: mottle, color: "#2a170e", scale: 1.4, alpha: 0.35 }
+      scales: { size: 0.8, strength: 0.6 }
+      material: { roughness: 0.42, metalness: 0.05, clearcoat: 0.5, iridescence: 0.15 }
+      fins:
+        color: "#4a2e20"
+        dorsal: [ { u0: 0.26, u1: 0.82, height: 0.45, shape: long, rake: 15, rays: 24, spiny: true, scallop: 0.2, edge: "#d08a40" } ]
+        anal: [ { u0: 0.64, u1: 0.83, height: 0.5, shape: rounded, rake: 20, edge: "#d08a40" } ]
+        pectoral: { u: 0.3, y: -0.15, size: 0.15, spread: 30, color: "#5a3a26", edge: "#c88a4a" }
+        pelvic: { u: 0.34, size: 0.12, color: "#2a1a12" }
+        caudal: { type: rounded, span: 1.0, length: 0.2, edge: "#e8e0d0", edgeBand: "#f0e8d8" }
+      swim: { amp: 0.035, waves: 0.8, freq: 1.0 }
+
+  - id: orkinos
+    rank: 2
+    name: Mavi Yüzgeçli Orkinos
+    latin: Thunnus thynnus
+    say: "İkinci sırada mavi yüzgeçli orkinos. {600|Altı yüz} kiloyu aşabilir ve yumurtlamak için okyanustan *Akdeniz'e* göç eder."
+    chips: [ { icon: weight, text: "600+ kg" }, { icon: globe, text: "Atlantik → Akdeniz" } ]
+    env: { habitat: open, palette: open }
+    subject: { scale: 1.1 }
+    camera: { yaw: [-0.35, 0.45], pitch: [-0.05, 0.08] }
+    fish:
+      height: 0.13
+      width: 0.105
+      maxAt: 0.42
+      noseTop: 1.05
+      noseBottom: 1.15
+      peduncle: 0.075
+      pedWidth: 0.22
+      tailPow: 0.75
+      keel: 1.0
+      bodyFrac: 0.82
+      eye: { u: 0.09, y: 0.25, size: 0.2, iris: "#1a1a1a", sclera: "#9aa8b0" }
+      mouth: { y: -0.05, len: 0.07, depth: 0.2 }
+      colors: { back: "#0b1c48", side: "#8796a8", belly: "#eef2f5", split: 0.12, bellyStart: -0.2 }
+      patterns:
+        - { type: hstripes, color: "#b9c7d6", count: 1, width: 0.25, y0: 0.0, y1: 0.12, u0: 0.25, u1: 0.95, alpha: 0.5, blur: 4 }
+        - { type: spots, color: "#c9d3dd", count: 50, size: 0.006, u0: 0.4, u1: 0.95, y0: -0.6, y1: -0.15, alpha: 0.5 }
+      scales: { size: 0.6, strength: 0.4 }
+      material: { roughness: 0.22, metalness: 0.55, clearcoat: 1.0, iridescence: 0.65 }
+      fins:
+        color: "#26324a"
+        dorsal:
+          - { u0: 0.3, u1: 0.45, height: 0.45, shape: spiny, rake: 35, rays: 10, color: "#1a2238" }
+          - { u0: 0.52, u1: 0.62, height: 0.95, shape: falcate, rake: 40, rays: 10, color: "#8a845a" }
+        anal: [ { u0: 0.57, u1: 0.67, height: 0.85, shape: falcate, rake: 40, color: "#b8b49a" } ]
+        pectoral: { u: 0.28, y: 0.05, size: 0.18, spread: 22, droop: 8, fan: 25, color: "#1a2440" }
+        pelvic: { u: 0.3, size: 0.07 }
+        caudal: { type: lunate, span: 2.1, length: 0.17, color: "#16203a" }
+        finlets: { count: 8, u0: 0.72, color: "#f0c832", size: 1.1 }
+      swim: { amp: 0.07, waves: 0.6, freq: 2.2, style: thunniform }
+
+  - id: sarpa
+    rank: 1
+    name: Sarpa
+    latin: Sarpa salpa
+    say: "Ve bir numara: sarpa, namıdiğer *rüya balığı*. Bazı sarpaları yiyenler, saatlerce süren !halüsinasyonlar! gördüklerini anlatmış."
+    chips: [ { icon: eye, text: "Halüsinasyon", tone: danger }, { icon: pin, text: "Deniz çayırları" } ]
+    callout: { anchor: head, text: "Rüya balığı", at_word: "rüya", icon: sparkle }
+    env: { habitat: meadow, palette: default }
+    camera: { yaw: [0.75, 0.2], pitch: [0.08, 0.14] }
+    cues:
+      - { type: dream, at_word: "halüsinasyonlar", dur: 1.8, amount: 1.0 }
+      - { type: flash, at_word: "sarpa", dur: 0.05, attack: 0.05, release: 0.35, amount: 0.5 }
+    fish:
+      height: 0.15
+      width: 0.065
+      maxAt: 0.38
+      noseTop: 1.6
+      noseBottom: 1.5
+      peduncle: 0.24
+      eye: { u: 0.1, y: 0.3, size: 0.24, iris: "#f2c12e", ring: "#ffe27a" }
+      mouth: { y: -0.1, len: 0.05, depth: 0.25 }
+      colors: { back: "#56656e", side: "#a8b5ba", belly: "#e8ecec", split: 0.3, bellyStart: -0.45 }
+      patterns:
+        - { type: hstripes, color: "#f0c63a", count: 10, width: 0.42, y0: -0.78, y1: 0.82, u0: 0.12, u1: 0.99, alpha: 0.92 }
+        - { type: ocellus, u: 0.28, y: -0.12, r: 0.017, color: "#151515" }
+      material: { roughness: 0.28, metalness: 0.35, clearcoat: 0.9, iridescence: 0.55 }
+      fins:
+        color: "#9aa39a"
+        dorsal: [ { u0: 0.3, u1: 0.8, height: 0.5, shape: long, rake: 18, rays: 20, spiny: true, scallop: 0.18, edge: "#d8c070" } ]
+        anal: [ { u0: 0.62, u1: 0.8, height: 0.45, shape: rounded, rake: 22 } ]
+        pectoral: { u: 0.28, y: -0.15, size: 0.13, spread: 30, color: "#c8c090" }
+        pelvic: { u: 0.33, size: 0.1 }
+        caudal: { type: forked, span: 1.35, color: "#8f9890", edge: "#d6c27a" }
+      swim: { amp: 0.045, waves: 0.85, freq: 1.4 }
+
+outro:
+  say: "Sence en ilginci hangisi? Yorumlara yaz, daha fazlası için takip et!"
+  cta: { question: "Sence en ilginci hangisi?", comment: "Yorumlara yaz", follow: "Takip et" }
+  env: { habitat: meadow, palette: default }
+
+seo:
+  title: "Akdeniz'e Özgü 10 Balık 🐟 1 numara seni şaşırtacak!"
+  description: "Akdeniz'in en ilginç 10 balığı: barbunyadan halüsinasyon gördüren sarpaya kadar. Sence en ilginci hangisi?"
+  hashtags: ["#akdeniz", "#balık", "#bilgi", "#denizcanlıları", "#ilginçbilgiler", "#keşfet", "#shorts", "#reels", "#tiktok"]

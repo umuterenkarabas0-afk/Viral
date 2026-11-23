@@ -1,0 +1,17 @@
+# Otomatik üretim kuyruğu. `python -m viral auto` sıradaki 'pending' konuyu alır,
+# Claude ile senaryosunu yazar (script verilmemişse), videoyu üretir ve durumu günceller.
+# Kuyruk boşalınca Claude yeni konular önerip buraya ekler.
+topics:
+  - title: "Akdeniz'e özgü 10 balık çeşidi"
+    status: pending
+    script: content/scripts/akdeniz-baliklari.yaml
+  - title: "Karadeniz'in en ilginç 10 balığı"
+    status: pending
+  - title: "Okyanusun en zehirli 7 balığı"
+    status: pending
+  - title: "Derin denizin en tuhaf 10 balığı"
+    status: pending
+  - title: "Ege'de dalışta görebileceğin 10 renkli balık"
+    status: pending
+  - title: "Cinsiyet değiştirebilen 7 balık"
+    status: pending

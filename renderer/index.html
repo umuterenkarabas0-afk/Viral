@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Viral Renderer</title>
+<link rel="stylesheet" href="/node_modules/@fontsource/montserrat/700.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/montserrat/800.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/montserrat/900.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/montserrat/700-italic.css">
+<link rel="stylesheet" href="/node_modules/@fontsource/anton/400.css">
+<style>
+  :root { --accent: #FFD60A; --accent2: #2EE6D6; --danger: #FF4D5E; --ink: #04121f; }
+  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+  #gl { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+  #ui { position: absolute; inset: 0; pointer-events: none; font-family: 'Montserrat', sans-serif; color: #fff; }
+
+  /* ilerleme */
+  .progress { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; left: 0; right: 0; justify-content: center; }
+  .pdot { width: 64px; height: 40px; border-radius: 20px; background: rgba(3, 25, 40, .55); border: 2px solid rgba(255,255,255,.22);
+    display: flex; align-items: center; justify-content: center; font: 800 20px 'Montserrat'; color: rgba(255,255,255,.65); }
+  .pdot.done { background: rgba(255,255,255,.22); color: rgba(255,255,255,.85); }
+  .pdot.active { background: var(--accent); color: var(--ink); border-color: #fff; box-shadow: 0 0 24px rgba(255,214,10,.65); }
+
+  /* başlık bloğu */
+  .header { position: absolute; top: 210px; left: 70px; right: 70px; height: 420px; }
+  .rank { position: absolute; left: 0; top: 0; width: 270px; height: 250px; display: flex; align-items: flex-start; justify-content: center; transform-origin: 50% 60%; }
+  .rank .hash { font: 400 110px 'Anton'; margin-top: 34px; color: #fff; -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill;
+    text-shadow: 0 8px 0 rgba(0,0,0,.35); }
+  .rank .num { font: 400 230px/1 'Anton'; letter-spacing: -4px;
+    background: linear-gradient(180deg, #FFF7C2 0%, var(--accent) 45%, #FF8A00 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 6px 0 #7a3b00) drop-shadow(0 12px 0 rgba(0,0,0,.35)) drop-shadow(0 0 30px rgba(255,170,0,.45)); }
+  .rank .ring { position: absolute; left: 50%; top: 55%; width: 220px; height: 220px; border-radius: 50%; border: 8px solid var(--accent); opacity: 0; }
+  .namebox { position: absolute; left: 290px; top: 34px; right: 0; }
+  .name { font-weight: 900; font-size: 104px; line-height: 1.0; white-space: nowrap; letter-spacing: -1px;
+    -webkit-text-stroke: 10px var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 rgba(0,0,0,.35), 0 0 40px rgba(0,0,0,.35); }
+  .name .ch { display: inline-block; }
+  .latin { margin-top: 14px; font: italic 700 42px 'Montserrat'; color: #bff4ff; text-shadow: 0 3px 10px rgba(0,0,0,.7); white-space: nowrap; }
+  .chips { position: absolute; top: 270px; left: 0; right: 0; display: flex; gap: 16px; justify-content: flex-start; flex-wrap: nowrap; }
+  .chip { display: flex; align-items: center; gap: 12px; padding: 14px 24px 14px 18px; border-radius: 999px;
+    background: rgba(4, 22, 38, .72); border: 2px solid rgba(255,255,255,.22);
+    font: 800 36px 'Montserrat'; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.35); white-space: nowrap; }
+  .chip svg { color: var(--accent2); flex: none; }
+  .chip.danger svg { color: var(--danger); } .chip.danger { border-color: rgba(255,77,94,.6); }
+  .chip.gold svg { color: var(--accent); }
+
+  /* hook başlığı */
+  .hooktitle { position: absolute; top: 330px; left: 0; right: 0; text-align: center; opacity: 0; }
+  .hooktitle .kicker { font: 900 66px 'Montserrat'; letter-spacing: 10px; color: #fff; -webkit-text-stroke: 8px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 0 rgba(0,0,0,.3); }
+  .hooktitle .big { display: inline-block; font: 400 230px/1.05 'Anton'; white-space: nowrap;
+    background: linear-gradient(180deg, #FFFBD6 0%, var(--accent) 50%, #FF7A00 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 8px 0 #6b3200) drop-shadow(0 16px 0 rgba(0,0,0,.35)) drop-shadow(0 0 40px rgba(255,160,0,.5)); }
+  .hooktitle .sweep { margin: 8px auto 0; width: 620px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, transparent, var(--accent2), transparent); transform-origin: center; }
+
+  /* callout */
+  .callout-svg { position: absolute; inset: 0; width: 1080px; height: 1920px; opacity: 0; overflow: visible; }
+  .callout-svg .c-dot { fill: var(--accent); stroke: #fff; stroke-width: 4; }
+  .callout-svg .c-pulse { fill: none; stroke: var(--accent); stroke-width: 4; }
+  .callout-svg .c-line { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+  .callout-label { position: absolute; display: flex; align-items: center; gap: 12px; padding: 16px 26px; border-radius: 18px; opacity: 0;
+    background: rgba(255,255,255,.95); color: var(--ink); font: 900 36px 'Montserrat'; white-space: nowrap; box-shadow: 0 12px 30px rgba(0,0,0,.4);
+    border-left: 10px solid var(--accent); }
+  .callout-label svg { color: #e07b00; }
+
+  /* altyazılar */
+  .captions { position: absolute; left: 60px; right: 60px; top: 1235px; height: 260px; display: flex; align-items: center; justify-content: center; }
+  .capline { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 38px; text-align: center; transform-origin: 50% 50%; }
+  .capline .w { display: inline-block; font: 900 84px/1.12 'Montserrat'; color: #fff; letter-spacing: -0.5px;
+    -webkit-text-stroke: 14px #000; paint-order: stroke fill; text-shadow: 0 7px 0 rgba(0,0,0,.55), 0 12px 30px rgba(0,0,0,.45); transform-origin: 50% 70%; }
+  .capline .w.emph { color: var(--accent2); }
+  .capline .w.danger { color: var(--danger); }
+  .capline .w.on { color: var(--accent); }
+  .capline.hook .w { font-size: 96px; }
+
+  /* outro */
+  .outro { position: absolute; top: 260px; left: 40px; right: 40px; text-align: center; opacity: 0; }
+  .outro .q { font: 900 96px/1.04 'Montserrat'; color: #fff; -webkit-text-stroke: 14px var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 rgba(0,0,0,.35); max-width: 900px; margin: 0 auto; }
+  .outro .cmt { margin: 30px auto 0; display: inline-flex; align-items: center; gap: 16px; padding: 18px 34px; border-radius: 999px;
+    background: rgba(4,22,38,.65); border: 2px solid rgba(255,255,255,.25); font: 900 46px 'Montserrat'; }
+  .outro .cmt svg { color: var(--accent2); }
+  .outro .follow { position: relative; margin: 34px auto 0; width: max-content; }
+  .outro .btn { display: flex; align-items: center; gap: 14px; padding: 22px 48px; border-radius: 999px; background: var(--danger); font: 900 52px 'Montserrat';
+    box-shadow: 0 14px 40px rgba(255,77,94,.55); }
+  .outro .tap { position: absolute; left: 82%; top: 70%; width: 80px; height: 80px; border-radius: 50%; border: 6px solid #fff; opacity: 0; }
+
+  .brand { position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; opacity: .55;
+    font: 800 30px 'Montserrat'; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.7); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="1080" height="1920"></canvas>
+  <div id="ui"></div>
+</div>
+<script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }</script>
+<script type="module" src="/renderer/src/main.js"></script>
+</body>
+</html>

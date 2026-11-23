@@ -1,0 +1,19 @@
+{
+  "name": "viral-shorts-engine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Otomatik 3D bilgi videosu (Shorts/Reels/TikTok) üretim motoru",
+  "type": "module",
+  "scripts": {
+    "render": "node renderer/render.mjs"
+  },
+  "dependencies": {
+    "three": "0.170.0",
+    "@fontsource/montserrat": "5.1.0",
+    "@fontsource/bebas-neue": "5.1.0",
+    "@fontsource/anton": "5.1.0"
+  },
+  "optionalDependencies": {
+    "playwright": "1.49.1"
+  }
+}
