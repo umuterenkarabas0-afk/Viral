@@ -188,8 +188,8 @@ def render_stills(timeline_path: Path, times: list[float], out_dir: Path):
 def encode(frames_dir: Path, audio: Path, out: Path, fps: int = 30):
     cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(fps), "-i", str(frames_dir / "%05d.jpg"),
            "-i", str(audio), "-map", "0:v", "-map", "1:a",
-           "-c:v", "libx264", "-preset", "slow", "-crf", "17", "-profile:v", "high", "-level", "4.2", "-pix_fmt", "yuv420p",
-           "-maxrate", "16M", "-bufsize", "24M", "-g", str(fps * 2), "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
+           "-c:v", "libx264", "-preset", "slow", "-crf", "21", "-profile:v", "high", "-level", "4.2", "-pix_fmt", "yuv420p", "-tune", "film",
+           "-maxrate", "10M", "-bufsize", "16M", "-g", str(fps * 2), "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
            "-movflags", "+faststart", "-shortest", str(out)]
     subprocess.run(cmd, check=True)
 
