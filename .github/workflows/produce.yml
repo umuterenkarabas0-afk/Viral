@@ -11,6 +11,10 @@ on:
       script:
         description: "(İsteğe bağlı) doğrudan üretilecek senaryo yolu, ör. content/scripts/akdeniz-baliklari.yaml"
         default: ""
+      voice_only:
+        description: "Yalnızca ses testi: video render edilmez, ses + altyazı artifact olarak yüklenir"
+        type: boolean
+        default: false
       tts:
         description: "Seslendirme motoru (boş = ELEVENLABS_API_KEY varsa elevenlabs, yoksa google)"
         default: ""
@@ -71,14 +75,30 @@ jobs:
           [ -n "$ELEVENLABS_MODEL" ] || unset ELEVENLABS_MODEL
           [ -n "$ELEVENLABS_VOICE_ID" ] || unset ELEVENLABS_VOICE_ID
           echo "Seslendirme motoru: $TTS"
-          if [ -n "${{ github.event.inputs.script }}" ]; then
+          if [ "${{ github.event.inputs.voice_only }}" = "true" ]; then
+            SCRIPT="${{ github.event.inputs.script }}"
+            python -m viral make "${SCRIPT:-content/scripts/akdeniz-baliklari.yaml}" --tts "$TTS" --no-render
+          elif [ -n "${{ github.event.inputs.script }}" ]; then
             python -m viral make "${{ github.event.inputs.script }}" --tts "$TTS" --workers 3
           else
             python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts "$TTS" --workers 3
           fi
 
+      - name: Ses testi çıktıları (artifact)
+        if: always() && github.event.inputs.voice_only == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-test-${{ github.run_number }}
+          path: |
+            output/**/audio.wav
+            output/**/stems/voice.wav
+            output/**/captions.srt
+            output/**/timeline.json
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Çıktıları yükle (artifact)
-        if: always()
+        if: always() && github.event.inputs.voice_only != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: videos-${{ github.run_number }}
