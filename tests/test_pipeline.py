@@ -9,6 +9,7 @@ import numpy as np
 from viral.align import align_words
 from viral.script import build_segments, load_script, number_words, parse_markup, syllables, turkish_upper, validate_script
 from viral.timeline import VoiceClip, build_timeline, to_srt
+from viral.tts import _is_piper_voice, piper_word_starts
 
 
 class MarkupTests(unittest.TestCase):
@@ -79,6 +80,25 @@ class ScriptTests(unittest.TestCase):
         item = next(s for s in tl["segments"] if s.get("rank") == 10)
         self.assertIn("callout", item)
         self.assertGreaterEqual(item["callout"]["t0"], item["start"])
+
+
+class PiperTests(unittest.TestCase):
+    def test_word_starts_from_phoneme_alignments(self):
+        sr = 100
+        # cümle 1: "ab cd." → kelimeler 10. ve 40. örnekte başlar; cümle 2: "ef" (gap 0.5 sn = 50 örnek)
+        c1 = [("^", 10), ("a", 10), ("b", 10), (" ", 10), ("c", 10), ("d", 10), (".", 5), ("$", 5)]
+        c2 = [("^", 4), ("ˈ", 2), ("e", 10), ("f", 10), ("$", 4)]
+        ws = piper_word_starts([(70, c1), (30, c2)], sr, 0.5)
+        self.assertEqual(ws, [0.1, 0.4, 1.24])
+
+    def test_missing_alignment_falls_back(self):
+        self.assertIsNone(piper_word_starts([(10, None)], 100, 0.1))
+
+    def test_voice_name_detection(self):
+        self.assertTrue(_is_piper_voice("tr_TR-dfki-medium"))
+        self.assertTrue(_is_piper_voice("voices/ses.onnx"))
+        self.assertFalse(_is_piper_voice("tr-TR-Chirp3-HD-Charon"))
+        self.assertFalse(_is_piper_voice("tr-TR-Wavenet-E"))
 
 
 if __name__ == "__main__":

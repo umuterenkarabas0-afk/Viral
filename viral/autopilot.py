@@ -27,7 +27,7 @@ def _save(p: Path, q: dict):
     p.write_text(yaml.safe_dump(q, allow_unicode=True, sort_keys=False, width=140), encoding="utf-8")
 
 
-def run(queue: str = "content/topics.yaml", *, count: int = 1, tts: str = "google", workers: int | None = None,
+def run(queue: str = "content/topics.yaml", *, count: int = 1, tts: str = "auto", workers: int | None = None,
         handle: str | None = None, out_root: str = "output") -> list[dict]:
     qp = Path(queue)
     q = _load(qp)

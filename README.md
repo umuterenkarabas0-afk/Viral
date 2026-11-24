@@ -4,7 +4,7 @@ Merak uyandıran **Türkçe bilgi videolarını** (YouTube Shorts · Instagram R
 
 - **3D animasyon**: Three.js ile tamamen prosedürel sahne: su altı ortamı, kostik ışıklar, ışık huzmeleri, Posidonia çayırları, kabarcıklar ve parametrelerle üretilen, yüzme animasyonlu 3D balıklar
 - **Motion graphics**: sıralama vurgusu (#10 → #1), harf harf isim animasyonu, bilgi kartları, 3D noktaya bağlı callout çizgileri, ilerleme çubuğu, geçişlerde hareket bulanıklığı, "rüya" (halüsinasyon) efekti
-- **Türkçe seslendirme**: Google Cloud Text-to-Speech (Chirp3-HD / WaveNet)
+- **Türkçe seslendirme**: Google Cloud Text-to-Speech (Chirp3-HD / WaveNet) veya **Piper** (yerel, ücretsiz, anahtarsız)
 - **Altyazı**: kelime kelime senkronlu, vurgulu, videoya gömülü + ayrıca `captions.srt`
 - **Ses tasarımı tamamen kodla sentezlenir**: müzik (pluck arpej, pad, bas, davullar), su altı atmosferi, whoosh geçişleri, impact vurguları, riser, kabarcık/pop/sparkle efektleri; seslendirmeye göre ducking, -14 LUFS mastering
 - **Süre**: ~60 sn (konuşma hızı otomatik ayarlanır), 1080×1920, 30 fps, H.264 + AAC
@@ -17,7 +17,7 @@ content/topics.yaml ──► viral/writer.py (Claude) ──► content/scripts
                                                           │
                           ┌───────────────────────────────┘
                           ▼
-viral/pipeline.py ── tts.py (Google TTS) ── align.py (kelime zamanları)
+viral/pipeline.py ── tts.py (Google TTS / Piper) ── align.py (kelime zamanları)
         │            timeline.py (müzik ızgarasına oturan sahne sınırları)
         │            sound.py (sentez müzik + SFX + miks + loudness)
         ▼
@@ -45,7 +45,31 @@ sudo apt-get install -y ffmpeg
 2. Anahtarı `GOOGLE_TTS_API_KEY` ortam değişkeni olarak verin (GitHub Actions'ta repo secret olarak).
    Alternatif: `gcloud auth print-access-token` ile alınan token (`GOOGLE_TTS_ACCESS_TOKEN`).
 
-Anahtar yoksa `--tts auto` yalnızca **önizleme** için `espeak-ng`'ye düşer (robotik ses); üretim için `--tts google` kullanın.
+Anahtar yoksa `--tts auto` **Piper**'a düşer (aşağıya bakın); Piper da kullanılamazsa yalnızca önizleme için
+`espeak-ng` (robotik ses) kullanılır.
+
+### Piper (ücretsiz, yerel seslendirme)
+
+[Piper](https://github.com/OHF-Voice/piper1-gpl) bilgisayarda çalışan nöral bir TTS'tir: API anahtarı, kota ya da
+ücret yoktur. 60 sn'lik ses CPU'da birkaç saniyede üretilir. Ses modeli ilk kullanımda `.cache/piper/` altına
+indirilir (~63 MB, huggingface.co).
+
+```bash
+python -m viral make content/scripts/akdeniz-baliklari.yaml --tts piper
+python -m viral voices --engine piper     # resmi Türkçe Piper sesleri
+```
+
+- **Kelime zamanları** Piper'ın fonem hizalamasından gelir (bu yüzden `onnx` paketi gerekir); kelime sayısı
+  tutmazsa `align.py` devreye girer.
+- Varsayılan ses `tr_TR-dfki-medium`; değiştirmek için `PIPER_VOICE` ortam değişkeni ya da senaryoda
+  `voice: { engine: piper, name: <ses adı | model.onnx yolu | .onnx URL'si>, speaker: 0 }`.
+  URL verilirse yanındaki `.onnx.json` da aynı adresten indirilir; topluluğun eğittiği Türkçe sesler bu yolla kullanılabilir.
+- dfki sesi doğal olarak yavaş konuştuğu için hız sınırı Piper'da 1,6'dır (Google'da 1,3).
+
+> ⚠️ **Lisans**: Resmi tek Türkçe Piper sesi olan `tr_TR-dfki-medium`, **CC BY-NC-SA 4.0** lisanslı bir veri
+> setiyle eğitilmiştir, yani **ticari olmayan** kullanım içindir. Para kazanan (monetize) bir kanalda ticari
+> kullanıma izin veren bir model kullanın ya da kendi sesinizle bir Piper modeli eğitin. Piper yazılımının kendisi GPL-3.0'dır;
+> ürettiği ses dosyaları bu lisanstan etkilenmez.
 
 ```bash
 python -m viral voices     # kullanılabilir Türkçe sesleri listeler
@@ -117,7 +141,10 @@ hem görüntü hem ses tasarımı aynı zamanlamayı kullanır.
 3. Videoyu üretir; MP4 + kapak + SRT + paylaşım metnini **Artifact** ve **GitHub Release** olarak yayınlar
 4. Güncellenen kuyruğu ve yeni senaryoyu repoya commit'ler
 
-Gerekli repo secret'ları: `GOOGLE_TTS_API_KEY`, `ANTHROPIC_API_KEY`.
+Gerekli repo secret'ları: `ANTHROPIC_API_KEY`; isteğe bağlı `GOOGLE_TTS_API_KEY`.
+Seslendirme `auto` modundadır: Google anahtarı varsa Google, yoksa Piper kullanılır. Zorlamak için
+repo **değişkeni** (Settings → Secrets and variables → Actions → Variables) `VIRAL_TTS=piper` veya `google`;
+Piper sesi için `PIPER_VOICE`.
 
 Senaryo yazımı `claude-opus-5-5` ile yapılır; modelin reddettiği nadir isteklerde sunucu tarafı yedek model
 (`fallbacks: "default"`) devreye girer.

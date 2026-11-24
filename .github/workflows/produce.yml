@@ -27,6 +27,9 @@ jobs:
       GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       VIRAL_USE_GCLOUD: "0"
+      # auto: GOOGLE_TTS_API_KEY varsa Google, yoksa Piper (ücretsiz, yerel). Zorlamak için repo değişkeni VIRAL_TTS=piper|google
+      VIRAL_TTS: ${{ vars.VIRAL_TTS || 'auto' }}
+      PIPER_VOICE: ${{ vars.PIPER_VOICE || 'tr_TR-dfki-medium' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -56,12 +59,18 @@ jobs:
           key: tts-${{ github.run_id }}
           restore-keys: tts-
 
+      - name: Piper ses modelleri
+        uses: actions/cache@v4
+        with:
+          path: .cache/piper
+          key: piper-${{ vars.PIPER_VOICE || 'tr_TR-dfki-medium' }}
+
       - name: Video üret
         run: |
           if [ -n "${{ github.event.inputs.script }}" ]; then
-            python -m viral make "${{ github.event.inputs.script }}" --tts google --workers 3
+            python -m viral make "${{ github.event.inputs.script }}" --tts "$VIRAL_TTS" --workers 3
           else
-            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts google --workers 3
+            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts "$VIRAL_TTS" --workers 3
           fi
 
       - name: Çıktıları yükle (artifact)

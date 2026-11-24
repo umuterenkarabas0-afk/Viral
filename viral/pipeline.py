@@ -205,7 +205,9 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
     out_dir.mkdir(parents=True, exist_ok=True)
     segs = build_segments(script)
     vcfg = script.get("voice", {}) or {}
-    voice = Voice(engine=tts, voice=vcfg.get("name"), prefs=vcfg.get("prefs"), pitch=vcfg.get("pitch", 0.0), lang=script.get("language", "tr-TR"))
+    engine = vcfg.get("engine", tts) if tts == "auto" else tts
+    voice = Voice(engine=engine, voice=vcfg.get("name"), prefs=vcfg.get("prefs"), pitch=vcfg.get("pitch", 0.0),
+                  lang=script.get("language", "tr-TR"), speaker=vcfg.get("speaker"))
 
     # süreyi hedefe oturt (konuşma hızı ile)
     rate = float(vcfg.get("speaking_rate", 1.1))
@@ -218,8 +220,7 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
         speech = sum(c.speech_end - c.speech_start for c in clips)
         other = est - speech
         want = max(10.0, target - other)
-        hi = 1.3 if voice.engine == "google" else 1.6
-        new_rate = float(np.clip(rate * speech / want, 0.9, hi))
+        new_rate = float(np.clip(rate * speech / want, 0.9, voice.max_rate))
         if abs(new_rate - rate) < 0.02:
             break
         rate = new_rate
