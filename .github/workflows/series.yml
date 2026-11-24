@@ -1,0 +1,142 @@
+name: Mini dizi bölümlerini paralel üret
+
+# Bir dizinin seçilen bölümlerini aynı anda (her bölüm ayrı makinede) üretir ve her birini
+# GitHub Release olarak yayınlar. Kuyruktaki durumları günceller; böylece zamanlanmış
+# üretim (produce.yml) aynı bölümü tekrar üretmez.
+on:
+  workflow_dispatch:
+    inputs:
+      series:
+        description: "Dizi klasörü (content/series altında)"
+        default: "balikci-kuponu"
+      episodes:
+        description: "Bölüm numaraları, virgülle (ör. 2,3,4,5,6,7,8)"
+        default: "2,3,4,5,6,7,8"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: viral-queue
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install PyYAML
+      - id: m
+        name: Bölüm listesi + kuyrukta 'rendering' işaretle
+        env:
+          SERIES: ${{ github.event.inputs.series }}
+          EPS: ${{ github.event.inputs.episodes }}
+        run: |
+          python - <<'PY'
+          import json, os, yaml
+          s, eps = os.environ["SERIES"], [int(x) for x in os.environ["EPS"].split(",") if x.strip()]
+          files = [f"content/series/{s}/b{n:02d}.yaml" for n in eps]
+          for f in files:
+              assert os.path.exists(f), f
+          q = yaml.safe_load(open("content/topics.yaml", encoding="utf-8")) or {"topics": []}
+          for t in q["topics"]:
+              if t.get("script") in files and t.get("status") != "done":
+                  t["status"] = "rendering"
+          open("content/topics.yaml", "w", encoding="utf-8").write(yaml.safe_dump(q, allow_unicode=True, sort_keys=False, width=140))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as o:
+              o.write("matrix=" + json.dumps({"script": files}) + "\n")
+          PY
+          git config user.name "viral-bot"; git config user.email "viral-bot@users.noreply.github.com"
+          git add content/topics.yaml
+          git diff --cached --quiet || (git commit -m "Kuyruk: bölümler üretimde [skip ci]" && git pull --rebase && git push)
+
+  render:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    env:
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+      ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: |
+          pip install -r requirements.txt
+          npm ci
+          npx playwright install --with-deps chromium
+      - uses: actions/cache@v4
+        with:
+          path: .cache/tts
+          key: tts-${{ github.run_id }}-${{ strategy.job-index }}
+          restore-keys: tts-
+      - name: Video üret
+        run: python -m viral make "${{ matrix.script }}" --workers 3
+      - name: Release olarak yayınla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for d in output/*/; do
+            id=$(basename "$d"); mp4="$d$id.mp4"; [ -f "$mp4" ] || continue
+            gh release create "video-$id-$(date +%Y%m%d-%H%M)" "$mp4" "$d/cover.jpg" "$d/captions.srt" "$d/post.txt" \
+              --title "$(head -n1 "$d/post.txt")" --notes-file "$d/post.txt"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: video-${{ strategy.job-index }}
+          path: |
+            output/**/*.mp4
+            output/**/cover.jpg
+            output/**/captions.srt
+            output/**/post.txt
+          if-no-files-found: ignore
+          retention-days: 30
+
+  finish:
+    needs: [plan, render]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install PyYAML
+      - name: Kuyruğu güncelle (yayınlananlar done, kalanlar failed)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MATRIX: ${{ needs.plan.outputs.matrix }}
+        run: |
+          gh release list --limit 200 --json tagName -q '.[].tagName' > tags.txt
+          python - <<'PY'
+          import datetime, json, os, yaml
+          files = json.loads(os.environ["MATRIX"])["script"]
+          tags = open("tags.txt").read().split()
+          q = yaml.safe_load(open("content/topics.yaml", encoding="utf-8"))
+          for t in q["topics"]:
+              f = t.get("script")
+              if f not in files:
+                  continue
+              vid = yaml.safe_load(open(f, encoding="utf-8"))["id"]
+              rel = sorted(x for x in tags if x.startswith(f"video-{vid}-"))
+              if rel:
+                  t.update({"status": "done", "date": datetime.date.today().isoformat(),
+                            "video": f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/releases/tag/{rel[-1]}"})
+              elif t.get("status") != "done":
+                  t["status"] = "failed"
+          open("content/topics.yaml", "w", encoding="utf-8").write(yaml.safe_dump(q, allow_unicode=True, sort_keys=False, width=140))
+          PY
+          git config user.name "viral-bot"; git config user.email "viral-bot@users.noreply.github.com"
+          git add content/topics.yaml
+          git diff --cached --quiet || (git commit -m "Kuyruk: paralel üretim sonucu [skip ci]" && git pull --rebase && git push)
