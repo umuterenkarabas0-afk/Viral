@@ -493,13 +493,54 @@ def render(tl_path: Path, frames: Path, workers: int | None = None, stills: list
     subprocess.run(cmd, check=True)
 
 
+def _pcm(path: Path, sr: int = 48000) -> np.ndarray:
+    r = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-f", "f32le", "-ac", "2", "-ar", str(sr), "-"], capture_output=True, check=True)
+    return np.frombuffer(r.stdout, np.float32).reshape(-1, 2)
+
+
+def safe_aac(wav: Path, out: Path, ceiling_db: float = -1.0, bitrate: str = "192k", passes: int = 4) -> float:
+    """AAC kodlayıcısı keskin geçişlerde tepeyi ~2 dB aşabiliyor. Kodlanmış sesi çözüp aşan bölgelere
+    yumuşak, yerel bir kazanç düşüşü uygular ve yeniden kodlar (kodlayıcıya duyarlı tepe sınırlama).
+    Döner: son tepe (dBFS)."""
+    sr = 48000
+    x = _pcm(wav, sr).copy()
+    ceil = 10 ** (ceiling_db / 20)
+    tmp = out.with_suffix(".tmp.wav")
+    win = int(0.012 * sr)
+    peak_db = 0.0
+    for i in range(passes + 1):
+        src = wav if i == 0 else tmp
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(src), "-c:a", "aac", "-b:a", bitrate, "-ar", str(sr), str(out)], check=True)
+        y = _pcm(out, sr)
+        n = min(len(x), len(y))
+        env = np.abs(y[:n]).max(axis=1)
+        peak_db = 20 * math.log10(max(1e-9, float(env.max())))
+        if peak_db <= ceiling_db + 0.05 or i == passes:
+            break
+        # gereken azaltma (biraz pay bırak), maksimum filtresiyle genişlet, sonra yumuşat
+        need = np.minimum(1.0, (ceil * 0.97) / np.maximum(env, 1e-9))
+        from scipy.ndimage import minimum_filter1d, uniform_filter1d
+        g = minimum_filter1d(need, size=win * 2 + 1)
+        g = uniform_filter1d(g, size=win)
+        g = np.minimum(g, uniform_filter1d(minimum_filter1d(need, size=win * 6 + 1), size=win * 4))
+        x[:n] *= g[:, None].astype(np.float32)
+        from .pipeline import write_wav
+        write_wav(tmp, x, sr)
+    tmp.unlink(missing_ok=True)
+    return peak_db
+
+
 def encode(frames: Path, audio: Path, out: Path, fps: int = FPS):
+    aac = out.with_suffix(".m4a")
+    pk = safe_aac(audio, aac)
+    log(f"  ses tepe (AAC sonrası): {pk:.2f} dBFS")
     cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(fps), "-i", str(frames / "%05d.jpg"),
-           "-i", str(audio), "-map", "0:v", "-map", "1:a",
+           "-i", str(aac), "-map", "0:v", "-map", "1:a",
            "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-profile:v", "high", "-level", "4.2", "-pix_fmt", "yuv420p",
            "-tune", "animation", "-maxrate", "9M", "-bufsize", "14M", "-g", str(fps * 2),
-           "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-movflags", "+faststart", "-shortest", str(out)]
+           "-c:a", "copy", "-movflags", "+faststart", "-shortest", str(out)]
     subprocess.run(cmd, check=True)
+    aac.unlink(missing_ok=True)
 
 
 def make_episode(series_dir: str | Path, n: int, out_root: str | Path = "output", *, render_video: bool = True, workers: int | None = None,
