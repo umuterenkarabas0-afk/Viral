@@ -215,7 +215,8 @@ EL_DEFAULT_MODEL = "eleven_multilingual_v2"
 
 
 def _el_key() -> str | None:
-    return os.environ.get("ELEVENLABS_API_KEY") or os.environ.get("XI_API_KEY")
+    key = os.environ.get("ELEVENLABS_API_KEY") or os.environ.get("XI_API_KEY")
+    return key.strip() if key and key.strip() else None
 
 
 def _el_request(method: str, path: str, body: dict | None = None, timeout: int = 120) -> dict:
