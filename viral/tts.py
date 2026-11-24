@@ -1,4 +1,8 @@
-"""Seslendirme: Google Cloud Text-to-Speech (birincil) + espeak-ng (yalnızca önizleme).
+"""Seslendirme: Google Cloud Text-to-Speech, ElevenLabs + espeak-ng (yalnızca önizleme).
+
+ElevenLabs: ELEVENLABS_API_KEY (xi-api-key başlığı). Ses: ELEVENLABS_VOICE_ID veya
+senaryoda `voice: { name: <voice_id> }`. Model: ELEVENLABS_MODEL (varsayılan
+eleven_multilingual_v2). Kelime zamanları /with-timestamps karakter hizalamasından gelir.
 
 Kimlik doğrulama (öncelik sırasıyla):
   1. GOOGLE_TTS_API_KEY ortam değişkeni → X-Goog-Api-Key başlığı
@@ -203,6 +207,149 @@ def synthesize_espeak(text: str, rate: float = 1.1, voice: str = "tr") -> TTSRes
     return TTSResult(_resample(a, sr), SR, None, "espeak-" + voice, "espeak")
 
 
+# ---------------------------------------------------------------- ElevenLabs
+
+EL_API = "https://api.elevenlabs.io"
+EL_DEFAULT_VOICE = "nPczCjzI2devNBz1zQrb"  # "Brian" (hazır, çok dilli anlatıcı sesi)
+EL_DEFAULT_MODEL = "eleven_multilingual_v2"
+
+
+def _el_key() -> str | None:
+    key = os.environ.get("ELEVENLABS_API_KEY") or os.environ.get("XI_API_KEY")
+    return key.strip() if key and key.strip() else None
+
+
+def _el_request(method: str, path: str, body: dict | None = None, timeout: int = 120) -> dict:
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(EL_API + path, data=data, method=method)
+    req.add_header("Content-Type", "application/json")
+    req.add_header("Accept", "application/json")
+    key = _el_key()
+    if key:
+        req.add_header("xi-api-key", key)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        msg = e.read().decode("utf-8", "replace")[:600]
+        if e.code == 401:
+            raise TTSAuthError(f"ElevenLabs yetkilendirme hatası (401). ELEVENLABS_API_KEY ayarlayın.\n{msg}") from None
+        raise RuntimeError(f"ElevenLabs HTTP {e.code}: {msg}") from None
+
+
+def list_voices_elevenlabs() -> list[dict]:
+    return _el_request("GET", "/v1/voices").get("voices", [])
+
+
+def _decode_any(b: bytes) -> tuple[np.ndarray, int]:
+    """MP3 vb. sıkıştırılmış sesi ffmpeg ile mono 48 kHz float'a çözer."""
+    exe = shutil.which("ffmpeg")
+    if not exe:
+        raise RuntimeError("ElevenLabs MP3 çıktısını çözmek için ffmpeg gerekli")
+    r = subprocess.run([exe, "-v", "error", "-i", "pipe:0", "-f", "s16le", "-ac", "1", "-ar", str(SR), "pipe:1"],
+                       input=b, capture_output=True, check=True)
+    return np.frombuffer(r.stdout, dtype=np.int16).astype(np.float32) / 32768.0, SR
+
+
+def _norm(s: str) -> str:
+    return "".join(ch for ch in s.lower() if ch.isalnum())
+
+
+def _el_word_starts(words: list[str], align: dict | None) -> list[float] | None:
+    """Karakter hizalamasından her kelimenin başlangıç zamanını bulur."""
+    if not align:
+        return None
+    chars = align.get("characters") or []
+    starts = align.get("character_start_times_seconds") or []
+    if not chars or len(chars) != len(starts):
+        return None
+    # yalnızca harf/rakamlardan oluşan akış + her birinin zamanı
+    flat, times = [], []
+    for c, t in zip(chars, starts):
+        for ch in c.lower():
+            if ch.isalnum():
+                flat.append(ch)
+                times.append(t)
+    stream = "".join(flat)
+    out, cur = [], 0
+    for w in words:
+        n = _norm(w)
+        if not n:
+            out.append(out[-1] if out else 0.0)
+            continue
+        i = stream.find(n, cur)
+        if i < 0 or i - cur > 40:  # kelime bulunamadı / çok uzakta → güvenilmez
+            return None
+        out.append(float(times[i]))
+        cur = i + len(n)
+    return out
+
+
+EL_MAX_SPEED = 1.2  # ElevenLabs'in kabul ettiği en yüksek hız
+
+
+def time_stretch(a: np.ndarray, sr: int, factor: float) -> np.ndarray:
+    """Sesi perdeyi değiştirmeden `factor` kat hızlandırır (ffmpeg atempo)."""
+    if abs(factor - 1.0) < 1e-3:
+        return a
+    exe = shutil.which("ffmpeg")
+    if not exe:
+        raise RuntimeError("Ses hızlandırma için ffmpeg gerekli")
+    filt = []
+    f = factor
+    while f > 2.0:  # atempo tek adımda 0.5–2.0
+        filt.append("atempo=2.0")
+        f /= 2.0
+    filt.append(f"atempo={f:.5f}")
+    r = subprocess.run([exe, "-v", "error", "-f", "f32le", "-ar", str(sr), "-ac", "1", "-i", "pipe:0",
+                        "-af", ",".join(filt), "-f", "f32le", "-ar", str(sr), "-ac", "1", "pipe:1"],
+                       input=np.ascontiguousarray(a, dtype=np.float32).tobytes(), capture_output=True, check=True)
+    return np.frombuffer(r.stdout, dtype=np.float32).copy()
+
+
+def synthesize_elevenlabs(text: str, words: list[str], voice: str, rate: float = 1.1, lang: str = "tr-TR") -> TTSResult:
+    """ElevenLabs en fazla 1.2 hız kabul eder; daha yüksek `rate` istenirse fark ffmpeg ile eklenir."""
+    speed = float(np.clip(rate, 0.7, EL_MAX_SPEED))
+    r = _synthesize_elevenlabs(text, words, voice, speed, lang)
+    extra = rate / speed
+    if extra > 1.001:
+        r.audio = time_stretch(r.audio, r.sr, extra)
+        if r.word_starts:
+            r.word_starts = [t / extra for t in r.word_starts]
+    return r
+
+
+def _synthesize_elevenlabs(text: str, words: list[str], voice: str, rate: float = 1.1, lang: str = "tr-TR") -> TTSResult:
+    CACHE.mkdir(parents=True, exist_ok=True)
+    model = os.environ.get("ELEVENLABS_MODEL", EL_DEFAULT_MODEL)
+    fmt = os.environ.get("ELEVENLABS_OUTPUT_FORMAT", "mp3_44100_128")
+    speed = float(np.clip(rate, 0.7, EL_MAX_SPEED))
+    settings = {
+        "stability": float(os.environ.get("ELEVENLABS_STABILITY", 0.45)),
+        "similarity_boost": float(os.environ.get("ELEVENLABS_SIMILARITY", 0.8)),
+        "style": float(os.environ.get("ELEVENLABS_STYLE", 0.2)),
+        "use_speaker_boost": True,
+        "speed": speed,
+    }
+    key = _cache_key("el1", text, voice, model, fmt, settings)
+    audio_p, meta_p = CACHE / f"{key}.el", CACHE / f"{key}.json"
+    if audio_p.exists() and meta_p.exists():
+        meta = json.loads(meta_p.read_text())
+        a, sr = _decode_any(audio_p.read_bytes())
+        return TTSResult(a, sr, _el_word_starts(words, meta.get("alignment")), voice, "elevenlabs")
+
+    body = {"text": text, "model_id": model, "voice_settings": settings}
+    if model.startswith(("eleven_flash_v2_5", "eleven_turbo_v2_5", "eleven_v3")):
+        body["language_code"] = lang.split("-")[0]
+    resp = _el_request("POST", f"/v1/text-to-speech/{voice}/with-timestamps?output_format={fmt}", body)
+    b = base64.b64decode(resp["audio_base64"])
+    align = resp.get("normalized_alignment") or resp.get("alignment")
+    audio_p.write_bytes(b)
+    meta_p.write_text(json.dumps({"alignment": align, "voice": voice, "model": model}))
+    a, sr = _decode_any(b)
+    return TTSResult(a, sr, _el_word_starts(words, align), voice, "elevenlabs")
+
+
 class Voice:
     """Pipeline'ın kullandığı TTS cephesi."""
 
@@ -212,7 +359,13 @@ class Voice:
         self.pitch = pitch
         self.voice = voice
         self.prefs = prefs
-        if engine in ("auto", "google"):
+        if engine == "elevenlabs" or (engine == "auto" and _el_key()):
+            if not _el_key():
+                raise TTSAuthError("ElevenLabs için ELEVENLABS_API_KEY ortam değişkeni gerekli")
+            self.engine = "elevenlabs"
+            if not self.voice or self.voice == "auto" or self.voice.startswith("tr-TR"):
+                self.voice = os.environ.get("ELEVENLABS_VOICE_ID") or EL_DEFAULT_VOICE
+        elif engine in ("auto", "google"):
             try:
                 if not self.voice or self.voice == "auto":
                     self.voice = pick_voice(prefs, lang)
@@ -225,6 +378,8 @@ class Voice:
         print(f"[tts] motor={self.engine} ses={self.voice}")
 
     def say(self, text: str, words: list[str], rate: float) -> TTSResult:
+        if self.engine == "elevenlabs":
+            return synthesize_elevenlabs(text, words, self.voice, rate, self.lang)
         if self.engine == "google":
             return synthesize_google(text, words, self.voice, rate, self.pitch, self.lang)
         return synthesize_espeak(text, rate)

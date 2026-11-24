@@ -4,7 +4,7 @@
   python -m viral make <yaml> --no-render --stills 1.5,8,20      # hızlı önizleme
   python -m viral write "Uzayın en tuhaf 10 gezegeni"              # Claude ile senaryo yaz
   python -m viral auto                                             # kuyruktan sıradaki konuyu üret
-  python -m viral voices                                           # Türkçe Google seslerini listele
+  python -m viral voices [--engine elevenlabs]                     # sesleri listele
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ def main(argv=None):
     m = sub.add_parser("make", help="Bir senaryodan video üret")
     m.add_argument("script")
     m.add_argument("--out", default="output")
-    m.add_argument("--tts", default="auto", choices=["auto", "google", "espeak"])
+    m.add_argument("--tts", default="auto", choices=["auto", "google", "elevenlabs", "espeak"])
     m.add_argument("--workers", type=int)
     m.add_argument("--target", type=float, default=60.0, help="hedef süre (sn)")
     m.add_argument("--no-render", action="store_true")
@@ -36,11 +36,12 @@ def main(argv=None):
     a = sub.add_parser("auto", help="Kuyruktaki sıradaki konuyu yaz + üret")
     a.add_argument("--queue", default="content/topics.yaml")
     a.add_argument("--count", type=int, default=1)
-    a.add_argument("--tts", default="google")
+    a.add_argument("--tts", default="google", choices=["auto", "google", "elevenlabs", "espeak"])
     a.add_argument("--workers", type=int)
     a.add_argument("--handle")
 
-    sub.add_parser("voices", help="Türkçe Google TTS seslerini listele")
+    vp = sub.add_parser("voices", help="Kullanılabilir sesleri listele")
+    vp.add_argument("--engine", default="google", choices=["google", "elevenlabs"])
 
     args = ap.parse_args(argv)
     if args.cmd == "make":
@@ -57,6 +58,12 @@ def main(argv=None):
         from .autopilot import run
         run(args.queue, count=args.count, tts=args.tts, workers=args.workers, handle=args.handle)
     elif args.cmd == "voices":
+        if args.engine == "elevenlabs":
+            from .tts import list_voices_elevenlabs
+            for v in list_voices_elevenlabs():
+                labels = v.get("labels") or {}
+                print(v["voice_id"], v.get("name"), v.get("category"), labels.get("gender", ""), labels.get("accent", ""))
+            return 0
         from .tts import list_voices
         for v in list_voices():
             print(v["name"], v.get("ssmlGender"), v.get("naturalSampleRateHertz"))

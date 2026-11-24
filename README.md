@@ -4,7 +4,7 @@ Merak uyandıran **Türkçe bilgi videolarını** (YouTube Shorts · Instagram R
 
 - **3D animasyon**: Three.js ile tamamen prosedürel sahne: su altı ortamı, kostik ışıklar, ışık huzmeleri, Posidonia çayırları, kabarcıklar ve parametrelerle üretilen, yüzme animasyonlu 3D balıklar
 - **Motion graphics**: sıralama vurgusu (#10 → #1), harf harf isim animasyonu, bilgi kartları, 3D noktaya bağlı callout çizgileri, ilerleme çubuğu, geçişlerde hareket bulanıklığı, "rüya" (halüsinasyon) efekti
-- **Türkçe seslendirme**: Google Cloud Text-to-Speech (Chirp3-HD / WaveNet)
+- **Türkçe seslendirme**: ElevenLabs (çok dilli v2/v3) veya Google Cloud Text-to-Speech (Chirp3-HD / WaveNet)
 - **Altyazı**: kelime kelime senkronlu, vurgulu, videoya gömülü + ayrıca `captions.srt`
 - **Ses tasarımı tamamen kodla sentezlenir**: müzik (pluck arpej, pad, bas, davullar), su altı atmosferi, whoosh geçişleri, impact vurguları, riser, kabarcık/pop/sparkle efektleri; seslendirmeye göre ducking, -14 LUFS mastering
 - **Süre**: ~60 sn (konuşma hızı otomatik ayarlanır), 1080×1920, 30 fps, H.264 + AAC
@@ -55,6 +55,28 @@ Varsayılan ses tercihi: `tr-TR-Chirp3-HD-Charon` → diğer Chirp3-HD → `tr-T
 Senaryoda değiştirmek için: `voice: { name: tr-TR-Wavenet-B, speaking_rate: 1.1 }`.
 SSML `<mark>` destekleyen seslerde (WaveNet/Standard) kelime zamanları doğrudan Google'dan gelir; Chirp3-HD'de
 Türkçe hece sayısı + sessizlik analizine dayalı hizalama kullanılır.
+
+### ElevenLabs anahtarı
+
+1. [elevenlabs.io](https://elevenlabs.io) → Profil → **API Keys** bölümünden bir anahtar oluşturun
+   (izin: *Text to Speech* ve sesleri listelemek için *Voices: Read*).
+2. Anahtarı `ELEVENLABS_API_KEY` ortam değişkeni olarak verin (GitHub Actions'ta repo **secret** olarak).
+3. Ses seçin: `python -m viral voices --engine elevenlabs` kimlikleri listeler. Seçtiğiniz `voice_id`'yi
+   `ELEVENLABS_VOICE_ID` ile (Actions'ta repo **variable** olarak) ya da senaryoda `voice: { name: <voice_id> }` ile verin.
+   Verilmezse hazır "Brian" sesi kullanılır.
+
+| Değişken | Varsayılan | Açıklama |
+|---|---|---|
+| `ELEVENLABS_MODEL` | `eleven_multilingual_v2` | `eleven_v3`, `eleven_flash_v2_5`, `eleven_turbo_v2_5` de olur |
+| `ELEVENLABS_OUTPUT_FORMAT` | `mp3_44100_128` | Pro planda `pcm_44100` vb. |
+| `ELEVENLABS_STABILITY` / `_SIMILARITY` / `_STYLE` | `0.45` / `0.8` / `0.2` | ses ayarları |
+
+Kelime zamanları ElevenLabs'in `with-timestamps` karakter hizalamasından gelir (altyazılar tam senkron).
+ElevenLabs en fazla 1,2 hız kabul eder; 60 sn hedefi için daha hızlı konuşma gerekirse fark perdeyi bozmadan ffmpeg `atempo` ile eklenir (toplam en fazla 1,45). `--tts auto`, `ELEVENLABS_API_KEY` varsa ElevenLabs'i seçer.
+
+```bash
+python -m viral make content/scripts/akdeniz-baliklari.yaml --tts elevenlabs
+```
 
 ## Kullanım
 
@@ -117,7 +139,9 @@ hem görüntü hem ses tasarımı aynı zamanlamayı kullanır.
 3. Videoyu üretir; MP4 + kapak + SRT + paylaşım metnini **Artifact** ve **GitHub Release** olarak yayınlar
 4. Güncellenen kuyruğu ve yeni senaryoyu repoya commit'ler
 
-Gerekli repo secret'ları: `GOOGLE_TTS_API_KEY`, `ANTHROPIC_API_KEY`.
+Gerekli repo secret'ları: `ANTHROPIC_API_KEY` ve `ELEVENLABS_API_KEY` **veya** `GOOGLE_TTS_API_KEY`.
+`ELEVENLABS_API_KEY` tanımlıysa iş akışı otomatik olarak ElevenLabs kullanır (elle çalıştırırken `tts` girdisiyle değiştirilebilir).
+İsteğe bağlı repo variable'ları: `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL`.
 
 Senaryo yazımı `claude-opus-5-5` ile yapılır; modelin reddettiği nadir isteklerde sunucu tarafı yedek model
 (`fallbacks: "default"`) devreye girer.

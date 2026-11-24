@@ -5,3 +5,5 @@ output/
 .cache/
 .venv/
 *.log
+# Local secrets written by `elevenlabs onboard`
+/.env.local
