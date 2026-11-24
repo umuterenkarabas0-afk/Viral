@@ -232,20 +232,34 @@ def elevenlabs_available() -> bool:
     return bool(_el_key()) or os.environ.get("VIRAL_ELEVENLABS_PROXY") == "1"
 
 
-def _el_request(method: str, path: str, body: dict | None = None) -> dict:
+def _el_request(method: str, path: str, body: dict | None = None, retries: int = 6) -> dict:
+    """ElevenLabs isteği; eşzamanlılık/hız sınırı (429) ve geçici 5xx hatalarında bekleyip yeniden dener."""
+    import time
     data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(EL_API + path, data=data, method=method)
-    req.add_header("Content-Type", "application/json")
-    req.add_header("Accept", "application/json")
-    req.add_header("xi-api-key", _el_key() or "proxy-injected")
-    try:
-        with urllib.request.urlopen(req, timeout=120) as r:
-            return json.loads(r.read())
-    except urllib.error.HTTPError as e:
-        msg = e.read().decode("utf-8", "replace")[:600]
-        if e.code in (401, 403):
-            raise TTSAuthError(f"ElevenLabs yetkilendirme hatası ({e.code}). ELEVENLABS_API_KEY'i kontrol edin.\n{msg}") from None
-        raise RuntimeError(f"ElevenLabs HTTP {e.code}: {msg}") from None
+    for attempt in range(retries + 1):
+        req = urllib.request.Request(EL_API + path, data=data, method=method)
+        req.add_header("Content-Type", "application/json")
+        req.add_header("Accept", "application/json")
+        req.add_header("xi-api-key", _el_key() or "proxy-injected")
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                return json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            msg = e.read().decode("utf-8", "replace")[:600]
+            if e.code in (401, 403):
+                raise TTSAuthError(f"ElevenLabs yetkilendirme hatası ({e.code}). ELEVENLABS_API_KEY'i kontrol edin.\n{msg}") from None
+            if (e.code == 429 or e.code >= 500) and attempt < retries:
+                wait = min(60, 5 * 2 ** attempt)
+                print(f"[tts] ElevenLabs HTTP {e.code}, {wait} sn sonra yeniden deneniyor")
+                time.sleep(wait)
+                continue
+            raise RuntimeError(f"ElevenLabs HTTP {e.code}: {msg}") from None
+        except (urllib.error.URLError, TimeoutError) as e:
+            if attempt < retries:
+                time.sleep(min(60, 5 * 2 ** attempt))
+                continue
+            raise RuntimeError(f"ElevenLabs bağlantı hatası: {e}") from None
+    raise RuntimeError("ElevenLabs: deneme sayısı aşıldı")
 
 
 def list_elevenlabs_voices() -> list[dict]:

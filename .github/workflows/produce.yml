@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: viral-produce
+  group: viral-queue
   cancel-in-progress: false
 
 jobs:
