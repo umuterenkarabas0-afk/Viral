@@ -11,6 +11,9 @@ on:
       script:
         description: "(İsteğe bağlı) doğrudan üretilecek senaryo yolu, ör. content/scripts/akdeniz-baliklari.yaml"
         default: ""
+      tts:
+        description: "Seslendirme motoru (boş = ELEVENLABS_API_KEY varsa elevenlabs, yoksa google)"
+        default: ""
 
 permissions:
   contents: write
@@ -25,6 +28,9 @@ jobs:
     timeout-minutes: 150
     env:
       GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+      ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
+      ELEVENLABS_MODEL: ${{ vars.ELEVENLABS_MODEL }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       VIRAL_USE_GCLOUD: "0"
     steps:
@@ -58,10 +64,17 @@ jobs:
 
       - name: Video üret
         run: |
+          TTS="${{ github.event.inputs.tts }}"
+          if [ -z "$TTS" ]; then
+            if [ -n "$ELEVENLABS_API_KEY" ]; then TTS=elevenlabs; else TTS=google; fi
+          fi
+          [ -n "$ELEVENLABS_MODEL" ] || unset ELEVENLABS_MODEL
+          [ -n "$ELEVENLABS_VOICE_ID" ] || unset ELEVENLABS_VOICE_ID
+          echo "Seslendirme motoru: $TTS"
           if [ -n "${{ github.event.inputs.script }}" ]; then
-            python -m viral make "${{ github.event.inputs.script }}" --tts google --workers 3
+            python -m viral make "${{ github.event.inputs.script }}" --tts "$TTS" --workers 3
           else
-            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts google --workers 3
+            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts "$TTS" --workers 3
           fi
 
       - name: Çıktıları yükle (artifact)
