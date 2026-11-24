@@ -1,17 +1,18 @@
-# Otomatik üretim kuyruğu. `python -m viral auto` sıradaki 'pending' konuyu alır,
-# Claude ile senaryosunu yazar (script verilmemişse), videoyu üretir ve durumu günceller.
-# Kuyruk boşalınca Claude yeni konular önerip buraya ekler.
 topics:
-  - title: "Akdeniz'e özgü 10 balık çeşidi"
-    status: pending
-    script: content/scripts/akdeniz-baliklari.yaml
-  - title: "Karadeniz'in en ilginç 10 balığı"
-    status: pending
-  - title: "Okyanusun en zehirli 7 balığı"
-    status: pending
-  - title: "Derin denizin en tuhaf 10 balığı"
-    status: pending
-  - title: "Ege'de dalışta görebileceğin 10 renkli balık"
-    status: pending
-  - title: "Cinsiyet değiştirebilen 7 balık"
-    status: pending
+- title: Akdeniz'e özgü 10 balık çeşidi
+  status: failed
+  script: content/scripts/akdeniz-baliklari.yaml
+  error: "Google TTS yetkilendirme hatası (403). GOOGLE_TTS_API_KEY ayarlayın ve projede 'Cloud Text-to-Speech API'nin etkin olduğundan emin olun.\n\
+    {\n  \"error\": {\n    \"code\": 403,\n    \"message\": \"Permission denied on the service.\",\n    \"status\": \"PERMISSION_DENIED\",\n \
+    \   \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"ACCESS_DENIED\",\n  \
+    \      \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"texttospeech.googleapis.com\"\n        }\n    "
+- title: Karadeniz'in en ilginç 10 balığı
+  status: pending
+- title: Okyanusun en zehirli 7 balığı
+  status: pending
+- title: Derin denizin en tuhaf 10 balığı
+  status: pending
+- title: Ege'de dalışta görebileceğin 10 renkli balık
+  status: pending
+- title: Cinsiyet değiştirebilen 7 balık
+  status: pending
