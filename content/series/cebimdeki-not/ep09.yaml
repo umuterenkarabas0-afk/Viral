@@ -14,7 +14,7 @@ shots:
     cast:
       - { who: kerem, outfit: casual, at: [-1.4, 0.6], face: -90, pose: sit, do: [[0, write_stuck]], hold: pen, look: desk, expr: tired }
     props: [ crumpled ]
-    cam: { shot: custom, pos: [-2.0, 1.35, -0.05], look: [-1.45, 1.0, 0.65], fov: 42, move: push, amt: 0.12 }
+    cam: { shot: custom, pos: [0.35, 1.65, 2.3], look: [-1.6, 0.95, 0.55], fov: 40, move: push, amt: 0.18 }
     lines:
       - say: "Kalemi aldım. Ama üç gün boyunca *tek kelime* yazamadım."
 
@@ -24,7 +24,7 @@ shots:
     cast:
       - { who: kerem, outfit: casual, at: [-1.4, 0.6], face: -90, pose: sit, do: headhands, look: desk, expr: worried }
     props: [ crumpled ]
-    cam: { shot: custom, pos: [-2.0, 1.25, 0.1], look: [-1.45, 0.98, 0.62], fov: 34, move: push, amt: 0.15 }
+    cam: { shot: custom, pos: [-1.46, 1.34, -0.85], look: [-1.74, 1.02, 0.6], fov: 38, move: push, amt: 0.18 }
     sfx: [ { type: crumple, at: 0.3 } ]
     lines:
       - say: "Kime, ne yazacaktım? Ya birinin hayatını *mahvedersem*?"
