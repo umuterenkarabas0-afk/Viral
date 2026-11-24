@@ -297,7 +297,7 @@ def synthesize_elevenlabs(text: str, words: list[str], voice_id: str, rate: floa
     vs = {"stability": 0.42, "similarity_boost": 0.82, "style": 0.38, "use_speaker_boost": True}
     vs.update(settings or {})
     vs["speed"] = float(np.clip(rate, 0.7, 1.2))
-    key = _cache_key("el1", text, voice_id, model, vs, prev_text, next_text)
+    key = _cache_key("el2", text, voice_id, model, vs, prev_text, next_text)
     wav_p, meta_p = CACHE / f"{key}.wav", CACHE / f"{key}.json"
     if wav_p.exists() and meta_p.exists():
         a, sr = _decode_wav(wav_p.read_bytes())
@@ -308,10 +308,19 @@ def synthesize_elevenlabs(text: str, words: list[str], voice_id: str, rate: floa
         body["previous_text"] = prev_text
     if next_text:
         body["next_text"] = next_text
-    resp = _el_request("POST", f"/v1/text-to-speech/{voice_id}/with-timestamps?output_format=pcm_44100", body)
-    pcm = base64.b64decode(resp["audio_base64"])
+    # mp3_44100_128 tüm ElevenLabs paketlerinde var (pcm_44100 yalnızca Pro+); ffmpeg ile çözülür.
+    fmt = os.environ.get("ELEVENLABS_FORMAT", "mp3_44100_128")
+    resp = _el_request("POST", f"/v1/text-to-speech/{voice_id}/with-timestamps?output_format={fmt}", body)
+    raw = base64.b64decode(resp["audio_base64"])
+    if fmt.startswith("pcm_"):
+        sr = int(fmt.split("_")[1])
+        pcm = raw
+    else:
+        sr = 44100
+        r = subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-f", "s16le", "-ac", "1", "-ar", str(sr), "pipe:1"],
+                           input=raw, capture_output=True, check=True)
+        pcm = r.stdout
     a = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768.0
-    sr = 44100
     al = resp.get("alignment") or resp.get("normalized_alignment") or {}
     wt = _word_times_from_alignment(text, al)
     word_starts = [s for s, _ in wt] if len(wt) == len(words) else None
