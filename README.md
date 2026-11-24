@@ -108,6 +108,27 @@ yüzgeçler (`dorsal/anal`: spiny|rounded|falcate|triangle|long|tall; `caudal`: 
 **Cue'lar**: `dream` (renk kayması + dalgalanma + psikedelik ses), `flash`, `shake` — `at_word` ile kelimeye bağlanır;
 hem görüntü hem ses tasarımı aynı zamanlamayı kullanır.
 
+## Mini dizi modu (hikâye) — "Cebimdeki Not"
+
+Bilgi videolarının yanında, bölüm bölüm ilerleyen **dikey mini diziler** de üretilebilir:
+
+- **Senaryo**: `content/series/<dizi>/` — `series.yaml` (karakterler, sesler, tema) + `epNN.yaml` çekim listeleri
+  (şema: [`content/series/README.md`](content/series/README.md)). Örnek: 10 bölümlük gizem/komedi dizisi *Cebimdeki Not*.
+- **Seslendirme**: Microsoft Edge TTS, `tr-TR-AhmetNeural`; her replik ayrı sentezlenir, kelime zamanları servisin
+  WordBoundary olaylarından gelir. Aynı ses perde/hız/işlemle karakterlere ayrılır (anlatıcı, not, Nuri Amca, yabancı, bağırma, "yabancı el yazısı").
+- **3D**: `renderer/story.html` + `renderer/story/` — prosedürel karakterler (iskelet, kıyafet katmanları, yüz ifadeleri,
+  göz kırpma, bakış, konuşma), 10 mekân (ofis, bit pazarı, oda, iskele + vapur, cadde + yağmur, sahaf, Altıyol boğası,
+  Moda çay bahçesi, gece/gün batımı güvertesi, yakın plan masa), el yazısıyla kelime kelime yazılan notlar, harita, fotoğraf.
+  Kamera ön ayarları (geniş, boy, bel, yakın, omuz üstü, ikili, insert) + hareketler, sepya/gece görüşü/glitch derecelendirmeleri.
+- **Motion graphics**: kanca kartı, dizi rozeti + ilerleme, daktilo konum etiketi, karakter kartı, kelime vurgulu altyazı
+  (notlar el yazısı kâğıt şeridinde), konuşma balonu, şüpheli panosu, kamera kayıt arayüzü, fotoğraf çerçevesi, son kart (devamı / takip et).
+- **Ses tasarımı** (`viral/story_sound.py`): mood'a göre değişen sentez müzik, mekân ortam sesleri, olay efektleri, ducking, -14 LUFS.
+
+```bash
+pip install edge-tts
+python -m viral series content/series/cebimdeki-not --ep all --workers 4
+```
+
 ## Otomatik üretim (GitHub Actions)
 
 `.github/workflows/produce.yml` her gün 05:17 UTC'de (ve elle "Run workflow" ile) çalışır:
