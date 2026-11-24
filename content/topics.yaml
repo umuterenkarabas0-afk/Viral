@@ -1,9 +1,11 @@
 topics:
 - title: 'Balıkçının Kuponu · Bölüm 1/8: Ağdaki Şişe'
-  status: pending
+  status: done
   script: content/series/balikci-kuponu/b01.yaml
   series: balikci-kuponu
   episode: 1
+  date: '2026-11-24'
+  video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b01-20261124-1423
 - title: 'Balıkçının Kuponu · Bölüm 2/8: Kupon Yatırılıyor'
   status: pending
   script: content/series/balikci-kuponu/b02.yaml
