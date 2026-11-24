@@ -206,14 +206,16 @@ def main():
     run(cmd)
 
     # Müzik yatağı + ducking + mastering
-    bed = separate_bed(orig_wav, work)
+    # Orijinal ses yalnızca müzik/efekt ise (varsayılan) olduğu gibi yatak olur;
+    # içinde eski bir seslendirme varsa DUB_SEPARATE=1 ile demucs ayırır.
+    bed = separate_bed(orig_wav, work) if os.environ.get("DUB_SEPARATE") == "1" else orig_wav
     final_audio = out / "audio_final.wav"
     if bed:
         run(["ffmpeg", "-v", "error", "-y", "-i", voice_wav, "-i", bed, "-filter_complex",
              "[0:a]asplit=2[vo][sc];"
-             "[1:a]aresample=48000,volume=0.85[bed];"
-             "[bed][sc]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=350[ducked];"
-             "[vo]volume=1.0[vv];"
+             "[1:a]aresample=48000,volume=0.6[bed];"
+             "[bed][sc]sidechaincompress=threshold=0.02:ratio=8:attack=15:release=400[ducked];"
+             "[vo]volume=1.6[vv];"
              f"[vv][ducked]amix=inputs=2:normalize=0:duration=first,atrim=0:{total:.3f},"
              "loudnorm=I=-14:TP=-1.0:LRA=11[out]",
              "-map", "[out]", "-ar", "48000", final_audio])

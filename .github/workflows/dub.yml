@@ -52,8 +52,11 @@ jobs:
       - name: Paketler
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg
-          pip install torch==2.3.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cpu
-          pip install demucs==4.0.1 soundfile "numpy<2"
+          # Orijinal seste eski seslendirme varsa: DUB_SEPARATE=1 + demucs
+          if [ "${DUB_SEPARATE:-0}" = "1" ]; then
+            pip install torch==2.3.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+            pip install demucs==4.0.1 soundfile "numpy<2"
+          fi
 
       - name: Seslendir
         run: |
