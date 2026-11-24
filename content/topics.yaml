@@ -7,37 +7,47 @@ topics:
   date: '2026-11-24'
   video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b01-20261124-1423
 - title: 'Balıkçının Kuponu · Bölüm 2/8: Kupon Yatırılıyor'
-  status: rendering
+  status: done
   script: content/series/balikci-kuponu/b02.yaml
   series: balikci-kuponu
   episode: 2
+  date: '2026-11-24'
+  video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b02-20261124-1516
 - title: 'Balıkçının Kuponu · Bölüm 3/8: Uzatma Dakikası'
-  status: rendering
+  status: done
   script: content/series/balikci-kuponu/b03.yaml
   series: balikci-kuponu
   episode: 3
+  date: '2026-11-24'
+  video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b03-20261124-1516
 - title: 'Balıkçının Kuponu · Bölüm 4/8: Kapıdaki Adam'
-  status: rendering
+  status: done
   script: content/series/balikci-kuponu/b04.yaml
   series: balikci-kuponu
   episode: 4
+  date: '2026-11-24'
+  video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b04-20261124-1505
 - title: 'Balıkçının Kuponu · Bölüm 5/8: Mantardaki Mühür'
-  status: rendering
+  status: done
   script: content/series/balikci-kuponu/b05.yaml
   series: balikci-kuponu
   episode: 5
+  date: '2026-11-24'
+  video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b05-20261124-1501
 - title: 'Balıkçının Kuponu · Bölüm 6/8: İkiz'
-  status: rendering
+  status: done
   script: content/series/balikci-kuponu/b06.yaml
   series: balikci-kuponu
   episode: 6
+  date: '2026-11-24'
+  video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b06-20261124-1518
 - title: 'Balıkçının Kuponu · Bölüm 7/8: Fırtına'
-  status: rendering
+  status: pending
   script: content/series/balikci-kuponu/b07.yaml
   series: balikci-kuponu
   episode: 7
 - title: 'Balıkçının Kuponu · Bölüm 8/8: Son Şişe'
-  status: rendering
+  status: pending
   script: content/series/balikci-kuponu/b08.yaml
   series: balikci-kuponu
   episode: 8
