@@ -53,12 +53,27 @@ class ElevenLabsSynthTest(unittest.TestCase):
                 self.assertEqual(v.engine, "elevenlabs")
                 r = v.say(text, ["Selam", "dünya"], 1.5)
                 self.assertEqual(r.sr, tts.SR)
-                self.assertAlmostEqual(len(r.audio) / r.sr, 1.0, delta=0.1)
+                # 1.2 ElevenLabs'te, kalan 1.25x ffmpeg ile → ~0.8 sn
+                self.assertAlmostEqual(len(r.audio) / r.sr, 1.0 / 1.25, delta=0.1)
                 self.assertEqual(len(r.word_starts), 2)
                 self.assertEqual(calls[0][1]["voice_settings"]["speed"], 1.2)  # 0.7–1.2'ye kırpıldı
+                self.assertAlmostEqual(r.word_starts[1], 6 * 0.05 / 1.25, places=4)
                 self.assertIn("/with-timestamps", calls[0][0])
                 v.say(text, ["Selam", "dünya"], 1.5)  # önbellekten
                 self.assertEqual(len(calls), 1)
+
+
+class TimeStretchTest(unittest.TestCase):
+    @unittest.skipUnless(subprocess.run(["which", "ffmpeg"], capture_output=True).returncode == 0, "ffmpeg yok")
+    def test_stretch_length_and_pitch(self):
+        sr = tts.SR
+        t = np.arange(sr * 2) / sr
+        a = (0.5 * np.sin(2 * np.pi * 440 * t)).astype(np.float32)
+        b = tts.time_stretch(a, sr, 1.3)
+        self.assertAlmostEqual(len(b) / sr, 2 / 1.3, delta=0.05)
+        spec = np.abs(np.fft.rfft(b[sr // 4: sr // 4 + sr // 2]))
+        peak = np.argmax(spec) * sr / (sr // 2)
+        self.assertAlmostEqual(peak, 440, delta=10)  # perde korunur
 
 
 if __name__ == "__main__":

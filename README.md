@@ -72,7 +72,7 @@ Türkçe hece sayısı + sessizlik analizine dayalı hizalama kullanılır.
 | `ELEVENLABS_STABILITY` / `_SIMILARITY` / `_STYLE` | `0.45` / `0.8` / `0.2` | ses ayarları |
 
 Kelime zamanları ElevenLabs'in `with-timestamps` karakter hizalamasından gelir (altyazılar tam senkron).
-Konuşma hızı ElevenLabs'te 0,7–1,2 aralığıyla sınırlıdır. `--tts auto`, `ELEVENLABS_API_KEY` varsa ElevenLabs'i seçer.
+ElevenLabs en fazla 1,2 hız kabul eder; 60 sn hedefi için daha hızlı konuşma gerekirse fark perdeyi bozmadan ffmpeg `atempo` ile eklenir (toplam en fazla 1,45). `--tts auto`, `ELEVENLABS_API_KEY` varsa ElevenLabs'i seçer.
 
 ```bash
 python -m viral make content/scripts/akdeniz-baliklari.yaml --tts elevenlabs

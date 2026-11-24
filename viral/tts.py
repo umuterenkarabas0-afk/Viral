@@ -285,12 +285,45 @@ def _el_word_starts(words: list[str], align: dict | None) -> list[float] | None:
     return out
 
 
+EL_MAX_SPEED = 1.2  # ElevenLabs'in kabul ettiği en yüksek hız
+
+
+def time_stretch(a: np.ndarray, sr: int, factor: float) -> np.ndarray:
+    """Sesi perdeyi değiştirmeden `factor` kat hızlandırır (ffmpeg atempo)."""
+    if abs(factor - 1.0) < 1e-3:
+        return a
+    exe = shutil.which("ffmpeg")
+    if not exe:
+        raise RuntimeError("Ses hızlandırma için ffmpeg gerekli")
+    filt = []
+    f = factor
+    while f > 2.0:  # atempo tek adımda 0.5–2.0
+        filt.append("atempo=2.0")
+        f /= 2.0
+    filt.append(f"atempo={f:.5f}")
+    r = subprocess.run([exe, "-v", "error", "-f", "f32le", "-ar", str(sr), "-ac", "1", "-i", "pipe:0",
+                        "-af", ",".join(filt), "-f", "f32le", "-ar", str(sr), "-ac", "1", "pipe:1"],
+                       input=np.ascontiguousarray(a, dtype=np.float32).tobytes(), capture_output=True, check=True)
+    return np.frombuffer(r.stdout, dtype=np.float32).copy()
+
+
 def synthesize_elevenlabs(text: str, words: list[str], voice: str, rate: float = 1.1, lang: str = "tr-TR") -> TTSResult:
+    """ElevenLabs en fazla 1.2 hız kabul eder; daha yüksek `rate` istenirse fark ffmpeg ile eklenir."""
+    speed = float(np.clip(rate, 0.7, EL_MAX_SPEED))
+    r = _synthesize_elevenlabs(text, words, voice, speed, lang)
+    extra = rate / speed
+    if extra > 1.001:
+        r.audio = time_stretch(r.audio, r.sr, extra)
+        if r.word_starts:
+            r.word_starts = [t / extra for t in r.word_starts]
+    return r
+
+
+def _synthesize_elevenlabs(text: str, words: list[str], voice: str, rate: float = 1.1, lang: str = "tr-TR") -> TTSResult:
     CACHE.mkdir(parents=True, exist_ok=True)
     model = os.environ.get("ELEVENLABS_MODEL", EL_DEFAULT_MODEL)
     fmt = os.environ.get("ELEVENLABS_OUTPUT_FORMAT", "mp3_44100_128")
-    # ElevenLabs hız aralığı 0.7–1.2
-    speed = float(np.clip(rate, 0.7, 1.2))
+    speed = float(np.clip(rate, 0.7, EL_MAX_SPEED))
     settings = {
         "stability": float(os.environ.get("ELEVENLABS_STABILITY", 0.45)),
         "similarity_boost": float(os.environ.get("ELEVENLABS_SIMILARITY", 0.8)),
