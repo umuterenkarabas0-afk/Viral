@@ -8,7 +8,9 @@ from pathlib import Path
 import numpy as np
 
 from viral.script import parse_markup
-from viral.story import LineClip, align_units, build_timeline, load_episode, load_series, normalize_shots, strip_markup, tnorm
+from viral.piper_tts import PiperTTS
+from viral.story import (LineClip, align_units, apply_voice_profile, build_timeline, load_episode, load_series, normalize_shots,
+                         strip_markup, tnorm)
 
 SERIES = Path(__file__).resolve().parent.parent / "content" / "series" / "cebimdeki-not"
 
@@ -71,6 +73,31 @@ class StoryTests(unittest.TestCase):
         for c in tl["cues"]:
             sh = tl["shots"][c["shot"]]
             self.assertGreaterEqual(c["t"], sh["start"] - 0.05)
+
+    def test_piper_word_assignment(self):
+        spans = [(0.0, 0.3), (0.35, 0.6), (0.7, 0.9), (1.0, 1.4)]
+        # bir belirteç iki fonem-kelimesine açılabilir (ör. "08:47" → "sekiz kırk yedi")
+        w = PiperTTS._assign(["Saat", "sekizkırk", "geçti."], [1, 2, 1], spans)
+        self.assertEqual([t for t, _, _ in w], ["Saat", "sekizkırk", "geçti."])
+        self.assertEqual((w[1][1], w[1][2]), (0.35, 0.9))
+        # sayılar tutmazsa sıralı orantılı eşleme: her belirteç bir aralık alır, sıra korunur
+        w = PiperTTS._assign(["a", "bb", "ccc"], [1, 1, 1], spans)
+        self.assertEqual(len(w), 3)
+        self.assertTrue(all(w[i][1] <= w[i + 1][1] for i in range(2)))
+        self.assertEqual(PiperTTS._phoneme_words(list("^ab cd, ef.$")), 3)
+
+    def test_voice_profile_switch(self):
+        series = load_series(SERIES)
+        self.assertIs(apply_voice_profile(series, None), series)
+        self.assertIs(apply_voice_profile(series, "edge"), series)
+        p = apply_voice_profile(series, "piper")
+        self.assertEqual(p["voice"]["engine"], "piper")
+        self.assertEqual(p["id"], "cebimdeki-not-piper")
+        self.assertEqual(series["id"], "cebimdeki-not")  # orijinal değişmez
+        for st in ("n", "note", "nuri", "stranger", "old", "shout", "twist"):
+            self.assertIn(st, p["voice"]["styles"])
+        with self.assertRaises(ValueError):
+            apply_voice_profile(series, "yok")
 
 
 if __name__ == "__main__":

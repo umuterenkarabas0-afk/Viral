@@ -7,6 +7,7 @@
   python -m viral voices                                           # Türkçe Google seslerini listele
   python -m viral series content/series/cebimdeki-not --ep 1       # mini dizi bölümü (Edge TTS + 3D)
   python -m viral series content/series/cebimdeki-not --ep all
+  python -m viral series content/series/cebimdeki-not --ep all --voice piper   # Piper (yerel TTS) seslendirmesi
 """
 from __future__ import annotations
 
@@ -53,6 +54,7 @@ def main(argv=None):
     se.add_argument("--stills", help="virgülle ayrılmış saniyeler (önizleme kareleri)")
     se.add_argument("--scale", type=float, help="3D katman çözünürlük ölçeği (varsayılan 0.75)")
     se.add_argument("--keep-frames", action="store_true")
+    se.add_argument("--voice", help="ses profili: series.yaml → voice_profiles (ör. 'piper'); varsayılan Edge TTS")
 
     args = ap.parse_args(argv)
     if args.cmd == "make":
@@ -75,7 +77,7 @@ def main(argv=None):
         stills = [float(x) for x in args.stills.split(",")] if args.stills else None
         for n in eps:
             r = make_episode(args.series_dir, n, args.out, render_video=not args.no_render, workers=args.workers, stills=stills,
-                             keep_frames=args.keep_frames, scale=args.scale)
+                             keep_frames=args.keep_frames, scale=args.scale, voice_profile=args.voice)
             print(r)
     elif args.cmd == "voices":
         from .tts import list_voices

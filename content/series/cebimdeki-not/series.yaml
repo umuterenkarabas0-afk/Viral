@@ -3,7 +3,8 @@
 #
 # Bölüm dosyaları: ep01.yaml … ep10.yaml (çekim listesi). Ortak tanımlar burada.
 #
-# Ses: Microsoft Edge TTS, tr-TR-AhmetNeural. Anlatıcı Kerem'in kendisi (birinci tekil).
+# Ses: Microsoft Edge TTS, tr-TR-AhmetNeural (varsayılan) veya Piper (--voice piper, aşağıda).
+# Anlatıcı Kerem'in kendisi (birinci tekil).
 # Diğer karakterler aynı sesin farklı perde/hız/işlem varyasyonlarıyla konuşur:
 #   n        → Kerem (anlatıcı)
 #   note     → cepten çıkan notların okunuşu (yakın, fısıltıya yakın, oda yankısı)
@@ -26,6 +27,28 @@ voice:
     old:      { rate: "-4%",  pitch: "-11Hz" }
     shout:    { rate: "+4%",  pitch: "+6Hz", volume: "+20%" }
     twist:    { rate: "-14%", pitch: "-20Hz" }
+
+# Alternatif ses profili: Piper (yerel, çevrimdışı nöral TTS).  --voice piper ile seçilir;
+# çıktı ayrı klasöre gider (output/cebimdeki-not-piper/). Her karakter ayrı bir Piper sesiyle konuşur:
+#   dfki      → Kerem (anlatıcı)            — en anlaşılır Türkçe Piper sesi
+#   fahrettin → notlar + Nuri Amca (perdesi düşük) — notları yazanın sesi, Nuri'ninkine yakın
+#   fettah    → simitçi, Selim Amca
+#   eren      → Hüsnü (kırmızı şemsiyeli adam) ve finaldeki yabancı not
+# length: fonem süresi çarpanı (>1 yavaş), semitones: perde (rubberband), takes: en anlaşılır çekim seçimi
+voice_profiles:
+  piper:
+    engine: piper
+    default: dfki
+    styles:
+      n:        { model: dfki,      rate: "+0%", length: 1.0,  noise: 0.6,  noise_w: 0.7, takes: 3 }
+      note:     { model: fahrettin, rate: "+0%", length: 1.1,  noise: 0.5,  noise_w: 0.6, semitones: -1, pause: 0.42, takes: 3 }
+      nuri:     { model: fahrettin, rate: "+0%", length: 1.12, noise: 0.5,  noise_w: 0.6, semitones: -3, takes: 3 }
+      stranger: { model: fettah,    rate: "+0%", length: 1.05, noise: 0.5,  noise_w: 0.6, takes: 4 }
+      old:      { model: fettah,    rate: "+0%", length: 1.15, noise: 0.45, noise_w: 0.5, semitones: -3, takes: 4 }
+      shout:    { model: dfki,      rate: "+0%", length: 0.9,  noise: 0.75, noise_w: 0.8, semitones: 2, gain_db: 3, takes: 3 }
+      twist:    { model: eren,      rate: "+0%", length: 1.6,  noise: 0.4,  noise_w: 0.3, semitones: -4, takes: 6 }
+    speakers:
+      husnu:    { model: eren,      length: 1.0,  noise: 0.667, noise_w: 0.8, semitones: -1, takes: 4 }
 theme:
   accent: "#FFC94A"     # hardal sarısı (not kâğıdı / vurgu)
   accent2: "#7FD4C1"    # Kadıköy deniz yeşili

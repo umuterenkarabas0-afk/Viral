@@ -59,6 +59,29 @@ def load_series(series_dir: str | Path) -> dict:
     return s
 
 
+def apply_voice_profile(series: dict, name: str | None) -> dict:
+    """series.yaml'daki voice_profiles.<ad> profilini etkin ses yapar; çıktı ayrı klasöre gitsin diye id'ye ek alır."""
+    profiles = series.get("voice_profiles") or {}
+    if not name or (name not in profiles and name == (series.get("voice") or {}).get("engine", "edge")):
+        return series  # varsayılan ses zaten etkin
+    prof = profiles.get(name)
+    if prof is None:
+        raise ValueError(f"ses profili yok: {name} (series.yaml → voice_profiles)")
+    s = dict(series)
+    s["voice"] = prof
+    s["base_id"] = series["id"]
+    s["id"] = f"{series['id']}-{name}"
+    return s
+
+
+def make_voice(series: dict):
+    vc = series.get("voice") or {}
+    if vc.get("engine") == "piper":
+        from .piper_tts import PiperTTS
+        return PiperTTS(vc.get("default", "dfki"))
+    return EdgeVoice(vc.get("name"))
+
+
 def load_episode(series: dict, n: int) -> dict:
     p = Path(series["_dir"]) / f"ep{n:02d}.yaml"
     with open(p, encoding="utf-8") as f:
@@ -193,16 +216,22 @@ def rate_shift(rate: str, delta: float) -> str:
     return f"{v:+d}%"
 
 
-def synth_lines(shots: list[dict], series: dict, voice: EdgeVoice, rate_delta: float = 0.0) -> list[LineClip]:
+def synth_lines(shots: list[dict], series: dict, voice, rate_delta: float = 0.0) -> list[LineClip]:
     styles = series.get("voice", {}).get("styles", {})
+    speakers = series.get("voice", {}).get("speakers", {}) or {}
     clips = []
     for sh in shots:
         for ln in sh["lines"]:
             st = ln.get("v", "n")
             cfg = styles.get(st, styles.get("n", {}))
+            if ln.get("by") in speakers:
+                cfg = {**cfg, **speakers[ln["by"]]}
             units, speak = parse_markup(ln["say"])
             rate = rate_shift(cfg.get("rate", "+0%"), rate_delta if st in ("n", "note") else rate_delta * 0.6)
-            r = voice.say(speak, rate=rate, pitch=cfg.get("pitch", "+0Hz"), volume=cfg.get("volume", "+0%"))
+            if hasattr(voice, "say_cfg"):
+                r = voice.say_cfg(speak, cfg, rate)
+            else:
+                r = voice.say(speak, rate=rate, pitch=cfg.get("pitch", "+0Hz"), volume=cfg.get("volume", "+0%"))
             s, e = speech_bounds(r.audio, r.sr)
             spans = align_units(units, r.words, len(r.audio) / r.sr)
             if spans:  # ilk kelime gerçek konuşma başlangıcından önce başlamasın
@@ -449,7 +478,7 @@ def build_timeline(series: dict, ep: dict, shots: list[dict], clips: list[LineCl
     cliff["t"] = round(_grid(last["ve"] + 0.45), 3)
     timeline = {
         "meta": {"mode": "story", "page": "story.html", "fps": FPS, "width": 1080, "height": 1920, "duration": duration, "bpm": BPM,
-                 "series": series.get("title"), "seriesId": series.get("id"), "episode": ep["episode"], "episodes": series.get("episodes", 10),
+                 "series": series.get("title"), "seriesId": series.get("base_id", series.get("id")), "episode": ep["episode"], "episodes": series.get("episodes", 10),
                  "title": ep.get("title"), "id": f"{series.get('id')}-{ep['episode']:02d}"},
         "theme": series.get("theme", {}),
         "hook": {"text": ep.get("hook", ""), "t": 0.0},
@@ -544,15 +573,16 @@ def encode(frames: Path, audio: Path, out: Path, fps: int = FPS):
 
 
 def make_episode(series_dir: str | Path, n: int, out_root: str | Path = "output", *, render_video: bool = True, workers: int | None = None,
-                 stills: list[float] | None = None, keep_frames: bool = False, target: float = 45.0, scale: float | None = None) -> dict:
+                 stills: list[float] | None = None, keep_frames: bool = False, target: float = 45.0, scale: float | None = None,
+                 voice_profile: str | None = None) -> dict:
     from . import story_sound
 
-    series = load_series(series_dir)
+    series = apply_voice_profile(load_series(series_dir), voice_profile)
     ep = load_episode(series, n)
     shots = normalize_shots(ep)
     out_dir = Path(out_root) / series["id"] / f"ep{n:02d}"
     out_dir.mkdir(parents=True, exist_ok=True)
-    voice = EdgeVoice(series.get("voice", {}).get("name"))
+    voice = make_voice(series)
     log(f"Bölüm {n}: {ep.get('title')} — {len(shots)} çekim, TTS ({voice.voice})")
     delta = 0.0
     clips = synth_lines(shots, series, voice, delta)

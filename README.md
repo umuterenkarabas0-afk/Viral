@@ -116,6 +116,11 @@ Bilgi videolarının yanında, bölüm bölüm ilerleyen **dikey mini diziler** 
   (şema: [`content/series/README.md`](content/series/README.md)). Örnek: 10 bölümlük gizem/komedi dizisi *Cebimdeki Not*.
 - **Seslendirme**: Microsoft Edge TTS, `tr-TR-AhmetNeural`; her replik ayrı sentezlenir, kelime zamanları servisin
   WordBoundary olaylarından gelir. Aynı ses perde/hız/işlemle karakterlere ayrılır (anlatıcı, not, Nuri Amca, yabancı, bağırma, "yabancı el yazısı").
+- **Alternatif seslendirme — Piper** (`viral/piper_tts.py`, `--voice piper`): yerel, çevrimdışı nöral TTS. Her karakter ayrı bir
+  Türkçe Piper sesiyle konuşur (Kerem: `dfki`, notlar + Nuri Amca: `fahrettin`, simitçi/Selim: `fettah`, Hüsnü + final notu: `eren`).
+  Kelime zamanları modelin fonem hizalamasından okunur (tahmin değil); perde `rubberband` ile değişir, süre korunur.
+  Piper her sentezde farklı bir "çekim" verdiğinden her replik birkaç kez üretilir ve Whisper ile yazıya dökülüp en anlaşılır çekim seçilir.
+  Çıktı ayrı klasöre gider: `output/cebimdeki-not-piper/`.
 - **3D**: `renderer/story.html` + `renderer/story/` — prosedürel karakterler (iskelet, kıyafet katmanları, yüz ifadeleri,
   göz kırpma, bakış, konuşma), 10 mekân (ofis, bit pazarı, oda, iskele + vapur, cadde + yağmur, sahaf, Altıyol boğası,
   Moda çay bahçesi, gece/gün batımı güvertesi, yakın plan masa), el yazısıyla kelime kelime yazılan notlar, harita, fotoğraf.
@@ -127,6 +132,10 @@ Bilgi videolarının yanında, bölüm bölüm ilerleyen **dikey mini diziler** 
 ```bash
 pip install edge-tts
 python -m viral series content/series/cebimdeki-not --ep all --workers 4
+
+# Piper ile (sesler ilk çalıştırmada Hugging Face'ten .cache/piper/voices altına iner)
+pip install "piper-tts[alignment]" faster-whisper
+python -m viral series content/series/cebimdeki-not --ep all --workers 4 --voice piper
 ```
 
 ## Otomatik üretim (GitHub Actions)

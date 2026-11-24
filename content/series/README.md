@@ -16,6 +16,8 @@ python -m viral series content/series/cebimdeki-not --ep 3 --no-render --stills 
 |---|---|
 | `voice.name` | Edge TTS sesi (varsayılan `tr-TR-AhmetNeural`) |
 | `voice.styles.<stil>` | `rate`, `pitch`, `volume` — replik stilleri: `n` (anlatıcı), `note`, `nuri`, `stranger`, `old`, `shout`, `twist` |
+| `voice_profiles.<ad>` | alternatif ses profili (`--voice <ad>`); çıktı `output/<id>-<ad>/` altına gider |
+| `voice_profiles.piper` | `engine: piper`, `styles.<stil>`: `model` (dfki, fahrettin, fettah, eren), `rate`, `length` (fonem süresi çarpanı), `noise`, `noise_w`, `semitones` (perde), `gain_db`, `pause` (cümle arası sn), `takes` (en anlaşılır çekim seçimi); `speakers.<id>`: konuşmacıya özel geçersiz kılma |
 | `theme` | `accent`, `accent2`, `danger`, `paper`, `ink` renkleri |
 | `cast.<id>` | prosedürel 3D karakter: `skin`, `hair{style,color}`, `eyes`, `brows`, `mustache`, `beard`, `glasses`, `stubble`, `old`, `female`, `build{height,width}`, `outfits{ad: {top, coat, jacket, vest, apron, skirt, pants, shoes, scarf, cap, hat, beret, sunglasses, fakeMustache, tray, stripes, lanyard}}`, `default` |
 
