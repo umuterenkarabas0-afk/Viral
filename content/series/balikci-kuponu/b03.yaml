@@ -1,0 +1,94 @@
+# Balıkçının Kuponu — Bölüm 3/8: Uzatma Dakikası
+id: balikci-kuponu-b03
+format: story
+title: "Uzatma Dakikası"
+language: tr-TR
+target_duration: 45
+series: { id: balikci-kuponu, title: "Balıkçının Kuponu", episode: 3, total: 8, next_title: "Kapıdaki Adam" }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.4, style: 0.45 } }
+theme: { accent: "#FFC93C", accent2: "#5CE1E6", danger: "#FF4D5E" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Doksan artı üçüncü dakika. Kahvehanede kimse nefes almıyordu."
+    set: coffeehouse
+    time: night
+    shot: { type: push, target: tv, from: { yaw: 0.3, pitch: 0.1, dist: 2.4 }, to: { yaw: 0.1, pitch: 0.02, dist: 1.0 } }
+    actors: { riza: { pose: sit } }
+    props: [tv, tables, tea]
+    mood: tension
+    cover: true
+    cues: [ { type: heartbeat, at: 0.2, dur: 3.5 } ]
+    gfx:
+      - { type: title, kicker: "BÖLÜM 3", big: "UZATMA DAKİKASI", at_word: "Kahvehanede" }
+      - { type: score, home: "KARADENİZ", away: "SİNOP GÜCÜ", a: 0, b: 0, minute: "90+3'", at: 0.1 }
+
+  - id: goal
+    say: "Son atak, son vuruş... Ve *gol*! Deplasman takımı kazandı."
+    set: coffeehouse
+    time: night
+    shot: { type: closeup, target: tv, from: { yaw: 0.0, pitch: 0.0, dist: 1.0 }, to: { yaw: 0.0, pitch: 0.0, dist: 0.7 } }
+    props: [tv]
+    mood: reveal
+    cues: [ { type: flash, at_word: "gol", amount: 0.8 }, { type: shake, at_word: "gol", dur: 0.5, amount: 0.7 } ]
+    gfx:
+      - { type: score, home: "KARADENİZ", away: "SİNOP GÜCÜ", a: 0, b: 1, minute: "90+4'", at_word: "gol" }
+
+  - id: win
+    say: "On beşte on beş. Rıza Reis, büyük ikramiyenin tek sahibi olmuştu."
+    set: coffeehouse
+    time: night
+    shot: { type: orbit, target: riza, from: { yaw: -0.5, pitch: 0.2, dist: 2.4 }, to: { yaw: 0.4, pitch: 0.1, dist: 1.6 } }
+    actors: { riza: { pose: cheer } }
+    props: [tables, confetti, tv]
+    mood: triumph
+    gfx:
+      - { type: counter, from: 0, to: 48000000, label: "BÜYÜK İKRAMİYE", suffix: " ₺", at_word: "ikramiyenin", dur: 3.2 }
+
+  - id: fact
+    say: "Bilgi: psikologlar, aniden zengin olanlarda görülen kaygı ve yalnızlık hâline *ani servet sendromu* diyor."
+    set: void
+    time: night
+    shot: { type: orbit, target: grid, from: { yaw: -0.3, pitch: 0.3, dist: 8 }, to: { yaw: 0.3, pitch: 0.1, dist: 5 } }
+    props: [money_rain]
+    mood: fact
+    gfx:
+      - { type: fact, icon: brain, value: "ANİ SERVET", label: "SENDROMU", sub: "Kaygı · Güvensizlik · Yalnızlık", at_word: "psikologlar" }
+
+  - id: home
+    say: "O gece Rıza uyuyamadı. Kupon masanın üstünde, şişe pencerenin önündeydi."
+    set: home
+    time: night
+    shot: { type: push, target: table, from: { yaw: 0.6, pitch: 0.35, dist: 2.4 }, to: { yaw: 0.3, pitch: 0.3, dist: 1.4 } }
+    actors: { riza: { pose: sit } }
+    props: [bottle, coupon_table, lamp]
+    mood: calm
+
+  - id: knock
+    say: "Saat gece üçü gösterdiğinde, kapı üç kez çalındı."
+    set: home
+    time: night
+    shot: { type: push, target: door, from: { yaw: 0.2, pitch: 0.1, dist: 2.6 }, to: { yaw: 0.05, pitch: 0.05, dist: 1.4 } }
+    actors: { riza: { pose: look } }
+    props: [lamp]
+    mood: tension
+    cues: [ { type: knock, at_word: "kapı" } ]
+    gfx:
+      - { type: chapter, text: "03:00", at_word: "gece", dur: 2.4 }
+
+  - id: cliff
+    say: "Kapıyı açtığında karşısındaki adam tek bir cümle kurdu: O kupon senin değil. Devamı dördüncü bölümde."
+    set: home
+    time: night
+    shot: { type: closeup, target: door, from: { yaw: 0.1, pitch: 0.05, dist: 1.2 }, to: { yaw: 0.0, pitch: 0.02, dist: 0.8 } }
+    actors: { stranger: { pose: stand } }
+    mood: cliff
+    gfx:
+      - { type: quote, text: "O kupon senin değil.", at_word: "senin", dur: 2.4 }
+      - { type: cliff, title: "BÖLÜM 4", next: "KAPIDAKİ ADAM", cta: "Takip et, kaçırma!", at_word: "Devamı" }
+
+seo:
+  title: "90+3'te gelen gol 48 milyonluk kuponu tutturdu 😱 | Balıkçının Kuponu 3/8"
+  description: "Son maç uzatmada bitti, Rıza Reis 15'te 15 yaptı. Ama gece üçte kapısı çalındı."
+  hashtags: ["#minidizi", "#hikaye", "#gizem", "#toto", "#bilgi", "#psikoloji", "#shorts", "#keşfet", "#reels"]

@@ -87,7 +87,8 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
         def flush():
             nonlocal group, chars
             if group:
-                captions.append({"w": group[:], "style": "hook" if seg.kind == "hook" else ""})
+                hooky = seg.kind == "hook" or (seg.kind == "scene" and i == 0)
+                captions.append({"w": group[:], "style": "hook" if hooky else ""})
             group, chars = [], 0
 
         raw_words = []
@@ -133,6 +134,20 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
                 w = _find_word(seg_words, d["title"].get("at_word"))
                 seg_rec["title"] = {"kicker": d["title"].get("kicker", ""), "big": d["title"].get("big", ""),
                                     "at": round((w["s"] - 0.05) if w else v_start + 2.0, 3)}
+        elif seg.kind == "scene":
+            for k in ("set", "time", "shot", "actors", "props", "mood", "weather", "cover", "cover_at", "music"):
+                if d.get(k) is not None:
+                    seg_rec[k] = d[k]
+            gfx = []
+            for g in d.get("gfx", []) or []:
+                w = _find_word(seg_words, g.get("at_word"))
+                t0 = (w["s"] - 0.08) if w else (v_start + float(g.get("at", 0.0)))
+                rec = {k: v for k, v in g.items() if k not in ("at_word", "at")}
+                rec["t0"] = round(max(prev_boundary, t0), 3)
+                dur = g.get("dur")
+                rec["t1"] = round(min(boundary, rec["t0"] + dur) if dur else boundary, 3)
+                gfx.append(rec)
+            seg_rec["gfx"] = gfx
         elif seg.kind == "outro":
             seg_rec["cta"] = d.get("cta", {})
             if d.get("carousel"):
@@ -165,6 +180,9 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
     timeline = {
         "meta": {"title": script.get("title"), "id": script.get("id"), "fps": fps, "width": 1080, "height": 1920,
                  "duration": round(duration, 3), "bpm": bpm, "handle": handle},
+        "format": script.get("format", "countdown"),
+        "series": script.get("series"),
+        "cast": script.get("cast", {}),
         "theme": script.get("theme", {}),
         "environment": script.get("environment", "ocean"),
         "segments": segs_out,

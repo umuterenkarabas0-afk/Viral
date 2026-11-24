@@ -1,0 +1,19 @@
+# Mini dizi tanımı: bölümler bu sırayla üretilir (python -m viral auto kuyruğu üzerinden).
+id: balikci-kuponu
+title: "Balıkçının Kuponu"
+premise: "Karadenizli yaşlı bir balıkçı, ağına takılan şişeden çıkan Süper Toto kuponunu oynar ve kazanır. Ama kupon kendi el yazısıyla doldurulmuştur."
+episodes:
+  - { n: 1, file: b01.yaml, title: "Ağdaki Şişe" }
+  - { n: 2, file: b02.yaml, title: "Kupon Yatırılıyor" }
+  - { n: 3, file: b03.yaml, title: "Uzatma Dakikası" }
+  - { n: 4, file: b04.yaml, title: "Kapıdaki Adam" }
+  - { n: 5, file: b05.yaml, title: "Mantardaki Mühür" }
+  - { n: 6, file: b06.yaml, title: "İkiz" }
+  - { n: 7, file: b07.yaml, title: "Fırtına" }
+  - { n: 8, file: b08.yaml, title: "Son Şişe" }
+# Karakterler (renderer bu parametrelerle 3D karakterleri kurar)
+cast:
+  riza:    { name: "Rıza Reis", age: 64, skin: "#c98f6b", hair: "#d9d4cc", beard: true, mustache: true, cap: "#2b3a55", coat: "#f2b705", sweater: "#24344f", pants: "#2c2f36" }
+  ilyas:   { name: "İlyas", age: 64, skin: "#c4886a", hair: "#e6e2da", beard: true, mustache: true, cap: null, coat: "#4d5b48", sweater: "#5a3b2a", pants: "#2b2a28" }
+  nuri:    { name: "Bayi Nuri", age: 45, skin: "#d8a27c", hair: "#2a1f1a", beard: false, mustache: true, cap: null, coat: null, sweater: "#8a2b2b", pants: "#30323a", glasses: true }
+  stranger: { name: "Yabancı", age: 38, skin: "#d2a07e", hair: "#151515", beard: false, mustache: false, cap: null, coat: "#1b1d22", sweater: "#e8e8e8", pants: "#1b1d22", tie: "#7a1020" }

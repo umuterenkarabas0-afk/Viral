@@ -1,0 +1,75 @@
+# Balıkçının Kuponu — Bölüm 8/8: Son Şişe (final)
+id: balikci-kuponu-b08
+format: story
+title: "Son Şişe"
+language: tr-TR
+target_duration: 45
+series: { id: balikci-kuponu, title: "Balıkçının Kuponu", episode: 8, total: 8, next_title: null }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.4, style: 0.45 } }
+theme: { accent: "#FFC93C", accent2: "#5CE1E6", danger: "#FF4D5E" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Karşısında, aynada görür gibi kendi yüzü duruyordu. İlyas yaşıyordu."
+    set: lighthouse
+    time: storm
+    shot: { type: orbit, target: ilyas, from: { yaw: -0.5, pitch: 0.08, dist: 1.6 }, to: { yaw: 0.3, pitch: 0.05, dist: 1.1 } }
+    actors: { ilyas: { pose: stand }, riza: { pose: stand } }
+    props: [lamp, bottles_many]
+    mood: reveal
+    cover: true
+    gfx:
+      - { type: title, kicker: "FİNAL", big: "SON ŞİŞE", at_word: "İlyas" }
+
+  - id: why
+    say: "Fırtınadan sağ çıkmış ama borçları yüzünden geri dönmeye utanmıştı. Otuz yıl bu fenerde yaşamıştı."
+    set: lighthouse
+    time: night
+    shot: { type: over, target: ilyas, from: { yaw: -0.5, pitch: 0.1, dist: 1.6 }, to: { yaw: -0.3, pitch: 0.05, dist: 1.1 } }
+    actors: { ilyas: { pose: sit }, riza: { pose: stand } }
+    props: [lamp]
+    mood: calm
+
+  - id: bottles
+    say: "Ve her hafta, kardeşine bir kupon yazıp denize bir şişe atmıştı. Bir gün birinin ona ulaşacağını umarak."
+    set: sea
+    time: dusk
+    shot: { type: establish, target: lighthouse, from: { yaw: -0.4, pitch: 0.2, dist: 4.5 }, to: { yaw: -0.1, pitch: 0.12, dist: 3 } }
+    props: [lighthouse_far, bottle_drift]
+    mood: calm
+
+  - id: fact
+    say: "Bilgi: otuz yıl, her hafta bir şişe. Bu, yaklaşık *bin beş yüz altmış* şişe demek."
+    set: void
+    time: night
+    shot: { type: orbit, target: grid, from: { yaw: -0.3, pitch: 0.3, dist: 9 }, to: { yaw: 0.3, pitch: 0.1, dist: 5 } }
+    props: [probability_grid]
+    mood: fact
+    gfx:
+      - { type: counter, from: 0, to: 1560, label: "ŞİŞE", suffix: "", at_word: "otuz", dur: 3.0 }
+      - { type: fact, icon: bottle, value: "30 × 52", label: "Otuz yıl, her hafta bir şişe", sub: "Sadece biri ulaştı", at_word: "Bu" }
+
+  - id: share
+    say: "Rıza ikramiyeyi kardeşiyle paylaştı. Fener yeniden yandı, köy limanı yeniden doldu."
+    set: harbor
+    time: day
+    shot: { type: orbit, target: riza, from: { yaw: -0.5, pitch: 0.2, dist: 3 }, to: { yaw: 0.4, pitch: 0.12, dist: 2 } }
+    actors: { riza: { pose: cheer }, ilyas: { pose: cheer } }
+    props: [village, gulls, confetti]
+    mood: triumph
+
+  - id: cliff
+    say: "Peki ya ulaşmayan bin beş yüz elli dokuz şişe? Belki biri, şu an senin kıyına vuruyor."
+    set: sea
+    time: dawn
+    shot: { type: pull, target: bottle, from: { yaw: 0.3, pitch: 0.3, dist: 0.8 }, to: { yaw: 0.5, pitch: 0.4, dist: 4.0 } }
+    props: [bottle_drift, gulls]
+    mood: cliff
+    gfx:
+      - { type: cliff, title: "SON", next: "YENİ DİZİDE GÖRÜŞÜRÜZ", cta: "Takip et, yeni hikâyeyi kaçırma!", at_word: "Belki" }
+
+seo:
+  title: "30 yıl boyunca her hafta denize bir şişe attı 🍾 | Balıkçının Kuponu FİNAL"
+  description: "İlyas yaşıyordu. Ve kardeşine ulaşmak için otuz yıl boyunca denize şişe attı. Mini dizinin final bölümü."
+  hashtags: ["#minidizi", "#hikaye", "#final", "#karadeniz", "#gizem", "#bilgi", "#shorts", "#keşfet", "#reels"]

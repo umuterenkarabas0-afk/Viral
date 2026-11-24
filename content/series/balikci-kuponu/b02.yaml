@@ -1,0 +1,92 @@
+# Balıkçının Kuponu — Bölüm 2/8: Kupon Yatırılıyor
+id: balikci-kuponu-b02
+format: story
+title: "Kupon Yatırılıyor"
+language: tr-TR
+target_duration: 45
+series: { id: balikci-kuponu, title: "Balıkçının Kuponu", episode: 2, total: 8, next_title: "Uzatma Dakikası" }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.4, style: 0.45 } }
+theme: { accent: "#FFC93C", accent2: "#5CE1E6", danger: "#FF4D5E" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Kendi el yazısıyla doldurulmuş bir kupon. Rıza Reis onu oynamaya karar verdi."
+    set: harbor
+    time: day
+    shot: { type: push, target: riza, from: { yaw: 0.7, pitch: 0.15, dist: 3.0 }, to: { yaw: 0.35, pitch: 0.08, dist: 1.4 } }
+    actors: { riza: { pose: walk } }
+    props: [village, gulls, coupon_hand]
+    mood: tension
+    cover: true
+    gfx:
+      - { type: title, kicker: "BÖLÜM 2", big: "KUPON YATIRILIYOR", at_word: "oynamaya" }
+
+  - id: kiosk
+    say: "Köyün tek bayisini işleten Nuri, kuponu görünce kaşlarını kaldırdı."
+    set: kiosk
+    time: day
+    shot: { type: over, target: nuri, from: { yaw: -0.55, pitch: 0.12, dist: 1.9 }, to: { yaw: -0.35, pitch: 0.06, dist: 1.4 } }
+    actors: { riza: { pose: stand }, nuri: { pose: read } }
+    props: [kiosk, coupon_counter]
+    mood: calm
+    gfx:
+      - { type: label, text: "BAYİ NURİ", anchor: nuri.head, at_word: "Nuri", dur: 2.2 }
+
+  - id: odd
+    say: "Çünkü on beş maçın tamamına *sürpriz* sonuç yazılmıştı. Hiçbir uzman böyle oynamazdı."
+    set: kiosk
+    time: day
+    shot: { type: closeup, target: coupon, from: { yaw: 0.0, pitch: 1.2, dist: 0.9 }, to: { yaw: 0.1, pitch: 1.05, dist: 0.6 } }
+    props: [coupon_counter]
+    mood: tension
+    gfx:
+      - { type: stamp, text: "15 SÜRPRİZ", tone: danger, at_word: "sürpriz", dur: 2.4 }
+
+  - id: fact
+    say: "Bilgi: araştırmalar, insanların rastgele sayı seçerken bile tekrar eden kalıplardan kaçındığını gösteriyor. Yani kimse gerçekten rastgele seçmiyor."
+    set: void
+    time: night
+    shot: { type: orbit, target: grid, from: { yaw: -0.3, pitch: 0.3, dist: 8 }, to: { yaw: 0.35, pitch: 0.12, dist: 5 } }
+    props: [probability_grid]
+    mood: fact
+    gfx:
+      - { type: fact, icon: brain, value: "RASTGELE?", label: "İnsan beyni kalıp arar", sub: "Tekrarlardan bilinçsizce kaçınırız", at_word: "araştırmalar" }
+
+  - id: match
+    say: "Cumartesi akşamı kahvehane doldu. Maçlar başladı ve tahminler tek tek tutmaya başladı."
+    set: coffeehouse
+    time: night
+    shot: { type: push, target: tv, from: { yaw: 0.4, pitch: 0.15, dist: 3.2 }, to: { yaw: 0.15, pitch: 0.05, dist: 1.8 } }
+    actors: { riza: { pose: sit } }
+    props: [tv, tables, tea]
+    mood: tension
+    gfx:
+      - { type: counter, from: 0, to: 14, label: "TUTAN TAHMİN", suffix: " / 15", at_word: "tek", dur: 4.0 }
+
+  - id: last
+    say: "On dört maç bilindi. Geriye tek maç kaldı. Doksanıncı dakika ve skor !sıfır sıfır!."
+    set: coffeehouse
+    time: night
+    shot: { type: closeup, target: tv, from: { yaw: 0.0, pitch: 0.0, dist: 1.2 }, to: { yaw: 0.05, pitch: 0.0, dist: 0.75 } }
+    props: [tv]
+    mood: reveal
+    cues: [ { type: heartbeat, at_word: "Geriye", dur: 3.0 } ]
+    gfx:
+      - { type: score, home: "KARADENİZ", away: "SİNOP GÜCÜ", a: 0, b: 0, minute: "90'", at_word: "Doksanıncı" }
+
+  - id: cliff
+    say: "Kuponda bu maça deplasman galibiyeti yazıyordu. Ve hakem uzatma dakikalarını gösterdi."
+    set: coffeehouse
+    time: night
+    shot: { type: push, target: face, from: { yaw: 0.5, pitch: 0.08, dist: 1.4 }, to: { yaw: 0.3, pitch: 0.04, dist: 0.6 } }
+    actors: { riza: { pose: sit } }
+    props: [tv]
+    mood: cliff
+    gfx:
+      - { type: cliff, title: "BÖLÜM 3", next: "UZATMA DAKİKASI", cta: "Takip et, kaçırma!", at_word: "hakem" }
+
+seo:
+  title: "15 maça 15 sürpriz yazılmış kupon 😳 | Balıkçının Kuponu 2/8"
+  description: "Rıza Reis şişeden çıkan kuponu bayide oynadı. 14 maç tuttu, son maç doksanıncı dakikada sıfır sıfır."
+  hashtags: ["#minidizi", "#hikaye", "#karadeniz", "#gizem", "#futbol", "#bilgi", "#shorts", "#keşfet", "#reels"]

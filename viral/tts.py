@@ -1,6 +1,12 @@
-"""Seslendirme: Google Cloud Text-to-Speech (birincil) + espeak-ng (yalnızca önizleme).
+"""Seslendirme motorları.
 
-Kimlik doğrulama (öncelik sırasıyla):
+  • ElevenLabs (birincil) — eleven_multilingual_v2, Türkçe. `/with-timestamps` uç noktası karakter
+    düzeyinde zaman döndürür → altyazılar kelimesi kelimesine senkron olur.
+    Anahtar: ELEVENLABS_API_KEY (GitHub Actions'ta repo secret'ı).
+  • Google Cloud Text-to-Speech (alternatif) — Chirp3-HD / WaveNet.
+  • espeak-ng — yalnızca anahtarsız yerel önizleme (robotik ses).
+
+Google kimlik doğrulama (öncelik sırasıyla):
   1. GOOGLE_TTS_API_KEY ortam değişkeni → X-Goog-Api-Key başlığı
   2. GOOGLE_TTS_ACCESS_TOKEN / `gcloud auth print-access-token` → Bearer
   3. Başlıksız istek (ağ proxy'si anahtarı enjekte ediyorsa)
@@ -203,15 +209,143 @@ def synthesize_espeak(text: str, rate: float = 1.1, voice: str = "tr") -> TTSRes
     return TTSResult(_resample(a, sr), SR, None, "espeak-" + voice, "espeak")
 
 
-class Voice:
-    """Pipeline'ın kullandığı TTS cephesi."""
+# ------------------------------------------------------------------ ElevenLabs
+EL_API = "https://api.elevenlabs.io"
+EL_DEFAULT_MODEL = "eleven_multilingual_v2"
+# Hazır (premade) sesler: tüm hesaplarda bulunur ve multilingual_v2 ile Türkçe konuşur.
+EL_DEFAULT_VOICES = [
+    "nPczCjzI2devNBz1zQrb",  # Brian — derin, rezonanslı anlatıcı
+    "pNInz6obpgDQGcFmaJgB",  # Adam
+    "onwK4e9ZLuTAKqWW03F9",  # Daniel
+]
+_PUNCT = ".,;:!?\"“”«»()…—–'’"
 
-    def __init__(self, engine: str = "auto", voice: str | None = None, prefs: list[str] | None = None, pitch: float = 0.0, lang: str = "tr-TR"):
+
+def _el_key() -> str | None:
+    for k in ("ELEVENLABS_API_KEY", "ELEVEN_API_KEY", "XI_API_KEY"):
+        if os.environ.get(k):
+            return os.environ[k].strip()
+    return None
+
+
+def elevenlabs_available() -> bool:
+    return bool(_el_key()) or os.environ.get("VIRAL_ELEVENLABS_PROXY") == "1"
+
+
+def _el_request(method: str, path: str, body: dict | None = None) -> dict:
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(EL_API + path, data=data, method=method)
+    req.add_header("Content-Type", "application/json")
+    req.add_header("Accept", "application/json")
+    req.add_header("xi-api-key", _el_key() or "proxy-injected")
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        msg = e.read().decode("utf-8", "replace")[:600]
+        if e.code in (401, 403):
+            raise TTSAuthError(f"ElevenLabs yetkilendirme hatası ({e.code}). ELEVENLABS_API_KEY'i kontrol edin.\n{msg}") from None
+        raise RuntimeError(f"ElevenLabs HTTP {e.code}: {msg}") from None
+
+
+def list_elevenlabs_voices() -> list[dict]:
+    return _el_request("GET", "/v1/voices").get("voices", [])
+
+
+def pick_elevenlabs_voice(pref: str | None = None) -> str:
+    want = pref or os.environ.get("ELEVENLABS_VOICE_ID")
+    if want and want != "auto":
+        if len(want) >= 18 and " " not in want:   # doğrudan voice_id
+            return want
+        for v in list_elevenlabs_voices():       # ada göre ara
+            if v.get("name", "").casefold().startswith(want.casefold()):
+                return v["voice_id"]
+        raise RuntimeError(f"ElevenLabs sesi bulunamadı: {want}")
+    return EL_DEFAULT_VOICES[0]
+
+
+def _word_times_from_alignment(text: str, al: dict) -> list[tuple[float, float]]:
+    """Karakter hizalamasından boşlukla ayrılmış (noktalama-dışı) kelimelerin (başlangıç, bitiş) zamanları."""
+    chars = al.get("characters") or []
+    st = al.get("character_start_times_seconds") or []
+    en = al.get("character_end_times_seconds") or []
+    words: list[tuple[float, float]] = []
+    cur: list[int] = []
+    txt = "".join(chars)
+
+    def flush():
+        if cur:
+            w = "".join(txt[i] for i in cur)
+            if w.strip(_PUNCT):
+                idx = [i for i in cur if txt[i] not in _PUNCT] or cur
+                words.append((float(st[idx[0]]), float(en[idx[-1]])))
+            cur.clear()
+
+    for i, ch in enumerate(chars):
+        if ch.isspace():
+            flush()
+        else:
+            cur.append(i)
+    flush()
+    return words
+
+
+def synthesize_elevenlabs(text: str, words: list[str], voice_id: str, rate: float = 1.0, *, model: str | None = None,
+                          settings: dict | None = None, prev_text: str | None = None, next_text: str | None = None) -> TTSResult:
+    CACHE.mkdir(parents=True, exist_ok=True)
+    model = model or os.environ.get("ELEVENLABS_MODEL") or EL_DEFAULT_MODEL
+    vs = {"stability": 0.42, "similarity_boost": 0.82, "style": 0.38, "use_speaker_boost": True}
+    vs.update(settings or {})
+    vs["speed"] = float(np.clip(rate, 0.7, 1.2))
+    key = _cache_key("el1", text, voice_id, model, vs, prev_text, next_text)
+    wav_p, meta_p = CACHE / f"{key}.wav", CACHE / f"{key}.json"
+    if wav_p.exists() and meta_p.exists():
+        a, sr = _decode_wav(wav_p.read_bytes())
+        meta = json.loads(meta_p.read_text())
+        return TTSResult(_resample(a, sr), SR, meta.get("word_starts"), voice_id, "elevenlabs")
+    body: dict = {"text": text, "model_id": model, "voice_settings": vs}
+    if prev_text:
+        body["previous_text"] = prev_text
+    if next_text:
+        body["next_text"] = next_text
+    resp = _el_request("POST", f"/v1/text-to-speech/{voice_id}/with-timestamps?output_format=pcm_44100", body)
+    pcm = base64.b64decode(resp["audio_base64"])
+    a = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768.0
+    sr = 44100
+    al = resp.get("alignment") or resp.get("normalized_alignment") or {}
+    wt = _word_times_from_alignment(text, al)
+    word_starts = [s for s, _ in wt] if len(wt) == len(words) else None
+    if word_starts is None and al:
+        print(f"[tts] uyarı: hizalama kelime sayısı {len(wt)} ≠ {len(words)}; sessizlik tabanlı hizalama kullanılacak")
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr); w.writeframes(pcm)
+    wav_p.write_bytes(buf.getvalue())
+    meta_p.write_text(json.dumps({"word_starts": word_starts, "voice": voice_id, "model": model}))
+    return TTSResult(_resample(a, sr), SR, word_starts, voice_id, "elevenlabs")
+
+
+class Voice:
+    """Pipeline'ın kullandığı TTS cephesi.
+
+    engine: auto | elevenlabs | google | espeak
+      auto → ElevenLabs anahtarı varsa ElevenLabs, yoksa Google, o da yoksa espeak (önizleme).
+    """
+
+    def __init__(self, engine: str = "auto", voice: str | None = None, prefs: list[str] | None = None, pitch: float = 0.0,
+                 lang: str = "tr-TR", settings: dict | None = None, model: str | None = None):
         self.engine = engine
         self.lang = lang
         self.pitch = pitch
         self.voice = voice
         self.prefs = prefs
+        self.settings = settings or {}
+        self.model = model
+        if engine == "elevenlabs" or (engine == "auto" and elevenlabs_available()):
+            self.engine = "elevenlabs"
+            self.voice = pick_elevenlabs_voice(voice if voice and not str(voice).startswith("tr-TR") else None)
+            print(f"[tts] motor=elevenlabs ses={self.voice} model={model or os.environ.get('ELEVENLABS_MODEL') or EL_DEFAULT_MODEL}")
+            return
         if engine in ("auto", "google"):
             try:
                 if not self.voice or self.voice == "auto":
@@ -224,7 +358,10 @@ class Voice:
                 self.voice = "tr"
         print(f"[tts] motor={self.engine} ses={self.voice}")
 
-    def say(self, text: str, words: list[str], rate: float) -> TTSResult:
+    def say(self, text: str, words: list[str], rate: float, prev_text: str | None = None, next_text: str | None = None) -> TTSResult:
+        if self.engine == "elevenlabs":
+            return synthesize_elevenlabs(text, words, self.voice, rate, model=self.model, settings=self.settings,
+                                         prev_text=prev_text, next_text=next_text)
         if self.engine == "google":
             return synthesize_google(text, words, self.voice, rate, self.pitch, self.lang)
         return synthesize_espeak(text, rate)

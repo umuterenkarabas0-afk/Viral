@@ -1,4 +1,44 @@
 topics:
+- title: 'Balıkçının Kuponu · Bölüm 1/8: Ağdaki Şişe'
+  status: pending
+  script: content/series/balikci-kuponu/b01.yaml
+  series: balikci-kuponu
+  episode: 1
+- title: 'Balıkçının Kuponu · Bölüm 2/8: Kupon Yatırılıyor'
+  status: pending
+  script: content/series/balikci-kuponu/b02.yaml
+  series: balikci-kuponu
+  episode: 2
+- title: 'Balıkçının Kuponu · Bölüm 3/8: Uzatma Dakikası'
+  status: pending
+  script: content/series/balikci-kuponu/b03.yaml
+  series: balikci-kuponu
+  episode: 3
+- title: 'Balıkçının Kuponu · Bölüm 4/8: Kapıdaki Adam'
+  status: pending
+  script: content/series/balikci-kuponu/b04.yaml
+  series: balikci-kuponu
+  episode: 4
+- title: 'Balıkçının Kuponu · Bölüm 5/8: Mantardaki Mühür'
+  status: pending
+  script: content/series/balikci-kuponu/b05.yaml
+  series: balikci-kuponu
+  episode: 5
+- title: 'Balıkçının Kuponu · Bölüm 6/8: İkiz'
+  status: pending
+  script: content/series/balikci-kuponu/b06.yaml
+  series: balikci-kuponu
+  episode: 6
+- title: 'Balıkçının Kuponu · Bölüm 7/8: Fırtına'
+  status: pending
+  script: content/series/balikci-kuponu/b07.yaml
+  series: balikci-kuponu
+  episode: 7
+- title: 'Balıkçının Kuponu · Bölüm 8/8: Son Şişe'
+  status: pending
+  script: content/series/balikci-kuponu/b08.yaml
+  series: balikci-kuponu
+  episode: 8
 - title: Akdeniz'e özgü 10 balık çeşidi
   status: failed
   script: content/scripts/akdeniz-baliklari.yaml

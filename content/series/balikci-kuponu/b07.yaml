@@ -1,0 +1,78 @@
+# Balıkçının Kuponu — Bölüm 7/8: Fırtına
+id: balikci-kuponu-b07
+format: story
+title: "Fırtına"
+language: tr-TR
+target_duration: 45
+series: { id: balikci-kuponu, title: "Balıkçının Kuponu", episode: 7, total: 8, next_title: "Son Şişe" }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.4, style: 0.45 } }
+theme: { accent: "#FFC93C", accent2: "#5CE1E6", danger: "#FF4D5E" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Meteoroloji fırtına uyarısı verdi. Ama Rıza Reis o gece yine de denize açıldı."
+    set: harbor
+    time: storm
+    shot: { type: push, target: boat, from: { yaw: 0.5, pitch: 0.2, dist: 3.6 }, to: { yaw: 0.25, pitch: 0.1, dist: 2.0 } }
+    actors: { riza: { pose: stand } }
+    props: [boat, village]
+    mood: tension
+    cover: true
+    gfx:
+      - { type: title, kicker: "BÖLÜM 7", big: "FIRTINA", at_word: "Ama" }
+      - { type: stamp, text: "TURUNCU UYARI", tone: danger, at_word: "uyarısı", dur: 2.0 }
+
+  - id: waves
+    say: "Dalgalar teknenin boyunu aşıyordu. Fener adası, şimşeklerin arasında bir görünüp bir kayboluyordu."
+    set: sea
+    time: storm
+    shot: { type: establish, target: boat, from: { yaw: -0.6, pitch: 0.18, dist: 3.4 }, to: { yaw: -0.3, pitch: 0.1, dist: 2.0 } }
+    actors: { riza: { pose: haul } }
+    props: [boat, lighthouse_far, lighthouse_on]
+    mood: tension
+    cues: [ { type: flash, at_word: "şimşeklerin", amount: 0.9 }, { type: shake, at_word: "Dalgalar", dur: 1.0, amount: 0.5 } ]
+
+  - id: fact
+    say: "Bilgi: Karadeniz'in yaklaşık iki yüz metre altında neredeyse hiç *oksijen* yok. Bu yüzden oradaki batıklar yüzyıllarca bozulmadan kalabiliyor."
+    set: void
+    time: night
+    shot: { type: orbit, target: grid, from: { yaw: -0.3, pitch: 0.3, dist: 8 }, to: { yaw: 0.3, pitch: 0.1, dist: 5 } }
+    props: [depth_column]
+    mood: fact
+    gfx:
+      - { type: fact, icon: depth, value: "~200 M", label: "Altında oksijensiz su", sub: "Batıklar yüzyıllarca korunuyor", at_word: "altında" }
+
+  - id: island
+    say: "Tekne kayalara sürtünerek adaya vurdu. Rıza, ıslak basamakları tek tek çıktı."
+    set: lighthouse
+    time: storm
+    shot: { type: low, target: lighthouse, from: { yaw: 0.4, pitch: -0.05, dist: 3.2 }, to: { yaw: 0.2, pitch: 0.1, dist: 2.0 } }
+    actors: { riza: { pose: walk } }
+    props: [lighthouse_on]
+    mood: tension
+
+  - id: door
+    say: "Fenerin kapısı aralıktı. İçeride bir masa, masanın üstünde de yüzlerce boş *şişe* vardı."
+    set: lighthouse
+    time: storm
+    shot: { type: push, target: door, from: { yaw: 0.2, pitch: 0.1, dist: 2.2 }, to: { yaw: 0.05, pitch: 0.06, dist: 1.0 } }
+    props: [bottles_many, lamp]
+    mood: reveal
+
+  - id: cliff
+    say: "Arkasından tanıdık bir ses geldi: Geç kaldın kardeşim. Devamı final bölümünde."
+    set: lighthouse
+    time: storm
+    shot: { type: push, target: face, from: { yaw: 0.5, pitch: 0.06, dist: 1.2 }, to: { yaw: 0.25, pitch: 0.03, dist: 0.55 } }
+    actors: { riza: { pose: shock } }
+    mood: cliff
+    cues: [ { type: shake, at_word: "kardeşim", dur: 0.5, amount: 0.6 } ]
+    gfx:
+      - { type: quote, text: "Geç kaldın kardeşim.", at_word: "Geç", dur: 2.2 }
+      - { type: cliff, title: "FİNAL", next: "SON ŞİŞE", cta: "Finali kaçırma!", at_word: "Devamı" }
+
+seo:
+  title: "Fırtınada fener adasına çıktı, içeride yüzlerce şişe vardı 🌊 | Balıkçının Kuponu 7/8"
+  description: "Rıza Reis fırtınaya rağmen adaya ulaştı. Fenerin içinde onu tanıdık bir ses bekliyordu."
+  hashtags: ["#minidizi", "#hikaye", "#fırtına", "#karadeniz", "#gizem", "#bilgi", "#shorts", "#keşfet", "#reels"]
