@@ -1,0 +1,80 @@
+name: ElevenLabs seslendirme
+
+on:
+  push:
+    paths:
+      - "dub/input/**"
+      - "dub/dub.py"
+      - "dub/segments.json"
+      - ".github/workflows/dub.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dub-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dub:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Anahtarı bul
+        env:
+          K1: ${{ secrets.ELEVENLABS_API_KEY }}
+          K2: ${{ secrets.ELEVEN_LABS_API_KEY }}
+          K3: ${{ secrets.ELEVENLABS_KEY }}
+          K4: ${{ secrets.XI_API_KEY }}
+          K5: ${{ secrets.ELEVENLABS }}
+          K6: ${{ secrets.ELEVEN_API_KEY }}
+          VOICE: ${{ secrets.ELEVENLABS_VOICE_ID }}
+        run: |
+          for n in 1 2 3 4 5 6; do
+            v="K$n"; val="${!v}"
+            if [ -n "$val" ]; then
+              echo "Anahtar bulundu (aday $n, uzunluk ${#val})"
+              echo "::add-mask::$val"
+              echo "ELEVENLABS_API_KEY=$val" >> "$GITHUB_ENV"
+              break
+            fi
+          done
+          [ -n "$VOICE" ] && echo "ELEVENLABS_VOICE_ID=$VOICE" >> "$GITHUB_ENV" || true
+          grep -q ELEVENLABS_API_KEY "$GITHUB_ENV" || { echo "::error::ElevenLabs secret bulunamadı (ELEVENLABS_API_KEY adıyla ekleyin)"; exit 1; }
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Paketler
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          pip install torch==2.3.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install demucs==4.0.1 soundfile "numpy<2"
+
+      - name: Seslendir
+        run: |
+          for f in dub/input/*.mp4; do
+            python dub/dub.py "$f" "dub/out/$(basename "$f" .mp4)"
+          done
+
+      - name: Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elevenlabs-dub-${{ github.run_number }}
+          path: |
+            dub/out/**/*.mp4
+            dub/out/**/*.json
+            dub/out/**/voice_elevenlabs.wav
+          if-no-files-found: ignore
+
+      - name: Sonucu branch'e yaz
+        run: |
+          git config user.name "viral-bot"
+          git config user.email "viral-bot@users.noreply.github.com"
+          git add dub/out/*/*.mp4 dub/out/*/*.json
+          git diff --cached --quiet || (git commit -m "ElevenLabs seslendirmesi eklendi [skip ci]" && git push)

@@ -5,3 +5,4 @@ output/
 .cache/
 .venv/
 *.log
+dub/out/*/work/
