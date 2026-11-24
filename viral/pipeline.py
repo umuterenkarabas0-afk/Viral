@@ -221,8 +221,10 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
     clips = synth_voice(segs, voice, rate)
     hold = 3.2 if story else 2.3
     est = estimate_duration(clips, len(segs) - 1, hold)
-    for _ in range(2):
-        if abs(est - target) <= 3.0:
+    # ElevenLabs'te her yeniden sentez kredi harcar: yalnızca ciddi sapmada (±8 sn) ve en fazla bir kez dene
+    tol, tries = (8.0, 1) if voice.engine == "elevenlabs" else (3.0, 2)
+    for _ in range(tries):
+        if abs(est - target) <= tol:
             break
         speech = sum(c.speech_end - c.speech_start for c in clips)
         other = est - speech
