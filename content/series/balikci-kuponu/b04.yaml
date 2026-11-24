@@ -1,0 +1,77 @@
+# Balıkçının Kuponu — Bölüm 4/8: Kapıdaki Adam
+id: balikci-kuponu-b04
+format: story
+title: "Kapıdaki Adam"
+language: tr-TR
+target_duration: 45
+series: { id: balikci-kuponu, title: "Balıkçının Kuponu", episode: 4, total: 8, next_title: "Mantardaki Mühür" }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.4, style: 0.45 } }
+theme: { accent: "#FFC93C", accent2: "#5CE1E6", danger: "#FF4D5E" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Gece üçte kapıda bekleyen adam, Rıza'nın hiç tanımadığı biriydi. Ama o, Rıza'yı çok iyi tanıyordu."
+    set: home
+    time: night
+    shot: { type: push, target: stranger, from: { yaw: 0.3, pitch: 0.1, dist: 2.2 }, to: { yaw: 0.1, pitch: 0.04, dist: 1.0 } }
+    actors: { stranger: { pose: stand }, riza: { pose: look } }
+    props: [lamp]
+    mood: tension
+    cover: true
+    gfx:
+      - { type: title, kicker: "BÖLÜM 4", big: "KAPIDAKİ ADAM", at_word: "tanımadığı" }
+
+  - id: claim
+    say: "Adam, o şişeyi denize atanın kendisi olmadığını, ama onu *kimin* attığını bildiğini söyledi."
+    set: home
+    time: night
+    shot: { type: over, target: stranger, from: { yaw: -0.5, pitch: 0.12, dist: 1.7 }, to: { yaw: -0.3, pitch: 0.06, dist: 1.1 } }
+    actors: { stranger: { pose: point }, riza: { pose: stand } }
+    props: [lamp, bottle]
+    mood: tension
+
+  - id: fact
+    say: "Bilgi: piyango kazananlarla yapılan ünlü bir araştırmada, kazananların diğer insanlardan *belirgin şekilde daha mutlu olmadığı* görüldü."
+    set: void
+    time: night
+    shot: { type: orbit, target: grid, from: { yaw: -0.3, pitch: 0.3, dist: 8 }, to: { yaw: 0.3, pitch: 0.1, dist: 5 } }
+    props: [money_rain]
+    mood: fact
+    gfx:
+      - { type: fact, icon: heart, value: "1978", label: "Piyango ve mutluluk çalışması", sub: "Brickman ve arkadaşları, ABD", at_word: "araştırmada" }
+
+  - id: photo
+    say: "Sonra cebinden sararmış bir fotoğraf çıkardı. Fotoğrafta, aynı kazağı giymiş iki küçük çocuk vardı."
+    set: home
+    time: night
+    shot: { type: closeup, target: photo, from: { yaw: 0.0, pitch: 1.1, dist: 0.9 }, to: { yaw: 0.1, pitch: 1.0, dist: 0.6 } }
+    props: [photo]
+    mood: reveal
+    gfx:
+      - { type: label, text: "1968", anchor: photo, at_word: "sararmış", dur: 2.4 }
+
+  - id: same
+    say: "Çocuklardan biri Rıza'ydı. Diğeri ise ona *birebir* benziyordu."
+    set: home
+    time: night
+    shot: { type: push, target: face, from: { yaw: 0.5, pitch: 0.08, dist: 1.3 }, to: { yaw: 0.25, pitch: 0.04, dist: 0.55 } }
+    actors: { riza: { pose: shock } }
+    mood: reveal
+    cues: [ { type: shake, at_word: "birebir", dur: 0.5, amount: 0.6 }, { type: heartbeat, at_word: "Diğeri", dur: 2.2 } ]
+
+  - id: cliff
+    say: "Rıza'nın annesi ona hiçbir zaman bir kardeşi olduğunu söylememişti. Devamı beşinci bölümde."
+    set: home
+    time: night
+    shot: { type: pull, target: table, from: { yaw: 0.3, pitch: 0.3, dist: 1.2 }, to: { yaw: 0.5, pitch: 0.4, dist: 2.8 } }
+    actors: { riza: { pose: sit } }
+    props: [lamp, photo, bottle]
+    mood: cliff
+    gfx:
+      - { type: cliff, title: "BÖLÜM 5", next: "MANTARDAKİ MÜHÜR", cta: "Takip et, kaçırma!", at_word: "Devamı" }
+
+seo:
+  title: "Gece 3'te kapıyı çalan adam bir fotoğraf gösterdi 😨 | Balıkçının Kuponu 4/8"
+  description: "Kuponun sırrını bilen yabancı, Rıza Reis'e 1968'den kalma bir fotoğraf gösterdi."
+  hashtags: ["#minidizi", "#hikaye", "#gizem", "#ikiz", "#bilgi", "#psikoloji", "#shorts", "#keşfet", "#reels"]

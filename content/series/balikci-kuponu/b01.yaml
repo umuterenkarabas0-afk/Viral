@@ -1,0 +1,111 @@
+# Balıkçının Kuponu — Bölüm 1/8: Ağdaki Şişe
+# İşaretleme: *vurgu*  !tehlike!  {gösterilen|okunan}
+id: balikci-kuponu-b01
+format: story
+title: "Ağdaki Şişe"
+language: tr-TR
+target_duration: 45
+series: { id: balikci-kuponu, title: "Balıkçının Kuponu", episode: 1, total: 8, next_title: "Kupon Yatırılıyor" }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.4, style: 0.45 } }
+theme: { accent: "#FFC93C", accent2: "#5CE1E6", danger: "#FF4D5E" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Yaşlı bir balıkçı ağını çekti ve içinden, hayatını sonsuza dek değiştirecek bir *şişe* çıktı."
+    set: sea
+    time: dawn
+    shot: { type: closeup, target: net, from: { yaw: 0.9, pitch: 0.05, dist: 0.55 }, to: { yaw: 0.35, pitch: 0.28, dist: 1.0 } }
+    actors: { riza: { pose: haul } }
+    props: [boat, net, bottle_in_net, gulls]
+    mood: tension
+    cover: true
+    cover_at: 2.6
+    gfx:
+      - { type: title, kicker: "MİNİ DİZİ", big: "BALIKÇININ KUPONU", at_word: "şişe" }
+    cues: [ { type: flash, at_word: "şişe", amount: 0.5 } ]
+
+  - id: dawn
+    say: "Karadeniz, sabahın beşi. Rıza Reis kırk yıldır aynı sularda ağ atıyor."
+    set: sea
+    time: dawn
+    shot: { type: establish, target: boat, from: { yaw: -0.6, pitch: 0.32, dist: 3.4 }, to: { yaw: -0.25, pitch: 0.18, dist: 2.2 } }
+    actors: { riza: { pose: haul } }
+    props: [boat, net, gulls]
+    mood: calm
+    gfx:
+      - { type: chapter, text: "KARADENİZ · 05:12", at: 0.1, dur: 3.0 }
+      - { type: label, text: "RIZA REİS · 64", anchor: riza.head, at_word: "Rıza", dur: 2.4 }
+
+  - id: catch
+    say: "Ama o sabah ağda, balıkların arasında mantarla mühürlenmiş *eski bir şişe* vardı."
+    set: deck
+    time: dawn
+    shot: { type: push, target: bottle, from: { yaw: 0.5, pitch: 0.55, dist: 1.6 }, to: { yaw: 0.2, pitch: 0.4, dist: 0.8 } }
+    actors: { riza: { pose: kneel } }
+    props: [boat, net_pile, bottle, fish_pile]
+    mood: tension
+    gfx:
+      - { type: label, text: "MÜHÜRLÜ ŞİŞE", anchor: bottle, at_word: "mühürlenmiş", dur: 2.6 }
+
+  - id: coupon
+    say: "İçinden dürülmüş bir kâğıt çıktı: doldurulmuş bir *Süper Toto* kuponu."
+    set: deck
+    time: dawn
+    shot: { type: closeup, target: coupon, from: { yaw: 0.0, pitch: 1.3, dist: 1.35 }, to: { yaw: 0.1, pitch: 1.15, dist: 0.95 } }
+    actors: { riza: { pose: hold } }
+    props: [coupon_unroll]
+    mood: reveal
+    gfx:
+      - { type: stamp, text: "15 MAÇ · 15 TAHMİN", at_word: "Süper", dur: 2.6 }
+
+  - id: fact
+    say: "Bilgi: on beş maçın hepsini doğru bilme ihtimali, yaklaşık *on dört milyonda bir*."
+    set: void
+    time: night
+    shot: { type: orbit, target: grid, from: { yaw: -0.4, pitch: 0.25, dist: 9 }, to: { yaw: 0.4, pitch: 0.1, dist: 4.5 } }
+    props: [probability_grid]
+    mood: fact
+    gfx:
+      - { type: fact, icon: dice, value: "1 / 14.348.907", label: "3 üzeri 15 olasılık", sub: "Her maç 3 sonuç: 1 · 0 · 2", at_word: "ihtimali" }
+
+  - id: note
+    say: "Kuponun arkasında tek satırlık bir not vardı: Bunu oyna. Kimseye söyleme."
+    set: deck
+    time: dawn
+    shot: { type: closeup, target: note, from: { yaw: 0.0, pitch: 1.3, dist: 1.2 }, to: { yaw: -0.08, pitch: 1.15, dist: 0.85 } }
+    props: [coupon_back]
+    mood: tension
+    gfx:
+      - { type: quote, text: "Bunu oyna. Kimseye söyleme.", at_word: "Bunu", dur: 3.4 }
+
+  - id: reveal
+    say: "Rıza'nın elleri titredi. Çünkü o yazı, !kendi el yazısıydı!."
+    set: deck
+    time: dawn
+    shot: { type: push, target: face, from: { yaw: 0.55, pitch: 0.1, dist: 1.4 }, to: { yaw: 0.25, pitch: 0.04, dist: 0.5 } }
+    actors: { riza: { pose: shock } }
+    props: [boat]
+    mood: reveal
+    cues:
+      - { type: shake, at_word: "kendi", dur: 0.6, amount: 0.8 }
+      - { type: flash, at_word: "kendi", amount: 0.6 }
+      - { type: heartbeat, at_word: "titredi", dur: 2.4 }
+    gfx:
+      - { type: stamp, text: "AYNI EL YAZISI", tone: danger, at_word: "kendi", dur: 2.2 }
+
+  - id: cliff
+    say: "Peki Rıza, hiç yazmadığı bir kuponu nasıl yazmış olabilirdi? Devamı ikinci bölümde."
+    set: sea
+    time: dawn
+    shot: { type: pull, target: boat, from: { yaw: 0.2, pitch: 0.12, dist: 1.6 }, to: { yaw: 0.55, pitch: 0.45, dist: 5.5 } }
+    actors: { riza: { pose: hold } }
+    props: [boat, gulls]
+    mood: cliff
+    gfx:
+      - { type: cliff, title: "BÖLÜM 2", next: "KUPON YATIRILIYOR", cta: "Takip et, kaçırma!", at_word: "Devamı" }
+
+seo:
+  title: "Ağına şişe takıldı, içinden Toto kuponu çıktı 😳 | Balıkçının Kuponu 1/8"
+  description: "Yaşlı balıkçı Rıza Reis'in ağından çıkan şişede doldurulmuş bir kupon vardı. Ama asıl sır, kuponun el yazısıydı. Mini dizinin 1. bölümü."
+  hashtags: ["#minidizi", "#hikaye", "#balıkçı", "#karadeniz", "#gizem", "#bilgi", "#shorts", "#keşfet", "#reels", "#tiktokturkiye"]

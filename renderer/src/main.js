@@ -253,7 +253,15 @@ class Director {
       document.fonts.load('italic 700 42px Montserrat', 'abc'),
       document.fonts.load('400 200px Anton', '0123456789#'),
     ]);
-    const d = new Director(tl);
+    let d;
+    if (tl.format === 'story') {
+      await document.fonts.load('700 108px Caveat', 'Bunu oyna. Kimseye söyleme. ğüşİıöç');
+      await document.fonts.load('600 108px Caveat', 'Rıza İlyas ğüşİıöç');
+      const { StoryDirector } = await import('./story/director.js');
+      d = new StoryDirector(tl);
+    } else {
+      d = new Director(tl);
+    }
     await d.init();
     window.__director = d;
     window.renderFrame = (t) => { d.frame(t); return true; };

@@ -1,0 +1,79 @@
+# Balıkçının Kuponu — Bölüm 5/8: Mantardaki Mühür
+id: balikci-kuponu-b05
+format: story
+title: "Mantardaki Mühür"
+language: tr-TR
+target_duration: 45
+series: { id: balikci-kuponu, title: "Balıkçının Kuponu", episode: 5, total: 8, next_title: "İkiz" }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.4, style: 0.45 } }
+theme: { accent: "#FFC93C", accent2: "#5CE1E6", danger: "#FF4D5E" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Yabancı gittikten sonra Rıza şişeyi yeniden eline aldı. Ve ilk kez *mantarın* üstündeki işareti fark etti."
+    set: home
+    time: night
+    shot: { type: closeup, target: bottle, from: { yaw: 0.6, pitch: 0.3, dist: 1.2 }, to: { yaw: 0.2, pitch: 0.2, dist: 0.55 } }
+    actors: { riza: { pose: hold } }
+    props: [bottle, lamp]
+    mood: tension
+    cover: true
+    gfx:
+      - { type: title, kicker: "BÖLÜM 5", big: "MANTARDAKİ MÜHÜR", at_word: "işareti" }
+
+  - id: seal
+    say: "Mantara bir deniz feneri kazınmıştı. Altında da iki sayı vardı: bir enlem ve bir boylam."
+    set: void
+    time: night
+    shot: { type: orbit, target: cork, from: { yaw: -0.5, pitch: 0.35, dist: 1.4 }, to: { yaw: 0.3, pitch: 0.2, dist: 0.9 } }
+    props: [cork_seal]
+    mood: reveal
+    gfx:
+      - { type: stamp, text: "41°58′ K · 35°12′ D", at_word: "enlem", dur: 3.0 }
+
+  - id: fact
+    say: "Bilgi: bilinen en eski şişedeki mesaj, Avustralya kıyısında bulundu ve denizde tam *yüz otuz iki yıl* kalmıştı."
+    set: void
+    time: night
+    shot: { type: orbit, target: grid, from: { yaw: -0.3, pitch: 0.3, dist: 8 }, to: { yaw: 0.3, pitch: 0.1, dist: 5 } }
+    props: [bottle_drift]
+    mood: fact
+    gfx:
+      - { type: fact, icon: bottle, value: "132 YIL", label: "Denizde kalan şişe mesajı", sub: "1886'da atıldı, 2018'de bulundu", at_word: "eski" }
+
+  - id: map
+    say: "Koordinatlar, köyün karşısındaki küçük adayı gösteriyordu. Otuz yıldır kimsenin uğramadığı adayı."
+    set: sea
+    time: night
+    shot: { type: establish, target: lighthouse, from: { yaw: -0.4, pitch: 0.2, dist: 5 }, to: { yaw: -0.15, pitch: 0.1, dist: 3.2 } }
+    props: [lighthouse_far]
+    mood: tension
+    gfx:
+      - { type: label, text: "FENER ADASI", anchor: lighthouse, at_word: "adayı", dur: 2.6 }
+
+  - id: light
+    say: "Fener çoktan terk edilmişti. Ama o gece Rıza, adadan bir ışığın *yanıp söndüğünü* gördü."
+    set: sea
+    time: night
+    shot: { type: push, target: lighthouse, from: { yaw: -0.1, pitch: 0.08, dist: 3.0 }, to: { yaw: 0.0, pitch: 0.05, dist: 1.6 } }
+    props: [lighthouse_far, lighthouse_on]
+    mood: reveal
+    cues: [ { type: flash, at_word: "yanıp", amount: 0.4 } ]
+
+  - id: cliff
+    say: "Biri ona sinyal veriyordu. Üç kısa, üç uzun, üç kısa. Devamı altıncı bölümde."
+    set: harbor
+    time: night
+    shot: { type: push, target: riza, from: { yaw: 0.6, pitch: 0.1, dist: 2.0 }, to: { yaw: 0.3, pitch: 0.05, dist: 1.0 } }
+    actors: { riza: { pose: look } }
+    props: [village, lighthouse_on]
+    mood: cliff
+    gfx:
+      - { type: stamp, text: "··· ——— ···", tone: danger, at_word: "Üç", dur: 2.6 }
+      - { type: cliff, title: "BÖLÜM 6", next: "İKİZ", cta: "Takip et, kaçırma!", at_word: "Devamı" }
+
+seo:
+  title: "Şişenin mantarında bir koordinat vardı 🧭 | Balıkçının Kuponu 5/8"
+  description: "Mantardaki mühür, 30 yıldır terk edilmiş bir fener adasını gösteriyordu. Ve o gece fener yandı."
+  hashtags: ["#minidizi", "#hikaye", "#gizem", "#denizfeneri", "#bilgi", "#shorts", "#keşfet", "#reels"]

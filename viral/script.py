@@ -127,11 +127,25 @@ def load_script(path: str | Path) -> dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     data.setdefault("id", Path(path).stem)
+    ref = data.get("cast_ref")
+    if ref:
+        rp = Path(path).parent / ref
+        if rp.exists():
+            with open(rp, "r", encoding="utf-8") as f:
+                ser = yaml.safe_load(f) or {}
+            cast = dict(ser.get("cast") or {})
+            cast.update(data.get("cast") or {})
+            data["cast"] = cast
     return data
 
 
 def build_segments(script: dict[str, Any]) -> list[Segment]:
     segs: list[Segment] = []
+    if script.get("format") == "story":
+        for i, sc in enumerate(script.get("scenes", [])):
+            u, sp = parse_markup(sc["say"])
+            segs.append(Segment(sc.get("id") or f"s{i + 1}", "scene", sc["say"], u, sp, sc))
+        return segs
     hook = script.get("hook")
     if hook:
         u, sp = parse_markup(hook["say"])
@@ -148,6 +162,8 @@ def build_segments(script: dict[str, Any]) -> list[Segment]:
 
 def validate_script(script: dict[str, Any]) -> list[str]:
     """Basit şema kontrolü; hata listesini döndürür."""
+    if script.get("format") == "story":
+        return validate_story(script)
     errs = []
     if not script.get("title"):
         errs.append("title eksik")
@@ -165,4 +181,40 @@ def validate_script(script: dict[str, Any]) -> list[str]:
     hook = script.get("hook") or {}
     if hook.get("subject") and hook["subject"] not in ids:
         errs.append(f"hook.subject '{hook['subject']}' bir item id'si değil")
+    return errs
+
+
+STORY_SETS = {"sea", "deck", "harbor", "kiosk", "coffeehouse", "home", "lighthouse", "void"}
+STORY_GFX = {"title", "fact", "label", "stamp", "chapter", "cliff", "quote", "counter", "score"}
+
+
+def validate_story(script: dict[str, Any]) -> list[str]:
+    errs = []
+    if not script.get("title"):
+        errs.append("title eksik")
+    ser = script.get("series") or {}
+    for k in ("title", "episode", "total"):
+        if not ser.get(k):
+            errs.append(f"series.{k} eksik")
+    scenes = script.get("scenes") or []
+    if len(scenes) < 3:
+        errs.append("en az 3 sahne (scenes) gerekli")
+    ids = set()
+    for i, sc in enumerate(scenes):
+        if not sc.get("say"):
+            errs.append(f"scenes[{i}].say eksik")
+        if sc.get("set", "sea") not in STORY_SETS:
+            errs.append(f"scenes[{i}].set geçersiz: {sc.get('set')} (geçerli: {', '.join(sorted(STORY_SETS))})")
+        sid = sc.get("id") or f"s{i + 1}"
+        if sid in ids:
+            errs.append(f"scenes[{i}].id tekrar ediyor: {sid}")
+        ids.add(sid)
+        for j, g in enumerate(sc.get("gfx") or []):
+            if g.get("type") not in STORY_GFX:
+                errs.append(f"scenes[{i}].gfx[{j}].type geçersiz: {g.get('type')}")
+            aw = g.get("at_word")
+            if aw and aw.casefold()[:4] not in sc.get("say", "").casefold():
+                errs.append(f"scenes[{i}].gfx[{j}].at_word '{aw}' say metninde yok")
+    if scenes and not any(g.get("type") == "cliff" for g in (scenes[-1].get("gfx") or [])):
+        errs.append("son sahnede 'cliff' (merak kancası / sonraki bölüm) gfx'i olmalı")
     return errs

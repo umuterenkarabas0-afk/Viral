@@ -37,9 +37,11 @@ def write_wav(path: Path, x: np.ndarray, sr: int = S.SR):
 
 def synth_voice(segments, voice: Voice, rate: float) -> list[VoiceClip]:
     clips = []
-    for seg in segments:
+    for k, seg in enumerate(segments):
         spoken = [w for u in seg.units for w in u.spoken]
-        r = voice.say(seg.speak_text, spoken, rate)
+        prev_t = segments[k - 1].speak_text if k > 0 else None
+        next_t = segments[k + 1].speak_text if k + 1 < len(segments) else None
+        r = voice.say(seg.speak_text, spoken, rate, prev_text=prev_t, next_text=next_t)
         spans = align_words(r.audio, r.sr, spoken, r.word_starts)
         s, e = speech_bounds(r.audio, r.sr)
         clips.append(VoiceClip(seg, r.audio, r.sr, spans, s, e))
@@ -195,7 +197,7 @@ def encode(frames_dir: Path, audio: Path, out: Path, fps: int = 30):
 
 
 def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str = "auto", workers: int | None = None,
-         target: float = 60.0, render: bool = True, stills: list[float] | None = None, gpu: bool = False,
+         target: float | None = None, render: bool = True, stills: list[float] | None = None, gpu: bool = False,
          handle: str | None = None, keep_frames: bool = False) -> dict[str, Any]:
     script = load_script(script_path)
     errs = validate_script(script)
@@ -204,37 +206,52 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
     out_dir = Path(out_root) / script["id"]
     out_dir.mkdir(parents=True, exist_ok=True)
     segs = build_segments(script)
+    story = script.get("format") == "story"
     vcfg = script.get("voice", {}) or {}
-    voice = Voice(engine=tts, voice=vcfg.get("name"), prefs=vcfg.get("prefs"), pitch=vcfg.get("pitch", 0.0), lang=script.get("language", "tr-TR"))
+    if tts == "auto" and vcfg.get("engine"):
+        tts = vcfg["engine"]
+    voice = Voice(engine=tts, voice=vcfg.get("name"), prefs=vcfg.get("prefs"), pitch=vcfg.get("pitch", 0.0),
+                  lang=script.get("language", "tr-TR"), settings=vcfg.get("settings"), model=vcfg.get("model"))
+    if target is None:
+        target = float(script.get("target_duration", 45.0 if story else 60.0))
 
     # süreyi hedefe oturt (konuşma hızı ile)
-    rate = float(vcfg.get("speaking_rate", 1.1))
+    rate = float(vcfg.get("speaking_rate", 1.0 if voice.engine == "elevenlabs" else 1.1))
     log(f"TTS: {len(segs)} segment, hız {rate:.2f}")
     clips = synth_voice(segs, voice, rate)
-    est = estimate_duration(clips, len(segs) - 1)
+    hold = 3.2 if story else 2.3
+    est = estimate_duration(clips, len(segs) - 1, hold)
     for _ in range(2):
         if abs(est - target) <= 3.0:
             break
         speech = sum(c.speech_end - c.speech_start for c in clips)
         other = est - speech
         want = max(10.0, target - other)
-        hi = 1.3 if voice.engine == "google" else 1.6
-        new_rate = float(np.clip(rate * speech / want, 0.9, hi))
+        lo, hi = {"google": (0.9, 1.3), "elevenlabs": (0.85, 1.2)}.get(voice.engine, (0.9, 1.6))
+        new_rate = float(np.clip(rate * speech / want, lo, hi))
         if abs(new_rate - rate) < 0.02:
             break
         rate = new_rate
         log(f"TTS: süre {est:.1f} sn → hız {rate:.2f} ile yeniden")
         clips = synth_voice(segs, voice, rate)
-        est = estimate_duration(clips, len(segs) - 1)
+        est = estimate_duration(clips, len(segs) - 1, hold)
 
-    timeline, placements = build_timeline(script, clips, handle=handle or script.get("handle"))
+    if story:
+        timeline, placements = build_timeline(script, clips, handle=handle or script.get("handle"), bpm=script.get("bpm", 84.0),
+                                              outro_hold=hold, gap_before=0.12, gap_after=0.1)
+    else:
+        timeline, placements = build_timeline(script, clips, handle=handle or script.get("handle"))
     timeline["meta"]["voice"] = {"engine": voice.engine, "name": voice.voice, "rate": rate}
     tl_path = out_dir / "timeline.json"
     tl_path.write_text(json.dumps(timeline, ensure_ascii=False, indent=1))
     (out_dir / "captions.srt").write_text(to_srt(timeline), encoding="utf-8")
     log(f"Zaman çizelgesi: {timeline['meta']['duration']:.2f} sn, {len(timeline['words'])} kelime, {len(timeline['captions'])} altyazı")
 
-    audio = design_audio(timeline, placements, out_dir)
+    if story:
+        from .story_sound import design_story_audio
+        audio = design_story_audio(timeline, placements, out_dir, write_wav, loudnorm)
+    else:
+        audio = design_audio(timeline, placements, out_dir)
     log(f"Ses: {audio}")
 
     if stills:
@@ -247,9 +264,9 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
         video = out_dir / f"{script['id']}.mp4"
         log("Kodlama (H.264 + AAC)")
         encode(frames, audio, video, timeline["meta"]["fps"])
-        # kapak görseli: #1'in başlık anı
-        top = next((s for s in timeline["segments"] if s.get("rank") == 1), None)
-        ct = (top["start"] + 1.6) if top else timeline["meta"]["duration"] / 2
+        # kapak görseli: #1'in başlık anı (hikâyede: cover: true sahnesi veya ilk başlık)
+        top = next((s for s in timeline["segments"] if s.get("rank") == 1 or s.get("cover")), None)
+        ct = (top["start"] + top.get("cover_at", 1.6)) if top else timeline["meta"]["duration"] / 2
         fi = int(ct * timeline["meta"]["fps"])
         src = frames / f"{fi:05d}.jpg"
         if src.exists():

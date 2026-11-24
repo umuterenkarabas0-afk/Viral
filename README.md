@@ -2,6 +2,61 @@
 
 Merak uyandıran **Türkçe bilgi videolarını** (YouTube Shorts · Instagram Reels · TikTok) **otomatik ve sürekli** üreten sistem.
 
+İki format var:
+
+| Format | Örnek | Süre |
+|---|---|---|
+| **Mini dizi (story)** — 3D animasyonlu, bölüm sonu merak kancalı hikâye + her bölümde gerçek bir bilgi | [`content/series/balikci-kuponu/`](content/series/balikci-kuponu) — *Balıkçının Kuponu* (8 bölüm) | ~45 sn |
+| Geri sayım (countdown) — "en ilginç 10 …" | [`content/scripts/akdeniz-baliklari.yaml`](content/scripts/akdeniz-baliklari.yaml) | ~60 sn |
+
+## Mini dizi formatı (story)
+
+- **3D**: Three.js ile tamamen prosedürel dünya — zaman dilimine göre gökyüzü (şafak/gündüz/gün batımı/gece/fırtına,
+  bulutlar, yıldızlar, şimşek), Gerstner dalgalı deniz (güneş parıltısı, köpük, fener yansıması), dalgada salınan
+  Karadeniz kayığı, ağ + balıklar, mantarlı şişe, **kıvrılarak açılan kupon**, el yazısı not, martılar, yamaçta köy ve
+  iskele, fener adası (dönen ışık huzmesi), bayi, kahvehane (canlı maç yayını olan TV), ev, fenerin içi, infografik boşluğu
+- **Karakterler**: iskeletli, stilize animasyon karakterleri (göz kırpma, kaş/ağız ifadesi) ve pozlar:
+  `stand haul hold read shock kneel sit walk cheer look point`. Kadro `series.yaml` içinde renk/aksesuar parametreleriyle tanımlanır.
+- **Motion graphics**: dizi rozeti + 8 bölümlük ilerleme çubuğu, harf harf düşen kinetik başlık, daktilo mekân/saat yazısı,
+  3D noktaya bağlı etiketler, damga, **BİLGİ** kartı (rakamlar karışarak yerine oturur), el yazısı alıntı, sayaç, skor bandı,
+  bölüm sonu **"DEVAMI BÖLÜM N"** merak kancası kartı, kelime kelime vurgulu altyazı
+- **Kamera**: establish / push / pull / orbit / closeup / low / over çekimleri, whip-zoom-rise-spin geçişleri (hareket
+  bulanıklığı), el kamerası titreşimi, sarsıntı, kalp atışı nabzı, alan derinliği
+- **Ses tasarımı (tamamı kodla sentez, `viral/story_sound.py`)**: sahnenin ruh hâline (`calm tension reveal fact triumph cliff`)
+  göre beste — drone, saat-tik ostinato, nabız bas, müzik kutusu motifi, "braam" vurgusu, zafer arpeji, merak kancasında
+  sub-drop + tik-tak; atmosfer — dalga, tekneye çarpan su, rüzgâr, martı, ahşap gıcırtısı, yağmur, gök gürültüsü
+  (görüntüdeki şimşeklerle aynı deterministik zamanlama), kahvehane uğultusu, stadyum, duvar saati, cırcır böceği;
+  efektler — whoosh, impact, daktilo, damga, kâğıt hışırtısı, cam tıngırtısı, kalp atışı, kapı vuruşu, sayaç, düdük
+- **Seslendirme**: **ElevenLabs** (`eleven_multilingual_v2`, Türkçe). `/with-timestamps` karakter hizalaması sayesinde
+  altyazılar kelimesi kelimesine senkron. Sahneler arası tonlama sürekliliği için `previous_text/next_text` gönderilir.
+  Google TTS alternatif motor olarak duruyor (`--tts google`).
+
+```bash
+python -m viral make content/series/balikci-kuponu/b01.yaml                 # tek bölüm (ElevenLabs)
+python -m viral make content/series/balikci-kuponu/b01.yaml --no-render --stills 2,12,24   # hızlı önizleme
+python -m viral series "Bir deniz fenerinde kaybolan bekçinin sırrı" --episodes 8           # Claude ile yeni dizi + kuyruğa ekle
+python -m viral voices                                                       # ElevenLabs seslerini listele
+```
+
+Ses seçimi: senaryoda `voice: { engine: elevenlabs, name: <voice_id veya ad>, speaking_rate: 1.0, settings: {stability, style} }`
+ya da ortam değişkeni `ELEVENLABS_VOICE_ID` (varsayılan: hazır "Brian" anlatıcı sesi). Model: `ELEVENLABS_MODEL`.
+
+### Sahne YAML'ı (özet)
+
+```yaml
+scenes:
+  - id: reveal
+    say: "Rıza'nın elleri titredi. Çünkü o yazı, !kendi el yazısıydı!."
+    set: deck            # sea | deck | harbor | kiosk | coffeehouse | home | lighthouse | void
+    time: dawn           # dawn | day | dusk | night | storm
+    mood: reveal         # müziği belirler
+    shot: { type: push, target: face, from: { yaw: 0.55, pitch: 0.1, dist: 1.4 }, to: { yaw: 0.25, pitch: 0.04, dist: 0.5 } }
+    actors: { riza: { pose: shock } }
+    props: [boat]
+    cues: [ { type: shake, at_word: "kendi" }, { type: heartbeat, at_word: "titredi", dur: 2.4 } ]
+    gfx:  [ { type: stamp, text: "AYNI EL YAZISI", tone: danger, at_word: "kendi" } ]
+```
+
 - **3D animasyon**: Three.js ile tamamen prosedürel sahne: su altı ortamı, kostik ışıklar, ışık huzmeleri, Posidonia çayırları, kabarcıklar ve parametrelerle üretilen, yüzme animasyonlu 3D balıklar
 - **Motion graphics**: sıralama vurgusu (#10 → #1), harf harf isim animasyonu, bilgi kartları, 3D noktaya bağlı callout çizgileri, ilerleme çubuğu, geçişlerde hareket bulanıklığı, "rüya" (halüsinasyon) efekti
 - **Türkçe seslendirme**: Google Cloud Text-to-Speech (Chirp3-HD / WaveNet)
@@ -112,12 +167,16 @@ hem görüntü hem ses tasarımı aynı zamanlamayı kullanır.
 
 `.github/workflows/produce.yml` her gün 05:17 UTC'de (ve elle "Run workflow" ile) çalışır:
 
-1. `content/topics.yaml` kuyruğundan sıradaki konuyu alır (kuyruk boşalırsa Claude yeni konular önerir)
+1. `content/topics.yaml` kuyruğundan sıradaki bölümü/konuyu alır (kuyruk boşalırsa Claude yeni bir mini dizi yazar)
 2. Senaryo yoksa Claude ile yazar ve doğrular (geçersizse otomatik onarım ister)
 3. Videoyu üretir; MP4 + kapak + SRT + paylaşım metnini **Artifact** ve **GitHub Release** olarak yayınlar
 4. Güncellenen kuyruğu ve yeni senaryoyu repoya commit'ler
 
-Gerekli repo secret'ları: `GOOGLE_TTS_API_KEY`, `ANTHROPIC_API_KEY`.
+Gerekli repo secret'ları: `ELEVENLABS_API_KEY` (seslendirme), `ANTHROPIC_API_KEY` (yeni dizi/senaryo yazımı).
+İsteğe bağlı: `GOOGLE_TTS_API_KEY`, repo değişkeni `ELEVENLABS_VOICE_ID`.
+
+İş akışı günde iki kez (05:17 ve 14:47 UTC) kuyruktaki sıradaki bölümü üretir. Kuyruk boşalınca Claude yeni bir
+8 bölümlük mini dizi tasarlar (dizi incelemesi → bölüm senaryoları → doğrulama/onarım) ve bölümleri kuyruğa ekler.
 
 Senaryo yazımı `claude-opus-5-5` ile yapılır; modelin reddettiği nadir isteklerde sunucu tarafı yedek model
 (`fallbacks: "default"`) devreye girer.

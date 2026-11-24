@@ -3,13 +3,14 @@ name: Viral video üretimi
 on:
   schedule:
     - cron: "17 5 * * *"        # her gün 05:17 UTC (08:17 TR)
+    - cron: "47 14 * * *"       # her gün 14:47 UTC (17:47 TR) — günde 2 bölüm
   workflow_dispatch:
     inputs:
       count:
         description: "Bu çalıştırmada üretilecek video sayısı"
         default: "1"
       script:
-        description: "(İsteğe bağlı) doğrudan üretilecek senaryo yolu, ör. content/scripts/akdeniz-baliklari.yaml"
+        description: "(İsteğe bağlı) doğrudan üretilecek senaryo yolu, ör. content/series/balikci-kuponu/b01.yaml"
         default: ""
 
 permissions:
@@ -24,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     env:
+      # Seslendirme: ElevenLabs (repo secret adı bunlardan biri olabilir)
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY || secrets.ELEVENLABS_KEY || secrets.ELEVEN_API_KEY || secrets.XI_API_KEY }}
+      ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
       GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       VIRAL_USE_GCLOUD: "0"
@@ -59,9 +63,9 @@ jobs:
       - name: Video üret
         run: |
           if [ -n "${{ github.event.inputs.script }}" ]; then
-            python -m viral make "${{ github.event.inputs.script }}" --tts google --workers 3
+            python -m viral make "${{ github.event.inputs.script }}" --workers 3
           else
-            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --tts google --workers 3
+            python -m viral auto --count "${{ github.event.inputs.count || '1' }}" --workers 3
           fi
 
       - name: Çıktıları yükle (artifact)
@@ -96,5 +100,5 @@ jobs:
         run: |
           git config user.name "viral-bot"
           git config user.email "viral-bot@users.noreply.github.com"
-          git add content/topics.yaml content/scripts || true
+          git add content/topics.yaml content/scripts content/series || true
           git diff --cached --quiet || (git commit -m "Otomatik üretim: kuyruk güncellendi [skip ci]" && git push)

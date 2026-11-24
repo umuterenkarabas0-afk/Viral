@@ -4,7 +4,8 @@ content/topics.yaml biçimi:
   topics:
     - { title: "Karadeniz'in en ilginç 10 balığı", status: pending }
     - { title: "...", status: done, script: content/scripts/x.yaml, video: output/x/x.mp4, date: 2026-11-23 }
-Kuyruk boşalırsa Claude yeni konular önerir. Senaryo yolu verilmiş (script:) bir konu doğrudan üretilir.
+Kuyruk boşalırsa Claude yeni bir 8 bölümlük mini dizi tasarlar ve bölümlerini kuyruğa ekler.
+Senaryo yolu verilmiş (script:) bir konu doğrudan üretilir (mini dizi bölümleri böyledir).
 """
 from __future__ import annotations
 
@@ -36,12 +37,12 @@ def run(queue: str = "content/topics.yaml", *, count: int = 1, tts: str = "googl
     for _ in range(count):
         pending = [t for t in q["topics"] if t.get("status", "pending") in ("pending", "scripted", "failed")]
         if not pending:
-            from .writer import propose_topics
-            done = [t["title"] for t in q["topics"]]
-            new = propose_topics(10, done)
-            log(f"Kuyruk boştu; {len(new)} yeni konu eklendi")
-            q["topics"] += [{"title": t, "status": "pending"} for t in new]
-            _save(qp, q)
+            from .series_writer import propose_series, write_series
+            done = sorted({t.get("series") or t["title"] for t in q["topics"]})
+            idea = propose_series(1, done)[0]
+            log(f"Kuyruk boştu; yeni mini dizi yazılıyor: {idea}")
+            write_series(idea, 8, queue=str(qp))
+            q = _load(qp)
             pending = [t for t in q["topics"] if t.get("status") == "pending"]
         topic = pending[0]
         try:

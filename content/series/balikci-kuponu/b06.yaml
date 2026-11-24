@@ -1,0 +1,77 @@
+# Balıkçının Kuponu — Bölüm 6/8: İkiz
+id: balikci-kuponu-b06
+format: story
+title: "İkiz"
+language: tr-TR
+target_duration: 45
+series: { id: balikci-kuponu, title: "Balıkçının Kuponu", episode: 6, total: 8, next_title: "Fırtına" }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.4, style: 0.45 } }
+theme: { accent: "#FFC93C", accent2: "#5CE1E6", danger: "#FF4D5E" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Sabah olunca Rıza, köyün en yaşlı kadınının kapısını çaldı. Ve otuz yıllık bir sırrı öğrendi."
+    set: harbor
+    time: day
+    shot: { type: push, target: riza, from: { yaw: 0.6, pitch: 0.12, dist: 2.6 }, to: { yaw: 0.3, pitch: 0.06, dist: 1.3 } }
+    actors: { riza: { pose: walk } }
+    props: [village, gulls]
+    mood: tension
+    cover: true
+    gfx:
+      - { type: title, kicker: "BÖLÜM 6", big: "İKİZ", at_word: "sırrı" }
+
+  - id: twin
+    say: "Rıza'nın *İlyas* adında bir ikiz kardeşi varmış. İkisi de aynı tekneyle denize açılırmış."
+    set: void
+    time: night
+    shot: { type: orbit, target: photo, from: { yaw: -0.3, pitch: 0.9, dist: 1.0 }, to: { yaw: 0.2, pitch: 0.8, dist: 0.7 } }
+    props: [photo]
+    mood: reveal
+    gfx:
+      - { type: label, text: "İLYAS", anchor: photo, at_word: "İlyas", dur: 2.6 }
+
+  - id: storm
+    say: "Otuz yıl önceki büyük fırtınada İlyas'ın teknesi batmış. Cesedi hiç bulunamamış."
+    set: sea
+    time: storm
+    shot: { type: establish, target: boat, from: { yaw: -0.5, pitch: 0.25, dist: 4 }, to: { yaw: -0.2, pitch: 0.12, dist: 2.4 } }
+    actors: { ilyas: { pose: haul } }
+    props: [boat]
+    mood: tension
+    gfx:
+      - { type: chapter, text: "1994 · BÜYÜK FIRTINA", at: 0.1, dur: 3.0 }
+
+  - id: fact
+    say: "Bilgi: tek yumurta ikizlerinin DNA'sı neredeyse aynıdır. Ama *parmak izleri* bile birbirinden farklıdır."
+    set: void
+    time: night
+    shot: { type: orbit, target: grid, from: { yaw: -0.3, pitch: 0.3, dist: 8 }, to: { yaw: 0.3, pitch: 0.1, dist: 5 } }
+    props: [fingerprint]
+    mood: fact
+    gfx:
+      - { type: fact, icon: fingerprint, value: "AYNI DNA", label: "Tek yumurta ikizleri", sub: "Parmak izleri yine de farklı", at_word: "ikizlerinin" }
+
+  - id: hand
+    say: "Babaları ikisine de yazıyı aynı defterden öğretmiş. Bu yüzden el yazıları ayırt edilemezmiş."
+    set: home
+    time: day
+    shot: { type: closeup, target: notebook, from: { yaw: 0.0, pitch: 1.15, dist: 0.9 }, to: { yaw: 0.1, pitch: 1.0, dist: 0.6 } }
+    props: [notebook]
+    mood: calm
+
+  - id: cliff
+    say: "Kuponu İlyas yazmıştı. Peki ölü sanılan bir adam, otuz yıl boyunca neredeydi? Devamı yedinci bölümde."
+    set: sea
+    time: dusk
+    shot: { type: pull, target: lighthouse, from: { yaw: 0.1, pitch: 0.06, dist: 1.8 }, to: { yaw: 0.25, pitch: 0.12, dist: 4.5 } }
+    props: [lighthouse_far]
+    mood: cliff
+    gfx:
+      - { type: cliff, title: "BÖLÜM 7", next: "FIRTINA", cta: "Takip et, kaçırma!", at_word: "Devamı" }
+
+seo:
+  title: "Kuponu 30 yıl önce ölen ikizi yazmıştı 😳 | Balıkçının Kuponu 6/8"
+  description: "Rıza Reis'in hiç bilmediği bir ikizi vardı: İlyas. Ve el yazıları birebir aynıydı."
+  hashtags: ["#minidizi", "#hikaye", "#ikiz", "#gizem", "#bilgi", "#dna", "#shorts", "#keşfet", "#reels"]

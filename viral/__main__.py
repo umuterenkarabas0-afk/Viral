@@ -1,5 +1,7 @@
 """Komut satırı.
 
+  python -m viral make content/series/balikci-kuponu/b01.yaml       # mini dizi bölümü
+  python -m viral series "Bir balıkçının Süper Toto kazanması" --episodes 8
   python -m viral make content/scripts/akdeniz-baliklari.yaml
   python -m viral make <yaml> --no-render --stills 1.5,8,20      # hızlı önizleme
   python -m viral write "Uzayın en tuhaf 10 gezegeni"              # Claude ile senaryo yaz
@@ -19,9 +21,9 @@ def main(argv=None):
     m = sub.add_parser("make", help="Bir senaryodan video üret")
     m.add_argument("script")
     m.add_argument("--out", default="output")
-    m.add_argument("--tts", default="auto", choices=["auto", "google", "espeak"])
+    m.add_argument("--tts", default="auto", choices=["auto", "elevenlabs", "google", "espeak"])
     m.add_argument("--workers", type=int)
-    m.add_argument("--target", type=float, default=60.0, help="hedef süre (sn)")
+    m.add_argument("--target", type=float, help="hedef süre (sn); varsayılan: hikâye 45, geri sayım 60")
     m.add_argument("--no-render", action="store_true")
     m.add_argument("--stills", help="virgülle ayrılmış saniyeler (önizleme kareleri)")
     m.add_argument("--gpu", action="store_true", help="donanım GPU'su ile render")
@@ -36,11 +38,18 @@ def main(argv=None):
     a = sub.add_parser("auto", help="Kuyruktaki sıradaki konuyu yaz + üret")
     a.add_argument("--queue", default="content/topics.yaml")
     a.add_argument("--count", type=int, default=1)
-    a.add_argument("--tts", default="google")
+    a.add_argument("--tts", default="auto")
     a.add_argument("--workers", type=int)
     a.add_argument("--handle")
 
-    sub.add_parser("voices", help="Türkçe Google TTS seslerini listele")
+    sr = sub.add_parser("series", help="Claude ile N bölümlük mini dizi senaryoları yaz ve kuyruğa ekle")
+    sr.add_argument("premise", help="dizinin konusu / olay örgüsü fikri")
+    sr.add_argument("--episodes", type=int, default=8)
+    sr.add_argument("--queue", default="content/topics.yaml")
+    sr.add_argument("--model")
+
+    vo = sub.add_parser("voices", help="Kullanılabilir sesleri listele")
+    vo.add_argument("--engine", default="elevenlabs", choices=["elevenlabs", "google"])
 
     args = ap.parse_args(argv)
     if args.cmd == "make":
@@ -56,10 +65,19 @@ def main(argv=None):
     elif args.cmd == "auto":
         from .autopilot import run
         run(args.queue, count=args.count, tts=args.tts, workers=args.workers, handle=args.handle)
+    elif args.cmd == "series":
+        from .series_writer import write_series
+        for p in write_series(args.premise, args.episodes, queue=args.queue, model=args.model):
+            print(p)
     elif args.cmd == "voices":
-        from .tts import list_voices
-        for v in list_voices():
-            print(v["name"], v.get("ssmlGender"), v.get("naturalSampleRateHertz"))
+        if args.engine == "elevenlabs":
+            from .tts import list_elevenlabs_voices
+            for v in list_elevenlabs_voices():
+                print(v["voice_id"], v.get("name"), v.get("category"), (v.get("labels") or {}).get("description", ""))
+        else:
+            from .tts import list_voices
+            for v in list_voices():
+                print(v["name"], v.get("ssmlGender"), v.get("naturalSampleRateHertz"))
     return 0
 
 
