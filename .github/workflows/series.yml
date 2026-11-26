@@ -42,7 +42,9 @@ jobs:
           python - <<'PY'
           import json, os, yaml
           s, eps = os.environ["SERIES"], [int(x) for x in os.environ["EPS"].split(",") if x.strip()]
-          files = [f"content/series/{s}/b{n:02d}.yaml" for n in eps]
+          ser = yaml.safe_load(open(f"content/series/{s}/series.yaml", encoding="utf-8"))
+          byn = {e["n"]: e["file"] for e in ser["episodes"]}
+          files = [f"content/series/{s}/{byn.get(n, f'b{n:02d}.yaml')}" for n in eps]
           for f in files:
               assert os.path.exists(f), f
           q = yaml.safe_load(open("content/topics.yaml", encoding="utf-8")) or {"topics": []}
@@ -128,6 +130,7 @@ jobs:
           MATRIX: ${{ needs.plan.outputs.matrix }}
         run: |
           gh release list --limit 200 --json tagName -q '.[].tagName' > tags.txt
+          [ -n "$MATRIX" ] || { echo "plan başarısız, kuyruk güncellenmedi"; exit 0; }
           python - <<'PY'
           import datetime, json, os, yaml
           files = json.loads(os.environ["MATRIX"])["script"]
