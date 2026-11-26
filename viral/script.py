@@ -184,8 +184,9 @@ def validate_script(script: dict[str, Any]) -> list[str]:
     return errs
 
 
-STORY_SETS = {"sea", "deck", "harbor", "kiosk", "coffeehouse", "home", "lighthouse", "void"}
-STORY_GFX = {"title", "fact", "label", "stamp", "chapter", "cliff", "quote", "counter", "score"}
+STORY_SETS = {"sea", "deck", "harbor", "kiosk", "coffeehouse", "home", "lighthouse", "void", "black", "depot", "shop", "factory"}
+STORY_GFX = {"title", "fact", "label", "stamp", "chapter", "cliff", "quote", "counter", "score",
+             "hook", "notify", "chat", "peephole", "cctv", "live", "clock", "next"}
 
 
 def validate_story(script: dict[str, Any]) -> list[str]:
@@ -215,6 +216,6 @@ def validate_story(script: dict[str, Any]) -> list[str]:
             aw = g.get("at_word")
             if aw and aw.casefold()[:4] not in sc.get("say", "").casefold():
                 errs.append(f"scenes[{i}].gfx[{j}].at_word '{aw}' say metninde yok")
-    if scenes and not any(g.get("type") == "cliff" for g in (scenes[-1].get("gfx") or [])):
-        errs.append("son sahnede 'cliff' (merak kancası / sonraki bölüm) gfx'i olmalı")
+    if scenes and not any(g.get("type") in ("cliff", "next") for g in (scenes[-1].get("gfx") or [])):
+        errs.append("son sahnede 'cliff' ya da 'next' (merak kancası / sonraki bölüm) gfx'i olmalı")
     return errs

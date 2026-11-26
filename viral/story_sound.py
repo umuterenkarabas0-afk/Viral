@@ -380,6 +380,8 @@ def render_ambience(timeline) -> np.ndarray:
             storm = tm == "storm"
             x += waves(L, 1.8 if storm else (0.9 if st == "harbor" else 1.0), seed=si)
             x += wind(L, 1.4 if storm else 0.35, seed=si + 7, howl=storm)
+            if "searchboat" in (s.get("props") or []):
+                x += stereo(boat_motor(L, si)) * 0.8
             if st in ("sea", "deck"):
                 x += lapping(L, seed=si) * (0.6 if st == "deck" else 0.4)
                 for k in range(int(L // 1.3)):
@@ -408,7 +410,21 @@ def render_ambience(timeline) -> np.ndarray:
             x += room_tone(L, 120) * 0.6 + wind(L, 0.9, si, howl=True) * 0.6 + lp(rain(L, 0.8), 2500) * 0.6
             for lt_ in lightning_times(a, b):
                 add_at(x, lp(thunder(4.0, int(lt_ * 10), 0.5), 900), lt_ - a + 0.3, 0.7)
-        elif st == "void":
+        elif st == "depot":
+            x += room_tone(L, 120) * 0.8 + lp(waves(L, 0.3, si), 600) * 0.6
+            for k in range(int(L // 2.3)):  # damlalar
+                add_at(x, pan(tick(rng.uniform(1200, 2200), 0.08, 0.25), rng.uniform(-0.7, 0.7)), rng.uniform(0, L), 0.5)
+            if s.get("lights") != "off":
+                x += stereo(fluorescent_hum(L)) * 0.6
+        elif st == "shop":
+            x += room_tone(L, 160) * 0.5 + stereo(fluorescent_hum(L)) * 0.9 + babble(L, 2, si) * 0.12
+        elif st == "factory":
+            x += room_tone(L, 110) * 0.6 + wind(L, 0.8, si, howl=True) * 0.5
+            for k in range(int(L // 1.9)):
+                add_at(x, pan(tick(rng.uniform(900, 1600), 0.1, 0.3), rng.uniform(-0.8, 0.8)), rng.uniform(0, L), 0.4)
+            if s.get("time") == "storm":
+                x += lp(rain(L, 0.6), 2000) * 0.5
+        elif st in ("void", "black"):
             tt = _t(_n(L))
             sub = np.sin(2 * np.pi * 41.2 * tt) * 0.15 * (0.7 + 0.3 * np.sin(2 * np.pi * 0.2 * tt))
             x += stereo(sub) + np.stack([hp(pink(_n(L)), 6000), hp(pink(_n(L)), 6000)], axis=1) * 0.01
@@ -486,6 +502,97 @@ def referee_whistle(dur=0.9):
     return x * np.minimum(1, t / 0.02) * np.exp(-np.maximum(0, t - dur * 0.7) * 20) * 0.25
 
 
+def phone_buzz(dur=0.9):
+    """Telefon titreşimi: 2 kısa vızıltı (masada tıkırdayan rezonans)."""
+    out = np.zeros(_n(dur))
+    for st in (0.0, 0.42):
+        m = _n(0.32); tt = _t(m)
+        mot = np.sign(np.sin(2 * np.pi * 172 * tt)) * 0.5 + np.sin(2 * np.pi * 344 * tt) * 0.3
+        env = np.minimum(1, tt / 0.01) * np.minimum(1, (0.32 - tt) / 0.03)
+        x = bp(mot * env, 120, 2400) + bp(white(m), 2000, 5000) * env * 0.05
+        i = _n(st)
+        if i < len(out): out[i:i + m] += x[: len(out) - i]
+    return out * 0.6
+
+
+def notify_chime():
+    out = np.zeros(_n(0.9))
+    for k, (m, d) in enumerate(((88, 0.0), (93, 0.11))):
+        mm = _n(0.7); tt = _t(mm)
+        f = midi_hz(m)
+        x = (np.sin(2 * np.pi * f * tt) + 0.25 * np.sin(2 * np.pi * f * 2 * tt)) * np.exp(-tt * 7) * 0.25
+        i = _n(d)
+        if i < len(out): out[i:i + mm] += x[: len(out) - i]
+    return reverb(out, 0.2, 0.8)
+
+
+def msg_sent():
+    n = _n(0.35); tt = _t(n)
+    f = 500 + 1400 * (tt / 0.35)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 14) * 0.25 + bp(white(n), 2000, 7000) * np.exp(-tt * 30) * 0.08
+    return x
+
+
+def msg_recv():
+    out = np.zeros(_n(0.6))
+    for k, m in enumerate((84, 88, 91)):
+        mm = _n(0.25); tt = _t(mm)
+        x = np.sin(2 * np.pi * midi_hz(m) * tt) * np.exp(-tt * 16) * 0.22
+        i = _n(k * 0.085)
+        if i < len(out): out[i:i + mm] += x[: len(out) - i]
+    return out
+
+
+def footsteps(dur=2.4, rate=0.55, seed=0, hard=True):
+    rng = np.random.default_rng(seed)
+    out = np.zeros((_n(dur), 2))
+    for k, st in enumerate(np.arange(0, dur - 0.2, rate)):
+        m = _n(0.18); tt = _t(m)
+        x = bp(white(m), 120 if hard else 80, 1800 if hard else 900) * np.exp(-tt * 38) + np.sin(2 * np.pi * rng.uniform(70, 110) * tt) * np.exp(-tt * 30) * 0.6
+        add_at(out, pan(x * 0.7, (-0.3 if k % 2 else 0.3)), st + rng.uniform(0, 0.03))
+    return reverb(out, 0.4, 1.6, 3000)
+
+
+def door_creak(dur=1.6, seed=1):
+    rng = np.random.default_rng(seed)
+    n = _n(dur); t = _t(n)
+    rate = 25 + 60 * np.sin(np.pi * t / dur) ** 2 + 10 * np.sin(2 * np.pi * 3 * t)
+    ph = np.cumsum(rate) / SR
+    imp = (np.diff(np.floor(ph), prepend=0) > 0).astype(float)
+    x = bp(imp, 400, 1600, 4) * 8 * np.sin(np.pi * t / dur) + bp(imp, 1800, 3200, 2) * 2
+    return reverb(x * 0.6, 0.35, 1.8, 3500)
+
+
+def power_down():
+    n = _n(1.4); t = _t(n)
+    f = 120 * np.exp(-t * 2.2) + 20
+    hum = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 2.5) * 0.4
+    clunk = bp(white(n), 80, 900) * np.exp(-t * 30) * 0.8
+    return reverb(hum + clunk, 0.3, 1.5, 2500)
+
+
+def boat_motor(dur, seed=0):
+    n = _n(dur); t = _t(n)
+    f = 38 + 4 * np.sin(2 * np.pi * 0.3 * t)
+    x = np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * 0.4 + np.sin(2 * np.pi * np.cumsum(f * 2) / SR) * 0.3
+    x = lp(x, 500) + bp(white(n), 300, 1500) * 0.15
+    return x * np.minimum(1, t / max(0.1, dur)) ** 2
+
+
+def crash():
+    n = _n(2.5); t = _t(n)
+    wood = bp(white(n), 300, 3000) * np.exp(-t * 9) * 1.2
+    thud = np.sin(2 * np.pi * np.cumsum(50 + 80 * np.exp(-t * 20)) / SR) * np.exp(-t * 6)
+    splash = lp(white(n), 3000) * np.exp(-np.maximum(0, t - 0.15) * 3) * (t > 0.15) * 0.8
+    return reverb(soft_clip(wood + thud + splash, 1.4), 0.4, 2.0, 3000)
+
+
+def fluorescent_hum(dur):
+    n = _n(dur); t = _t(n)
+    x = np.sin(2 * np.pi * 100 * t) * 0.03 + np.sin(2 * np.pi * 200 * t) * 0.015 + bp(white(n), 3000, 8000) * 0.004
+    return x
+
+
 def render_sfx(timeline) -> np.ndarray:
     dur = timeline["meta"]["duration"]
     out = np.zeros((_n(dur + 3), 2))
@@ -538,6 +645,32 @@ def render_sfx(timeline) -> np.ndarray:
                     add_at(out, S.sfx_pop(700), t0, 0.4)
             elif ty == "cliff":
                 add_at(out, S.sfx_whoosh(0.8, up=False, pan_from=0.6, pan_to=-0.6), t0 - 0.6, 0.5)
+            elif ty == "notify":
+                add_at(out, stereo(phone_buzz()), t0, 0.9)
+                add_at(out, stereo(notify_chime()), t0 + 0.05, 0.6)
+            elif ty == "chat":
+                if g.get("from") == "me":
+                    add_at(out, stereo(msg_sent()), t0, 0.7)
+                else:
+                    add_at(out, stereo(phone_buzz(0.4)), t0 - 0.05, 0.5)
+                    add_at(out, stereo(msg_recv()), t0, 0.7)
+            elif ty == "hook":
+                add_at(out, braam(2.4, ROOT - 12, 0.9), t0 + 0.02, 0.5)
+            elif ty == "peephole":
+                add_at(out, S.sfx_whoosh(0.5, up=True, pan_from=0, pan_to=0, bright=0.6), t0 - 0.3, 0.4)
+            elif ty == "cctv":
+                add_at(out, stereo(bp(white(_n(0.3)), 1000, 8000) * 0.2), t0, 0.6)  # parazit
+                add_at(out, stereo(fluorescent_hum(max(0.5, g["t1"] - t0))), t0, 0.8)
+            elif ty == "live":
+                for k in range(len(g.get("comments") or [])):
+                    add_at(out, stereo(msg_recv()), t0 + 0.7 * (k + 1), 0.35)
+                n2 = _n(max(1.0, g["t1"] - t0)); sw = np.linspace(0.2, 1.2, n2)
+                add_at(out, stadium(max(1.0, g["t1"] - t0), sw) * 0.4, t0, 0.4)
+            elif ty == "clock":
+                for k in range(4):
+                    add_at(out, stereo(tick(2000, 0.05, 0.4)), t0 + k * 0.5, 0.6)
+            elif ty == "next":
+                add_at(out, braam(3.0, ROOT - 12, 1.1), t0, 0.6)
     for c in timeline.get("cues", []):
         ty, t = c["type"], c["t"]
         if ty == "heartbeat":
@@ -552,6 +685,19 @@ def render_sfx(timeline) -> np.ndarray:
         elif ty == "flash":
             add_at(out, S.sfx_sparkle(1.2, 9), t, 0.4)
             add_at(out, S.sfx_impact(0.9, 1.2), t, 0.35)
+        elif ty == "vibrate":
+            add_at(out, stereo(phone_buzz()), t, 1.0)
+        elif ty == "footsteps":
+            add_at(out, footsteps(c.get("dur", 2.4), 0.5, int(t)), t, 0.8)
+        elif ty == "creak":
+            add_at(out, stereo(door_creak()), t, 0.8)
+        elif ty == "lightsout":
+            add_at(out, stereo(power_down()), t, 0.9)
+        elif ty == "crash":
+            add_at(out, crash(), t, 1.0)
+            add_at(out, S.sfx_impact(1.4, 1.6), t, 0.7)
+        elif ty == "splash":
+            add_at(out, S.sfx_splash(), t, 0.9)
     return out[: _n(dur)]
 
 
@@ -566,7 +712,12 @@ def design_story_audio(timeline: dict, placements, out_dir: Path, write_wav, lou
         j = min(n, i + len(a))
         if i < n:
             vox[max(0, i):j] += a[max(0, -i): j - i]
-    vox_st = S.process_voice(vox)
+    silent = (timeline["meta"].get("voice") or {}).get("engine") == "none"
+    if silent:
+        vox = np.zeros(n)
+        vox_st = np.zeros((n, 2))
+    else:
+        vox_st = S.process_voice(vox)
     print("[ses] müzik besteleniyor", flush=True)
     mus, perc = render_score(timeline)
     print("[ses] atmosfer + efektler", flush=True)

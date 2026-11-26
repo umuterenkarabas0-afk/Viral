@@ -389,10 +389,35 @@ def synthesize_piper(text: str, voice: str = PIPER_DEFAULT_VOICE, rate: float = 
     return TTSResult(_resample(a, sr), SR, None, voice, "piper")
 
 
+# ------------------------------------------------------------------ Sessiz zamanlama (seslendirme sonra eklenecek)
+def synthesize_silent(text: str, words: list[str], rate: float = 1.0) -> TTSResult:
+    """Seslendirme olmadan, ElevenLabs Türkçe konuşma hızına yakın kelime zamanları üretir.
+
+    Sonradan gerçek ses eklendiğinde (--tts elevenlabs) aynı senaryo yeniden üretilir; görsel kurgu
+    yaklaşık aynı kalır."""
+    from .script import syllables
+    t = 0.06
+    starts = []
+    for w in words:
+        starts.append(t)
+        clean = "".join(ch for ch in w if ch.isalnum())
+        t += (0.155 * syllables(clean) + 0.07) / max(0.5, rate)
+        if w.rstrip("\"'”»)").endswith((".", "!", "?", "…")):
+            t += 0.36 / max(0.5, rate)
+        elif w.rstrip("\"'”»)").endswith((",", ";", ":", "—")):
+            t += 0.2 / max(0.5, rate)
+    n = int((t + 0.08) * SR)
+    a = np.zeros(n, dtype=np.float32)
+    # konuşma sınırlarının bulunabilmesi için çok düşük seviyeli taşıyıcı (duyulmaz, miksde atılır)
+    i0, i1 = int(0.06 * SR), int((t - 0.02) * SR)
+    a[i0:i1] = 1e-3
+    return TTSResult(a, SR, starts, "silent", "none")
+
+
 class Voice:
     """Pipeline'ın kullandığı TTS cephesi.
 
-    engine: auto | elevenlabs | google | piper | espeak
+    engine: auto | elevenlabs | google | piper | espeak | none
       auto → ElevenLabs anahtarı varsa ElevenLabs, yoksa Google, o da yoksa espeak (önizleme).
     """
 
@@ -405,6 +430,10 @@ class Voice:
         self.prefs = prefs
         self.settings = settings or {}
         self.model = model
+        if engine == "none":
+            self.voice = "silent"
+            print("[tts] motor=none (seslendirme yok; zamanlama tahmini)")
+            return
         if engine == "piper":
             self.voice = os.environ.get("PIPER_VOICE") or PIPER_DEFAULT_VOICE
             print(f"[tts] motor=piper ses={self.voice}")
@@ -430,6 +459,8 @@ class Voice:
         if self.engine == "elevenlabs":
             return synthesize_elevenlabs(text, words, self.voice, rate, model=self.model, settings=self.settings,
                                          prev_text=prev_text, next_text=next_text)
+        if self.engine == "none":
+            return synthesize_silent(text, words, rate)
         if self.engine == "piper":
             return synthesize_piper(text, self.voice, rate)
         if self.engine == "google":

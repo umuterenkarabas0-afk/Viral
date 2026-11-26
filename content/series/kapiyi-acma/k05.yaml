@@ -1,0 +1,133 @@
+# Kapıyı Açma — Bölüm 5: Baba
+id: kapiyi-acma-k05
+format: story
+title: "Baba"
+language: tr-TR
+target_duration: 70
+bpm: 76
+series: { id: kapiyi-acma, title: "Kapıyı Açma", episode: 5, total: 6, next_title: "Kapıyı Açma", style: minimal }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.35, style: 0.5 } }
+theme: { accent: "#FFD23F", accent2: "#7FD1FF", danger: "#FF3B4E" }
+world: { boat: "YUSUF REİS" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Saklandığım depoda telefonum titredi. Ve beni öldürmek isteyen adam, üç adım ötedeydi."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: push, target: deniz.face, from: { yaw: 0.3, pitch: 0.05, dist: 1.4 }, to: { yaw: 0.15, pitch: 0.03, dist: 0.9 } }
+    actors: { deniz: { pose: hide, spot: hide, phone: true } }
+    mood: tension
+    cover: true
+    cover_at: 0.2
+    gfx:
+      - { type: hook, text: "Saklandığım yerde telefonum titredi. *Katil üç adım ötedeydi.*", instant: true, at: 0, dur: 4.0 }
+
+  - id: beam
+    say: "Fener ışığı kasaların üstünde gezindi. Bana yaklaşıyordu."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: track, target: selim, from: { yaw: 0.35, pitch: 0.12, dist: 1.3 }, to: { yaw: 0.1, pitch: 0.08, dist: 0.95 } }
+    actors: { selim: { pose: point, spot: table, light: flashlight }, deniz: { pose: hide, spot: hide } }
+    mood: tension
+    cues: [ { type: footsteps, at_word: "Fener", dur: 2.4 } ]
+
+  - id: hatch
+    say: "Arkamdaki tahta kapak açıldı. Bir el ağzımı kapattı ve beni aşağıdaki karanlık suya çekti."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: push, target: hatch, from: { yaw: 0.5, pitch: 0.5, dist: 2.0 }, to: { yaw: 0.3, pitch: 0.6, dist: 1.2 } }
+    actors: { deniz: { pose: shock, spot: hide } }
+    mood: reveal
+    cues: [ { type: flash, at_word: "el", amount: 0.4 }, { type: splash, at_word: "suya" } ]
+
+  - id: boat
+    say: "Bir kayıktaydım. Kapüşonlu bir adam sessizce kürek çekiyordu. Kapüşonunu indirdi."
+    set: sea
+    time: night
+    shot: { type: establish, target: rowboat, from: { yaw: -0.7, pitch: 0.35, dist: 2.6 }, to: { yaw: -0.4, pitch: 0.2, dist: 1.6 } }
+    actors: { yusuf: { pose: row, spot: rower, hood: true }, deniz: { pose: sit, spot: passenger } }
+    props: [rowboat]
+    mood: tension
+
+  - id: face
+    say: "Zayıflamıştı. Sakalı bembeyazdı. Ama gözleri aynıydı. Sana açma demiştim, dedi babam."
+    set: sea
+    time: night
+    shot: { type: push, target: yusuf.face, from: { yaw: 0.3, pitch: 0.05, dist: 2.4 }, to: { yaw: 0.12, pitch: 0.03, dist: 1.3 } }
+    actors: { yusuf: { pose: row, spot: rower, hood: false }, deniz: { pose: sit, spot: passenger } }
+    props: [rowboat]
+    mood: reveal
+    cues: [ { type: heartbeat, at_word: "gözleri", dur: 2.0 } ]
+    gfx:
+      - { type: label, text: "BABAM", anchor: yusuf.head, at_word: "babam", dur: 2.0 }
+
+  - id: why
+    say: "Neden, diye fısıldadım. Neden bir yıl... Selim kaçak yakıt taşıyordu. Benim teknemle. Öğrendim, tekneyi batırdı."
+    set: sea
+    time: night
+    shot: { type: orbit, target: rowboat, from: { yaw: 0.6, pitch: 0.25, dist: 1.1 }, to: { yaw: 1.2, pitch: 0.18, dist: 0.9 } }
+    actors: { yusuf: { pose: row, spot: rower, hood: false }, deniz: { pose: sit, spot: passenger } }
+    props: [rowboat]
+    mood: tension
+
+  - id: how
+    say: "Nasıl kurtuldun? Yüzdüm. Eski buz fabrikasına. Bir yıldır oradayım. Kanıt topluyorum."
+    set: sea
+    time: night
+    shot: { type: push, target: deniz.face, from: { yaw: 0.4, pitch: 0.05, dist: 2.4 }, to: { yaw: 0.2, pitch: 0.03, dist: 1.4 } }
+    actors: { yusuf: { pose: row, spot: rower, hood: false }, deniz: { pose: sit, spot: passenger } }
+    props: [rowboat]
+    mood: calm
+
+  - id: card
+    say: "Cebime küçük bir hafıza kartı sıkıştırdı. Her şey bunda."
+    set: sea
+    time: night
+    shot: { type: closeup, target: yusuf.hands, from: { yaw: 0.3, pitch: 0.4, dist: 1.4 }, to: { yaw: 0.2, pitch: 0.35, dist: 1.0 } }
+    actors: { yusuf: { pose: hold, spot: rower, hood: false }, deniz: { pose: sit, spot: passenger } }
+    props: [rowboat]
+    mood: tension
+    gfx:
+      - { type: label, text: "HAFIZA KARTI", anchor: yusuf.hands, at_word: "hafıza", dur: 2.2 }
+
+  - id: chase
+    say: "Arkamızda bir motor kükredi. Bir projektör üstümüze kilitlendi. Selim'in teknesi."
+    set: sea
+    time: night
+    shot: { type: establish, target: searchboat, from: { yaw: 0.2, pitch: 0.12, dist: 1.4 }, to: { yaw: 0.1, pitch: 0.08, dist: 0.9 } }
+    actors: { yusuf: { pose: row, spot: rower, hood: false }, deniz: { pose: shock, spot: passenger } }
+    props: [rowboat, searchboat]
+    mood: reveal
+    cues: [ { type: flash, at_word: "projektör", amount: 0.5 } ]
+
+  - id: crash
+    say: "Babam bana döndü, bağırdı: Kartı sakın Kerem'e— Çarpışma. Kayık devrildi. Buz gibi su."
+    set: sea
+    time: night
+    shot: { type: push, target: yusuf.face, from: { yaw: 0.2, pitch: 0.05, dist: 2.2 }, to: { yaw: 0.1, pitch: 0.03, dist: 1.3 } }
+    actors: { yusuf: { pose: point, spot: rower, hood: false }, deniz: { pose: shock, spot: passenger } }
+    props: [rowboat, searchboat]
+    mood: reveal
+    cues: [ { type: crash, at_word: "Çarpışma" }, { type: shake, at_word: "Çarpışma", dur: 0.8, amount: 1.0 }, { type: flash, at_word: "Çarpışma", amount: 0.9 } ]
+    gfx:
+      - { type: quote, text: "Kartı sakın Kerem'e—", at_word: "Kartı", dur: 2.2 }
+
+  - id: cliff
+    say: "Yüzeye çıktığımda elimde sadece hafıza kartı vardı. Babamı bir yıl içinde ikinci kez denize kaybetmiştim."
+    set: sea
+    time: night
+    shot: { type: pull, target: capsized, from: { yaw: 0.3, pitch: 0.05, dist: 1.0 }, to: { yaw: 0.6, pitch: 0.3, dist: 3.0 } }
+    props: [capsized]
+    mood: cliff
+    gfx:
+      - { type: next, kicker: "Final yarın", title: "6. Bölüm: Kapıyı Açma", cta: "Takip et", at: 6.0 }
+
+seo:
+  title: "Ölü sandığım babam beni depodan kaçırdı 🌊 | Kapıyı Açma #5"
+  description: "Babam yaşıyordu. Ama son cümlesi yarım kaldı: 'Kartı sakın Kerem'e...' (Kurgu dizi) Ver mi, verme mi? 👇"
+  hashtags: ["#kapıyıaçma", "#gerilim", "#hikaye", "#minidizi", "#gizem", "#shorts", "#keşfet", "#karadeniz"]

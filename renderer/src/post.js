@@ -50,7 +50,7 @@ export class Post {
       uFlash: { value: 0 }, uDream: { value: 0 }, uExposure: { value: 1.05 }, uBloom: { value: 0.65 },
       uSat: { value: 1.12 }, uContrast: { value: 1.06 }, uTint: { value: new THREE.Color(1.0, 1.0, 1.0) },
       uFade: { value: 0 }, uNear: { value: 0.05 }, uFar: { value: 900 }, uFocus: { value: 6 }, uDof: { value: 1.0 },
-      uFxaa: { value: msaa > 0 ? 0 : 1 },
+      uFxaa: { value: msaa > 0 ? 0 : 1 }, uFish: { value: 0 },
     };
     const mat = new THREE.ShaderMaterial({
       uniforms: this.u,
@@ -60,7 +60,7 @@ export class Post {
         precision highp float;
         uniform sampler2D tScene, tD1, tD2, tD3, tDepth; uniform vec2 uRes; uniform float uTime;
         uniform float uBlur, uZoom, uCA, uVig, uGrain, uFlash, uDream, uExposure, uBloom, uSat, uContrast, uFade;
-        uniform float uNear, uFar, uFocus, uDof, uFxaa;
+        uniform float uNear, uFar, uFocus, uDof, uFxaa, uFish;
         uniform vec2 uBlurDir; uniform vec3 uTint;
         varying vec2 vUv;
         float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
@@ -88,6 +88,7 @@ export class Post {
         }
         void main(){
           vec2 uv = vUv;
+          if (uFish > 0.0) { vec2 dd = uv - 0.5; dd.y *= 1.7778; float r2 = dot(dd, dd); dd *= 1.0 - uFish * r2 * 0.9; dd.y /= 1.7778; uv = 0.5 + dd; }
           if (uDream > 0.001) uv += uDream * 0.010 * vec2(sin(uv.y * 16.0 + uTime * 2.7), cos(uv.x * 12.0 + uTime * 2.1));
           vec3 col = vec3(0.0);
           bool moving = uBlur > 0.0005 || uZoom > 0.0005;

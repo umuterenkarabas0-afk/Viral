@@ -1,0 +1,19 @@
+# Kapıyı Açma — 6 bölümlük gerilim mini dizisi (kurgu)
+id: kapiyi-acma
+title: "Kapıyı Açma"
+premise: "Bir yıl önce denizde kaybolan babasını gömen Deniz'e, gece 03.17'de ölü babasının numarasından mesaj gelir: Kapıyı açma."
+episodes:
+  - { n: 1, file: k01.yaml, title: "03.17" }
+  - { n: 2, file: k02.yaml, title: "Batırılmış" }
+  - { n: 3, file: k03.yaml, title: "Ölü Hat" }
+  - { n: 4, file: k04.yaml, title: "17 Numara" }
+  - { n: 5, file: k05.yaml, title: "Baba" }
+  - { n: 6, file: k06.yaml, title: "Kapıyı Açma" }
+cast:
+  deniz:  { name: "Deniz", age: 22, female: true, hairStyle: long, skin: "#e2b596", hair: "#2b1a12", beard: false, mustache: false, cap: null, coat: "#2f3b4a", sweater: "#7a2e3a", pants: "#3a4660", boots: "#2a2a2a", lips: "#b5525a" }
+  yusuf:  { name: "Yusuf (baba)", age: 58, skin: "#c48a68", hair: "#ece9e2", beard: true, mustache: true, cap: null, coat: "#2d332e", sweater: "#4a3a2a", pants: "#2b2a28", hood: "#2d332e" }
+  selim:  { name: "Selim", age: 60, skin: "#cf9a74", hair: "#6f6a64", beard: false, mustache: true, cap: null, coat: "#5a3e2a", sweater: "#2f2f2f", pants: "#2a2d33" }
+  kerem:  { name: "Kerem", age: 31, skin: "#d8a684", hair: "#1c1612", beard: false, mustache: false, cap: null, coat: "#1d2d44", sweater: "#e8e8e8", pants: "#1d2433" }
+  keeper: { name: "Telefoncu", age: 55, skin: "#d0a07a", hair: "#3a3a3a", beard: false, mustache: true, glasses: true, cap: null, coat: null, sweater: "#3d5a3a", pants: "#2a2a2a" }
+  thug1:  { name: "Adam 1", age: 40, skin: "#c9926e", hair: "#1a1a1a", beard: true, mustache: true, cap: "#1a1a1a", coat: "#1b1d22", sweater: "#333", pants: "#1b1d22" }
+  thug2:  { name: "Adam 2", age: 35, skin: "#b9825e", hair: "#1a1a1a", beard: false, mustache: true, cap: null, coat: "#2a2422", sweater: "#3a3a3a", pants: "#1b1d22" }

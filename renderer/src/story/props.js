@@ -445,7 +445,7 @@ export function makeTV() {
 export function makeDoor() {
   const g = new THREE.Group();
   const frame = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.15, 0.12), M('#4a3020', 0.7)); frame.position.y = 1.075; g.add(frame);
-  const hole = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 2.02), new THREE.MeshBasicMaterial({ color: new THREE.Color('#050a16') })); hole.position.set(0, 1.01, 0.065); g.add(hole);
+  const hole = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 2.02), new THREE.MeshBasicMaterial({ color: new THREE.Color('#050a16') })); hole.position.set(0, 1.01, 0.065); g.add(hole); g.userData.hole = hole;
   const piv = new THREE.Group(); piv.position.set(-0.46, 0, 0.07); g.add(piv);
   const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.92, 2.02, 0.05), M('#ffffff', 0.75, 0, { map: TX.woodTexture('#7a4a2a', 21, [1, 1]) })); leaf.position.set(0.46, 1.01, 0); piv.add(leaf);
   const knob = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 8), M('#c9a24a', 0.3, 0.8)); knob.position.set(0.82, 1.0, 0.04); piv.add(knob);

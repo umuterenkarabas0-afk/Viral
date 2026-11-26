@@ -4,6 +4,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { World } from './world.js';
 import { Character } from './character.js';
 import { SeaSet, HarborSet, LighthouseInSet, KioskSet, CoffeehouseSet, HomeSet, VoidSet } from './sets.js';
+import { DepotSet, ShopSet, FactorySet } from './sets2.js';
 import { Post } from '../post.js';
 import { StoryOverlay } from './overlay.js';
 import { clamp, lerp, ease, noise3, smoothstep, hashString, mulberry32 } from '../util.js';
@@ -41,9 +42,12 @@ export class StoryDirector {
 
     // setler
     this.sets = {
-      sea: new SeaSet(this.world), harbor: new HarborSet(this.world), lighthouse_in: new LighthouseInSet(),
+      sea: new SeaSet(this.world), harbor: new HarborSet(this.world, mkExtra, { boatName: this.tl.world?.boat }), lighthouse_in: new LighthouseInSet(),
       kiosk: new KioskSet(), coffeehouse: new CoffeehouseSet(mkExtra), home: new HomeSet(), void: new VoidSet(),
+      depot: new DepotSet(), shop: new ShopSet(), factory: new FactorySet(),
     };
+    // el feneri (depoda Selim ve adamları)
+    this.flashlights = [];
     for (const s of Object.values(this.sets)) this.scene.add(s.group);
 
     // ortam haritaları (cam/metal yansımaları için)
@@ -66,6 +70,12 @@ export class StoryDirector {
     r.compile(this.scene, this.camera);
     for (const s of Object.values(this.sets)) s.group.visible = false;
     for (const c of Object.values(this.cast)) c.group.visible = false;
+  }
+
+  _phoneLit(seg, t) {
+    let v = seg.phone_lit ?? 0;
+    for (const g of seg.gfx || []) if ((g.type === 'notify' || g.type === 'chat' || g.type === 'live') && t >= g.t0 - 0.05 && t <= g.t1) v = Math.max(v, 0.35 + 0.65 * Math.exp(-(t - g.t0) * 1.5));
+    return v;
   }
 
   segIndexAt(t) { let i = 0; while (i < this.bounds.length && t >= this.bounds[i]) i++; return i; }
@@ -117,6 +127,7 @@ export class StoryDirector {
     let setName = seg.set || 'sea';
     const target = seg.shot?.target || 'boat';
     if (setName === 'deck') setName = 'sea';
+    if (setName === 'black') setName = 'void';
     if (setName === 'lighthouse') setName = target === 'lighthouse' ? 'sea' : 'lighthouse_in';
     for (const s of Object.values(this.sets)) s.group.visible = false;
     const set = (this.set = this.sets[setName]);
@@ -141,13 +152,19 @@ export class StoryDirector {
     const used = new Set();
     for (const [id, a] of Object.entries(actors)) {
       const c = this.cast[id]; if (!c) continue;
-      const spot = this._spotFor(setName, id, a.pose, seg, used);
+      const spot = this._spotFor(setName, id, a.pose, seg, used, a.spot);
       if (!spot) continue;
       used.add(spot);
-      spot.add(c.group); c.group.position.set(0, 0, 0); c.group.rotation.set(0, 0, 0);
+      spot.add(c.group); c.group.position.set(...(a.offset || [0, 0, 0])); c.group.rotation.set(0, a.turn || 0, 0);
       c.group.visible = true; c.pose = a.pose || 'stand';
+      c.setLook({ hood: a.hood, phone: !!a.phone, screen: a.screen ?? 0.9 });
+      c.holdsWatch = a.holds === 'watch';
+      c.walk = a.walk || null;
+      if (a.light === 'flashlight') this._flashlight(c);
       set.actors[id] = c;
     }
+    for (const f of this.flashlights) f.visible = Object.values(set.actors || {}).some((c) => c.flash === f);
+    if (set.setLights) set.setLights(seg.lights || 'on');
     // tekne setinde: çekim kupon/not ise kâğıt açılır; şişe güvertede mi ağda mı
     if (setName === 'sea') {
       const sea = this.sets.sea;
@@ -158,9 +175,21 @@ export class StoryDirector {
     this.seg = seg;
   }
 
-  _spotFor(setName, id, pose, seg, used) {
+  _flashlight(c) {
+    if (c.flash) { c.flash.visible = true; return; }
+    const sl = new THREE.SpotLight('#fff4dc', 18, 14, 0.32, 0.45, 1.4);
+    sl.position.set(0, -0.08, 0.05); c.j.wrR.add(sl); c.j.wrR.add(sl.target); sl.target.position.set(0, -0.6, 2.5);
+    const beam = new THREE.Mesh(new THREE.ConeGeometry(0.9, 6, 20, 1, true), new THREE.MeshBasicMaterial({ color: '#fff3d8', transparent: true, opacity: 0.07, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    beam.geometry.translate(0, -3, 0); beam.rotation.x = -Math.PI / 2 - 0.25; beam.position.set(0, -0.08, 0.05); sl.add(beam);
+    const torch = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.16, 10), new THREE.MeshStandardMaterial({ color: '#222', metalness: 0.6, roughness: 0.4 })); torch.rotation.x = Math.PI / 2; torch.position.set(0, -0.08, 0.03); sl.add(torch);
+    c.flash = sl; this.flashlights.push(sl);
+  }
+
+  _spotFor(setName, id, pose, seg, used, want) {
     const s = this.sets[setName].spots;
     const pick = (...names) => names.map((n) => s[n]).find((o) => o && !used.has(o));
+    if (want && s[want]) return s[want];
+    if (s[id] && !used.has(s[id])) return s[id];
     switch (setName) {
       case 'sea':
         if (pose === 'haul') return pick('haul', 'deck');
@@ -181,6 +210,13 @@ export class StoryDirector {
 
   _anchor(name) {
     const set = this.set;
+    if (name && name.includes('.')) {
+      const [who, part] = name.split('.');
+      const c = set.actors?.[who];
+      if (c) return { pos: () => c.anchor(part), frame: { face: 0.55, head: 0.7, hands: 0.75, handR: 0.5, handL: 0.5, chest: 1.6 }[part] || 1.2, yaw0: null, actor: c };
+    }
+    if (set.actors?.[name]) { const c = set.actors[name]; return { pos: () => c.anchor('chest'), frame: 2.3, yaw0: null, actor: c }; }
+    if (name === 'face' && set.actors) { const c = Object.values(set.actors)[0]; if (c) return { pos: () => c.anchor('face'), frame: 0.55, yaw0: null, actor: c }; }
     let a = set.anchor(name);
     if (!a && set.actors && set.actors[name]) a = { pos: () => set.actors[name].anchor('chest'), frame: 2.4, yaw0: null };
     if (!a) a = set.anchor(Object.keys(set.anchors)[0]);
@@ -210,7 +246,12 @@ export class StoryDirector {
       light = Math.max(light, this.cueValue(t, 'flash'));
     }
     this.world.lightning = light;
-    set.update(t, this.world, { tv: tvState });
+    const phoneLit = this._phoneLit(seg, t);
+    set.update(t, this.world, { tv: tvState, lt, phoneLit, lights: seg.lights, door: seg.door, porch: seg.porch });
+    // oyuncuların telefon ekranı bildirim anında parlar
+    for (const c of Object.values(set.actors || {})) if (c.phone.visible) c.phoneLight.intensity = 0.5 + 1.2 * phoneLit;
+    // yürüyen oyuncular
+    for (const c of Object.values(set.actors || {})) if (c.walk) { const [dx, dz] = c.walk; c.group.position.set(dx * lt, 0, dz * lt); }
 
     // kâğıt açılması
     if (set === this.sets.sea) {
@@ -244,7 +285,7 @@ export class StoryDirector {
     let base = A.yaw0;
     if (base == null) {
       const who = Object.values(set.actors || {}).find((c) => (shot.target === 'face' || shot.target === 'riza' || set.actors[shot.target] === c));
-      const c = set.actors?.[shot.target] || who || Object.values(set.actors || {})[0];
+      const c = A.actor || set.actors?.[shot.target] || who || Object.values(set.actors || {})[0];
       if (c) { const q = new THREE.Quaternion(); c.group.getWorldQuaternion(q); const f = V(0, 0, 1).applyQuaternion(q); base = Math.atan2(f.x, f.z); } else base = 0;
     } else if (set === this.sets.sea && ['boat', 'net', 'bottle', 'coupon', 'note'].includes(shot.target)) {
       base += this.sets.sea.boat.rotation.y;
@@ -275,7 +316,18 @@ export class StoryDirector {
     // dış sahnede kamera denizin altına girmesin
     if (set.exterior) cam.position.y = Math.max(cam.position.y, this.world.heightAt(cam.position.x, cam.position.z, t) + 0.35);
     if (paperUp) cam.up.copy(paperUp); else cam.up.set(0, 1, 0);
-    cam.lookAt(target);
+    if (shot.type === 'pov' && shot.eye) {
+      const E = this._anchor(shot.eye); cam.position.copy(E.pos()); cam.up.set(0, 1, 0);
+      const tgt = target.clone(); tgt.y += (shot.tilt || 0);
+      cam.lookAt(tgt);
+      cam.fov = lerp(shot.fov?.[0] ?? 70, shot.fov?.[1] ?? 55, p); cam.updateProjectionMatrix();
+    } else if (A.fixedCam || shot.type === 'cctv') {
+      const E = this._anchor(shot.eye || 'cctv'); cam.position.copy(E.pos()); cam.up.set(0, 1, 0); cam.lookAt(target);
+      cam.fov = lerp(shot.fov?.[0] ?? 62, shot.fov?.[1] ?? 40, p); cam.updateProjectionMatrix();
+    } else {
+      if (cam.fov !== 48) { cam.fov = 48; cam.updateProjectionMatrix(); }
+      cam.lookAt(target);
+    }
     cam.rotateZ(roll + 0.01 * Math.sin(t * 0.5));
     const shake = Math.max(this.cueValue(t, 'shake'), this.knock(t) * 0.5) + (seg.time === 'storm' && set.exterior ? 0.25 : 0);
     const hk = 1 + shake * 8;
@@ -301,9 +353,17 @@ export class StoryDirector {
     pu.uFlash.value = Math.max(tr ? 0.12 * Math.pow(tk, 6) : 0, this.cueValue(t, 'flash') * 0.55, light * 0.25);
     pu.uCA.value = 0.0018 + 0.012 * tk + shake * 0.008 + hb * 0.003;
     pu.uVig.value = 0.55 + hb * 0.25 + (seg.mood === 'cliff' ? 0.1 : 0);
-    pu.uDream.value = 0; pu.uFade.value = 0;
+    pu.uDream.value = 0; pu.uFade.value = 0; pu.uFish.value = 0; pu.uGrain.value = 0.035;
+    const flt = seg.filter;
+    if (flt === 'cctv') { pu.uSat.value = 0.0; pu.uContrast.value = 1.25; pu.uGrain.value = 0.12; pu.uExposure.value = 1.25; pu.uTint.value.setRGB(0.95, 1.02, 0.98); pu.uFish.value = 0.25; pu.uBloom.value = 0.3; }
+    else if (flt === 'flashback') { pu.uSat.value = 0.45; pu.uTint.value.setRGB(1.12, 1.0, 0.82); pu.uGrain.value = 0.07; pu.uVig.value = 0.9; }
+    else if (flt === 'peephole') { pu.uFish.value = 1.35; pu.uVig.value = 1.2; pu.uCA.value = 0.006; }
+    // ışıklar kapalı: ortam/gök ışığı kısılır, sahneyi ekran/ay/fener ışığı aydınlatır
+    const lm = set.exterior ? 'on' : (seg.lights || 'on');
+    this.scene.environmentIntensity = lm === 'off' ? 0.06 : lm === 'dim' ? 0.3 : 1;
+    if (!set.exterior) { this.world.hemi.intensity = lm === 'off' ? 0.06 : lm === 'dim' ? 0.18 : 0.35; this.world.hemi.color.set(lm === 'off' ? '#4a62a0' : '#ffffff'); }
     pu.uFocus.value = dist; pu.uNear.value = cam.near; pu.uFar.value = cam.far;
-    pu.uDof.value = A.frame < 1 ? 1.2 : 0.8;
+    pu.uDof.value = A.frame < 0.2 ? 0.5 : A.frame < 1 ? 1.2 : 0.8;
     pu.uBloom.value = interior ? 0.8 : 0.7;
     this.post.render(this.scene, cam);
 

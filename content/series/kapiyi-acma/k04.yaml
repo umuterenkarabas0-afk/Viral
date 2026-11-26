@@ -1,0 +1,139 @@
+# Kapıyı Açma — Bölüm 4: 17 Numara
+id: kapiyi-acma-k04
+format: story
+title: "17 Numara"
+language: tr-TR
+target_duration: 70
+bpm: 76
+series: { id: kapiyi-acma, title: "Kapıyı Açma", episode: 4, total: 6, next_title: "Baba", style: minimal }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.35, style: 0.5 } }
+theme: { accent: "#FFD23F", accent2: "#7FD1FF", danger: "#FF3B4E" }
+world: { boat: "YUSUF REİS" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Babam yaşıyordu. Ve o gece bana tek bir mesaj attı: On yedi numaralı depoya sakın yaklaşma."
+    set: home
+    time: night
+    lights: off
+    shot: { type: push, target: phone_table, from: { yaw: 0.3, pitch: 0.85, dist: 1.5 }, to: { yaw: 0.15, pitch: 0.75, dist: 0.9 } }
+    props: [phone_table]
+    phone_lit: 1
+    mood: tension
+    cover: true
+    cover_at: 0.2
+    gfx:
+      - { type: hook, text: "Babam yaşıyordu. *Bana tek bir şeyi yasakladı.*", instant: true, at: 0, dur: 3.8 }
+      - { type: notify, from: "Babam", text: "17 numaralı depoya sakın yaklaşma.", when: "23:48", instant: true, at: 0 }
+
+  - id: key
+    say: "Babamın anahtarlığında yıllardır neyi açtığını bilmediğim paslı bir anahtar vardı. Üstüne kazınmış bir sayı: On yedi."
+    set: black
+    time: night
+    shot: { type: orbit, target: key, from: { yaw: -0.5, pitch: 0.3, dist: 1.2 }, to: { yaw: 0.4, pitch: 0.15, dist: 0.8 } }
+    props: [key]
+    mood: tension
+    gfx:
+      - { type: label, text: "17", anchor: key, at_word: "sayı", dur: 2.4 }
+
+  - id: walk
+    say: "Gece yarısı limana indim. Anahtar kilide oturdu. Kapı inleyerek açıldı."
+    set: harbor
+    time: night
+    shot: { type: track, target: deniz, from: { yaw: 2.6, pitch: 0.12, dist: 1.8 }, to: { yaw: 2.9, pitch: 0.08, dist: 1.4 } }
+    actors: { deniz: { pose: walk, spot: pier, walk: [0, -0.9], phone: true, screen: 0.4 } }
+    props: [boat]
+    mood: tension
+    cues: [ { type: creak, at_word: "inleyerek" } ]
+
+  - id: drums
+    say: "İçeride balık kasaları vardı. Hiçbirinde balık yoktu. Bidonlar. Yüzlerce bidon. Kaçak akaryakıt. Yanlarında para desteleri."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: track, target: drums, from: { yaw: -0.5, pitch: 0.15, dist: 1.0 }, to: { yaw: 0.2, pitch: 0.1, dist: 0.75 } }
+    actors: { deniz: { pose: phone, spot: deniz, phone: true, light: flashlight } }
+    mood: reveal
+    gfx:
+      - { type: stamp, text: "KAÇAK AKARYAKIT", tone: danger, at_word: "Kaçak", dur: 2.4 }
+
+  - id: map
+    say: "Masada bir harita: babamın kaybolduğu gecenin rotası, kırmızı kalemle çizilmiş. Bu bir kaza değildi. Planlanmıştı."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: closeup, target: map, from: { yaw: 0.0, pitch: 1.25, dist: 1.3 }, to: { yaw: 0.05, pitch: 1.1, dist: 0.95 } }
+    actors: { deniz: { pose: phone, spot: table, phone: true, light: flashlight } }
+    mood: reveal
+    gfx:
+      - { type: stamp, text: "PLANLANMIŞ", tone: danger, at_word: "Planlanmıştı", dur: 1.8 }
+
+  - id: photo
+    say: "Duvarda bir fotoğraf asılıydı. Ben. Tapu dairesinin önünde. Dün."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: push, target: wallphoto, from: { yaw: 0.2, pitch: 0.05, dist: 1.6 }, to: { yaw: 0.05, pitch: 0.02, dist: 1.0 } }
+    actors: { deniz: { pose: phone, spot: deniz, phone: true, light: flashlight } }
+    mood: reveal
+    cues: [ { type: heartbeat, at_word: "Ben", dur: 2.2 } ]
+
+  - id: steps
+    say: "Dışarıda ayak sesleri. Kasaların arkasına saklandım."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: push, target: deniz.face, from: { yaw: 0.4, pitch: 0.1, dist: 2.2 }, to: { yaw: 0.2, pitch: 0.05, dist: 1.4 } }
+    actors: { deniz: { pose: hide, spot: hide, phone: true, screen: 0.1 } }
+    mood: tension
+    cues: [ { type: footsteps, at_word: "Dışarıda", dur: 2.6 } ]
+
+  - id: selim
+    say: "Selim amca ve iki adam içeri girdi. Ev satılınca anahtar başkasının eline geçecekti, dedi Selim. Kız anahtarı bulacak, buraya gelecekti."
+    set: depot
+    time: night
+    lights: on
+    shot: { type: push, target: selim.face, from: { yaw: 0.3, pitch: 0.05, dist: 3.4 }, to: { yaw: 0.15, pitch: 0.03, dist: 2.0 } }
+    actors: { selim: { pose: point, spot: selim }, thug1: { pose: stand, spot: thug1 }, thug2: { pose: stand, spot: thug2 } }
+    mood: tension
+    cues: [ { type: creak, at_word: "içeri" } ]
+
+  - id: trap
+    say: "Bir tuzaktı. Ve ben tam içine yürümüştüm. Bu gece hallediyoruz. Işıkları söndürdüler."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: orbit, target: room, from: { yaw: -0.3, pitch: 0.2, dist: 0.9 }, to: { yaw: 0.2, pitch: 0.15, dist: 0.75 } }
+    actors: { selim: { pose: stand, spot: selim, light: flashlight }, thug1: { pose: stand, spot: thug1, light: flashlight }, deniz: { pose: hide, spot: hide } }
+    mood: reveal
+    cues: [ { type: lightsout, at_word: "Işıkları" } ]
+    gfx:
+      - { type: stamp, text: "TUZAK", tone: danger, at_word: "tuzaktı", dur: 1.8 }
+
+  - id: buzz
+    say: "Karanlıkta nefesimi tuttum. Ve cebimde, telefonum titredi."
+    set: depot
+    time: night
+    lights: off
+    shot: { type: closeup, target: deniz.face, from: { yaw: 0.2, pitch: 0.05, dist: 1.2 }, to: { yaw: 0.1, pitch: 0.03, dist: 0.8 } }
+    actors: { deniz: { pose: hide, spot: hide, phone: true } }
+    mood: tension
+    cues: [ { type: vibrate, at_word: "titredi" }, { type: shake, at_word: "titredi", dur: 0.3, amount: 0.4 } ]
+
+  - id: cliff
+    say: "Ayak sesleri durdu. Kim var orada?"
+    set: depot
+    time: night
+    lights: off
+    shot: { type: push, target: selim.face, from: { yaw: 0.0, pitch: 0.02, dist: 4.0 }, to: { yaw: 0.0, pitch: 0.02, dist: 2.0 } }
+    actors: { selim: { pose: stand, spot: selim, light: flashlight }, thug1: { pose: stand, spot: thug1, light: flashlight } }
+    mood: cliff
+    cues: [ { type: footsteps, at_word: "Ayak", dur: 1.2 } ]
+    gfx:
+      - { type: next, kicker: "Devamı yarın", title: "5. Bölüm: Baba", cta: "Takip et", at: 2.6 }
+
+seo:
+  title: "17 numaralı depoda kendi fotoğrafımı buldum 😱 | Kapıyı Açma #4"
+  description: "Babam 'sakın gitme' demişti. Gittim. Ve bir tuzağın içine yürüdüm. (Kurgu dizi) Sen olsan ne yapardın? 👇"
+  hashtags: ["#kapıyıaçma", "#gerilim", "#hikaye", "#minidizi", "#gizem", "#shorts", "#keşfet", "#karadeniz"]
