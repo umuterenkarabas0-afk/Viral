@@ -1,0 +1,122 @@
+# Kapıyı Açma — Bölüm 3: Ölü Hat
+id: kapiyi-acma-k03
+format: story
+title: "Ölü Hat"
+language: tr-TR
+target_duration: 70
+bpm: 76
+series: { id: kapiyi-acma, title: "Kapıyı Açma", episode: 3, total: 6, next_title: "17 Numara", style: minimal }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.35, style: 0.5 } }
+theme: { accent: "#FFD23F", accent2: "#7FD1FF", danger: "#FF3B4E" }
+world: { boat: "YUSUF REİS" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Ölen babamın telefonu elimdeydi, kırık ve kapalı. Ama numarası bana yazmaya devam ediyordu."
+    set: harbor
+    time: day
+    shot: { type: closeup, target: brokenphone, from: { yaw: 0.2, pitch: 0.95, dist: 1.2 }, to: { yaw: 0.1, pitch: 0.85, dist: 0.85 } }
+    props: [boat, brokenphone]
+    mood: tension
+    cover: true
+    cover_at: 0.2
+    gfx:
+      - { type: hook, text: "Ölen babamın telefonu bozuktu. *Ama bana yazmaya devam ediyordu.*", instant: true, at: 0, dur: 4.0 }
+      - { type: notify, from: "Babam", text: "Bana inanmak zorundasın.", when: "şimdi", instant: true, at: 0 }
+
+  - id: show
+    say: "Kerem'e her şeyi anlattım. Mesajları görebilir miyim, dedi. Telefonumu verdim. Uzun uzun baktı."
+    set: harbor
+    time: day
+    shot: { type: push, target: kerem.face, from: { yaw: 0.6, pitch: 0.05, dist: 3.0 }, to: { yaw: 0.35, pitch: 0.03, dist: 1.6 } }
+    actors: { kerem: { pose: phone, spot: boatside2, phone: true }, deniz: { pose: stand, spot: boatside } }
+    props: [boat]
+    mood: tension
+
+  - id: sim
+    say: "Biri babanın numarasına yeni bir SIM kart çıkarmış, dedi. Bunun için babanın kimliği lazım."
+    set: harbor
+    time: day
+    shot: { type: orbit, target: kerem, from: { yaw: -0.5, pitch: 0.15, dist: 1.6 }, to: { yaw: 0.2, pitch: 0.1, dist: 1.3 } }
+    actors: { kerem: { pose: stand, spot: boatside2 }, deniz: { pose: look, spot: boatside } }
+    props: [boat]
+    mood: tension
+
+  - id: shop
+    say: "Kasabadaki tek telefoncuya gittik. Kayıtlar ortadaydı. Yeni kart, fırtınadan tam üç gün sonra çıkarılmıştı."
+    set: shop
+    time: day
+    shot: { type: push, target: room, from: { yaw: 0.0, pitch: 0.2, dist: 1.1 }, to: { yaw: 0.1, pitch: 0.12, dist: 0.8 } }
+    actors: { keeper: { pose: read, spot: keeper }, deniz: { pose: stand, spot: deniz }, kerem: { pose: stand, spot: kerem } }
+    mood: tension
+    gfx:
+      - { type: stamp, text: "+3 GÜN", tone: danger, at_word: "fırtınadan", dur: 2.6 }
+
+  - id: keeper
+    say: "Dükkân sahibi kaşlarını çattı. Unutur muyum? Kapüşonlu bir adamdı. Ölmüş birinin kartını istiyordu. İçim rahat etmedi, gizlice fotoğrafını çektim."
+    set: shop
+    time: day
+    shot: { type: push, target: keeper.face, from: { yaw: 0.3, pitch: 0.05, dist: 2.6 }, to: { yaw: 0.15, pitch: 0.03, dist: 1.5 } }
+    actors: { keeper: { pose: phone, spot: keeper, phone: true } }
+    mood: tension
+
+  - id: photo1
+    say: "Telefonunda bir yıllık fotoğrafı buldu. Bulanık. Adam yüzünü saklıyor."
+    set: shop
+    time: day
+    filter: cctv
+    shot: { type: cctv, eye: cctv, target: yusuf.head, fov: [62, 50] }
+    actors: { yusuf: { pose: read, spot: customer, hood: true }, keeper: { pose: stand, spot: keeper } }
+    mood: tension
+    gfx:
+      - { type: cctv, label: "FOTOĞRAF", cam: "1 YIL ÖNCE", time: "15.11.2025 14:32:07", at: 0 }
+
+  - id: scar
+    say: "Ama sol eli görünüyordu. Yüzük parmağında bir yara izi. Babamın elinde de aynı yara vardı. Ağ makarası yapmıştı onu."
+    set: shop
+    time: day
+    filter: cctv
+    shot: { type: cctv, eye: cctv, target: yusuf.handL, fov: [40, 26] }
+    actors: { yusuf: { pose: read, spot: customer, hood: true } }
+    mood: reveal
+    gfx:
+      - { type: cctv, label: "FOTOĞRAF", cam: "YAKINLAŞTIR ×4", time: "15.11.2025 14:32:09", at: 0 }
+      - { type: label, text: "YARA İZİ", anchor: yusuf.handL, at_word: "yara", dur: 2.6 }
+
+  - id: pale
+    say: "Kerem fotoğrafa bakarken yüzü bembeyaz oldu."
+    set: shop
+    time: day
+    shot: { type: push, target: kerem.face, from: { yaw: 0.25, pitch: 0.04, dist: 1.8 }, to: { yaw: 0.1, pitch: 0.02, dist: 1.1 } }
+    actors: { kerem: { pose: shock, spot: kerem }, deniz: { pose: stand, spot: deniz } }
+    mood: tension
+
+  - id: turn
+    say: "Dükkân sahibi kaydırdı. Bir fotoğraf daha. Adam kapıdan çıkarken dönmüş, kameraya bakıyordu."
+    set: shop
+    time: day
+    filter: cctv
+    shot: { type: cctv, eye: cctv, target: yusuf.head, fov: [55, 38] }
+    actors: { yusuf: { pose: look, spot: exit, hood: true } }
+    mood: reveal
+    gfx:
+      - { type: cctv, label: "FOTOĞRAF 2/2", cam: "1 YIL ÖNCE", time: "15.11.2025 14:33:41", at: 0 }
+
+  - id: cliff
+    say: "Ve ben, bir yıl sonra ilk kez, babamın yüzünü gördüm."
+    set: shop
+    time: day
+    filter: cctv
+    shot: { type: cctv, eye: cctv, target: yusuf.face, fov: [26, 16] }
+    actors: { yusuf: { pose: look, spot: exit, hood: false } }
+    mood: cliff
+    cues: [ { type: flash, at_word: "babamın", amount: 0.6 }, { type: heartbeat, at_word: "ilk", dur: 2.0 } ]
+    gfx:
+      - { type: cctv, label: "FOTOĞRAF 2/2", cam: "YAKINLAŞTIR ×8", time: "15.11.2025 14:33:42", at: 0 }
+      - { type: next, kicker: "Devamı yarın", title: "4. Bölüm: 17 Numara", cta: "Takip et", at: 3.2 }
+
+seo:
+  title: "Ölen babamın fotoğrafı, ölümünden 3 gün sonra çekilmişti 📸 | Kapıyı Açma #3"
+  description: "Babamın hattı fırtınadan 3 gün sonra yenilenmişti. Dükkâncı gizlice fotoğrafını çekmişti. (Kurgu dizi) Sence kim? 👇"
+  hashtags: ["#kapıyıaçma", "#gerilim", "#hikaye", "#minidizi", "#gizem", "#shorts", "#keşfet", "#karadeniz"]

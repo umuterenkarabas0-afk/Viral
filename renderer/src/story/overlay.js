@@ -10,6 +10,54 @@ const up = (s) => (s || '').toLocaleUpperCase(TR);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
 
+const CSS2 = `
+.s-mini { position:absolute; top:100px; left:60px; display:flex; align-items:center; gap:14px; font:900 30px 'Montserrat'; letter-spacing:6px; color:#fff; opacity:0; text-shadow:0 2px 10px rgba(0,0,0,.8); }
+.s-mini .ep { padding:6px 14px; border-radius:8px; background:rgba(255,255,255,.16); letter-spacing:2px; }
+.g-hook { position:absolute; top:250px; left:60px; right:60px; text-align:center; font:900 74px/1.12 'Montserrat'; color:#fff; letter-spacing:-0.5px;
+  -webkit-text-stroke:12px #000; paint-order:stroke fill; text-shadow:0 8px 0 rgba(0,0,0,.45), 0 16px 40px rgba(0,0,0,.6); }
+.g-hook b { color:var(--accent); font-weight:900; }
+.g-notify { position:absolute; top:640px; left:70px; right:70px; opacity:0; }
+.g-notify .clk { text-align:center; font:300 210px/1 'Montserrat'; color:rgba(255,255,255,.92); letter-spacing:-6px; text-shadow:0 6px 30px rgba(0,0,0,.6); margin-bottom:10px; }
+.g-notify .dt { text-align:center; font:700 40px 'Montserrat'; color:rgba(255,255,255,.8); margin-bottom:40px; }
+.g-notify .card { display:flex; gap:26px; align-items:flex-start; padding:30px 34px; border-radius:42px; background:rgba(40,44,52,.72); backdrop-filter:blur(18px); box-shadow:0 24px 70px rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.12); }
+.g-notify .ic { flex:none; width:96px; height:96px; border-radius:24px; background:linear-gradient(180deg,#5ef26a,#1fbf3a); display:flex; align-items:center; justify-content:center; color:#fff; }
+.g-notify .bd { flex:1; min-width:0; }
+.g-notify .hd { display:flex; justify-content:space-between; font:700 32px 'Montserrat'; color:rgba(255,255,255,.6); }
+.g-notify .nm { margin-top:6px; font:800 46px 'Montserrat'; color:#fff; }
+.g-notify .tx { margin-top:6px; font:600 48px/1.2 'Montserrat'; color:#fff; }
+.g-chat { position:absolute; top:300px; left:60px; right:60px; height:860px; border-radius:46px; overflow:hidden; opacity:0; background:#0b0d12; box-shadow:0 30px 90px rgba(0,0,0,.6); border:2px solid rgba(255,255,255,.08); }
+.g-chat .top { height:150px; display:flex; align-items:center; gap:22px; padding:0 34px; background:rgba(28,30,38,.96); border-bottom:1px solid rgba(255,255,255,.08); }
+.g-chat .av { width:92px; height:92px; border-radius:50%; background:linear-gradient(160deg,#8a96a8,#4a5466); display:flex; align-items:center; justify-content:center; font:800 44px 'Montserrat'; color:#fff; }
+.g-chat .who { font:800 46px 'Montserrat'; color:#fff; } .g-chat .st { font:600 30px 'Montserrat'; color:#7fd18b; }
+.g-chat .body { position:absolute; left:0; right:0; top:150px; bottom:0; padding:30px 34px; display:flex; flex-direction:column; justify-content:flex-end; gap:20px; }
+.g-chat .b { max-width:78%; padding:22px 30px; border-radius:34px; font:600 46px/1.22 'Montserrat'; color:#fff; transform-origin:left bottom; }
+.g-chat .b.them { align-self:flex-start; background:#2a2d36; border-bottom-left-radius:10px; }
+.g-chat .b.me { align-self:flex-end; background:#1f7af2; border-bottom-right-radius:10px; transform-origin:right bottom; }
+.g-chat .typing { align-self:flex-start; padding:26px 30px; border-radius:34px; background:#2a2d36; display:flex; gap:12px; }
+.g-chat .typing i { width:16px; height:16px; border-radius:50%; background:#9aa1ad; display:block; }
+.g-peep { position:absolute; inset:0; opacity:0; background:radial-gradient(circle at 50% 44%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 430px, rgba(0,0,0,.9) 470px, #000 520px); }
+.g-cctv { position:absolute; inset:0; opacity:0; font-family:'Montserrat'; color:#e8f1e8; }
+.g-cctv .rec { position:absolute; top:240px; left:70px; font:800 44px 'Montserrat'; display:flex; align-items:center; gap:14px; }
+.g-cctv .rec i { width:30px; height:30px; border-radius:50%; background:#ff2a2a; display:block; box-shadow:0 0 18px #ff2a2a; }
+.g-cctv .cam { position:absolute; top:240px; right:70px; font:800 40px 'Montserrat'; }
+.g-cctv .ts { position:absolute; bottom:560px; left:70px; font:700 40px 'Montserrat'; letter-spacing:2px; }
+.g-cctv .br { position:absolute; width:90px; height:90px; border-color:rgba(232,241,232,.85); border-style:solid; }
+.g-cctv .scan { position:absolute; inset:0; background:repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 2px, rgba(0,0,0,0) 2px 5px); }
+.g-live { position:absolute; inset:0; opacity:0; font-family:'Montserrat'; }
+.g-live .bar { position:absolute; top:230px; left:60px; display:flex; gap:16px; align-items:center; }
+.g-live .pill { padding:10px 22px; border-radius:12px; background:#ff2a4d; color:#fff; font:900 38px 'Montserrat'; letter-spacing:2px; }
+.g-live .vw { padding:10px 22px; border-radius:12px; background:rgba(0,0,0,.55); color:#fff; font:800 38px 'Montserrat'; display:flex; gap:12px; align-items:center; }
+.g-live .cm { position:absolute; left:60px; bottom:600px; width:720px; display:flex; flex-direction:column; gap:14px; }
+.g-live .cm div { padding:12px 22px; border-radius:22px; background:rgba(0,0,0,.45); color:#fff; font:700 34px 'Montserrat'; width:max-content; max-width:720px; }
+.g-live .cm b { color:#ffd166; margin-right:10px; }
+.g-live .ht { position:absolute; right:90px; bottom:640px; font-size:64px; }
+.g-clock { position:absolute; top:520px; left:0; right:0; text-align:center; opacity:0; font:200 260px/1 'Montserrat'; color:#fff; letter-spacing:-8px; text-shadow:0 10px 40px rgba(0,0,0,.7); }
+.g-next { position:absolute; inset:0; opacity:0; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; font-family:'Montserrat'; color:#fff; }
+.g-next .a { font:800 40px 'Montserrat'; letter-spacing:14px; color:rgba(255,255,255,.7); }
+.g-next .b { font:400 120px/1 'Anton'; letter-spacing:2px; color:#fff; text-align:center; padding:0 60px; }
+.g-next .c { font:800 40px 'Montserrat'; color:var(--accent); letter-spacing:3px; }
+`;
+
 const CSS = `
 .s-top { position:absolute; top:96px; left:56px; right:56px; display:flex; flex-direction:column; gap:14px; }
 .s-row { display:flex; align-items:center; justify-content:space-between; }
@@ -90,14 +138,23 @@ export class StoryOverlay {
     root.style.setProperty('--accent', th.accent || '#FFC93C');
     root.style.setProperty('--accent2', th.accent2 || '#5CE1E6');
     root.style.setProperty('--danger', th.danger || '#FF4D5E');
-    const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
-    this._buildTop();
+    const st = document.createElement('style'); st.textContent = CSS + CSS2; document.head.appendChild(st);
+    this.minimal = (tl.series || {}).style === 'minimal';
+    if (this.minimal) this._buildMini(); else this._buildTop();
     this.items = [];
-    tl.segments.forEach((seg) => (seg.gfx || []).forEach((g) => this.items.push({ g, seg, node: this._build(g) })));
+    tl.segments.forEach((seg, si) => (seg.gfx || []).forEach((g) => { g._scene = si; g._end = seg.end; this.items.push({ g, seg, node: this._build(g) }); }));
+    // sohbet mesajlarını panellere kaydet
+    for (const it of this.items) if (it.g.type === 'chat') (it.node._panel || it.node)._msgs.push(it.g);
     // altyazılar: geri sayım katmanının altyazı motorunu yeniden kullan
     const cap = el('div', 'captions'); root.appendChild(cap);
     this.capEl = cap; this.curCaption = -1;
     if (tl.meta?.handle) { const b = el('div', 's-brand', esc(tl.meta.handle)); root.appendChild(b); }
+  }
+
+  _buildMini() {
+    const s = this.tl.series || {};
+    const m = el('div', 's-mini', `${esc(up(s.title || ''))}<span class="ep">${esc(s.episode || 1)}. BÖLÜM</span>`);
+    this.root.appendChild(m); this.mini = m;
   }
 
   _buildTop() {
@@ -133,6 +190,31 @@ export class StoryOverlay {
         n._svg = svg; n._lab = lab;
         break;
       }
+      case 'hook': n = el('div', 'g-hook', esc(up(g.text || '')).replace(/\*([^*]+)\*/g, '<b>$1</b>')); break;
+      case 'notify':
+        n = el('div', 'g-notify', `${g.clock ? `<div class="clk">${esc(g.clock)}</div><div class="dt">${esc(g.date || '')}</div>` : ''}
+          <div class="card"><div class="ic">${icon('comment', 60, 2.4)}</div><div class="bd"><div class="hd"><span>MESAJLAR</span><span>${esc(g.when || 'şimdi')}</span></div>
+          <div class="nm">${esc(g.from || '')}</div><div class="tx">${esc(g.text || '')}</div></div></div>`);
+        break;
+      case 'chat': {
+        // aynı sahnedeki tüm chat mesajları tek bir sohbet ekranında birikir
+        const key = g._scene;
+        if (this.chatPanels?.[key]) { n = el('div', ''); n._panel = this.chatPanels[key]; break; }
+        n = el('div', 'g-chat', `<div class="top"><div class="av">${esc((g.contact || 'B')[0])}</div><div><div class="who">${esc(g.contact || 'Babam')}</div><div class="st">${esc(g.status || 'çevrimiçi')}</div></div></div><div class="body"></div>`);
+        (this.chatPanels = this.chatPanels || {})[key] = n; n._msgs = [];
+        break;
+      }
+      case 'peephole': n = el('div', 'g-peep'); break;
+      case 'cctv':
+        n = el('div', 'g-cctv', `<div class="scan"></div><div class="rec"><i></i>${esc(g.label || 'REC')}</div><div class="cam">${esc(g.cam || 'CAM 01')}</div><div class="ts"></div>
+          <div class="br" style="top:200px;left:40px;border-width:6px 0 0 6px"></div><div class="br" style="top:200px;right:40px;border-width:6px 6px 0 0"></div>
+          <div class="br" style="bottom:520px;left:40px;border-width:0 0 6px 6px"></div><div class="br" style="bottom:520px;right:40px;border-width:0 6px 6px 0"></div>`);
+        break;
+      case 'live':
+        n = el('div', 'g-live', `<div class="bar"><div class="pill">CANLI</div><div class="vw">${icon('eye', 40, 2.4)}<span>0</span></div></div><div class="cm"></div><div class="ht"></div>`);
+        break;
+      case 'clock': n = el('div', 'g-clock', esc(g.text || '03:17')); break;
+      case 'next': n = el('div', 'g-next', `<div class="a">${esc(up(g.kicker || 'DEVAMI YARIN'))}</div><div class="b">${esc(up(g.title || ''))}</div><div class="c">${esc(up(g.cta || 'TAKİP ET'))}</div>`); break;
       case 'stamp': n = el('div', 'g-stamp' + (g.tone === 'danger' ? ' danger' : ''), `<span>${esc(up(g.text))}</span>`); break;
       case 'fact':
         n = el('div', 'g-fact', `<div class="tag">${icon('sparkle', 34, 2.6)}BİLGİ</div><div class="ic">${icon(g.icon || 'sparkle', 72, 2)}</div>
@@ -158,20 +240,98 @@ export class StoryOverlay {
   update(t, ctx) {
     const dur = this.tl.meta.duration;
     if (this.nowPip) this.nowPip.style.width = `${clamp(t / dur) * 100}%`;
+    if (this.mini) { const endK = clamp((dur - 2.2 - t) / 0.4); this.mini.style.opacity = 0.75 * clamp((t - 2.4) / 0.6) * endK; }
     // cliff sırasında üst bar ve altyazı biraz geri çekilir
     let cliffK = 0;
     for (const it of this.items) {
       const { g, node } = it;
       const k0 = (t - g.t0), k1 = (g.t1 - t);
-      const on = t >= g.t0 - 0.05 && t <= g.t1 + 0.3;
+      const on = t >= g.t0 - 0.7 && t <= g.t1 + 0.3;
+      if (g.type === 'chat') { if (!node._panel) this._u_chat(node, g, t); continue; }
       if (!on) { node.style.opacity = 0; continue; }
-      const inK = clamp(k0 / 0.45), outK = clamp(1 - k1 / 0.25);
+      if (t < g.t0 - 0.05) { node.style.opacity = 0; continue; }
+      const inK = g.instant ? 1 : clamp(k0 / 0.45), outK = clamp(1 - k1 / 0.25);
       this[`_u_${g.type}`]?.(node, g, t, k0, inK, outK, ctx);
       if (g.type === 'cliff') cliffK = inK;
     }
-    this.top.style.opacity = 1 - 0.0 * cliffK;
+    if (this.top) this.top.style.opacity = 1 - 0.0 * cliffK;
     Overlay.prototype._updateCaptions.call(this, t);
     if (this.capLine && cliffK > 0) this.capEl.style.transform = `translateY(${cliffK * 230}px)`; else this.capEl.style.transform = '';
+  }
+
+  _u_hook(n, g, t, k0, inK, outK) {
+    n.style.opacity = (g.instant ? 1 : clamp(k0 * 5)) * (1 - outK);
+    n.style.transform = `scale(${g.instant ? 1 + 0.015 * Math.sin(t * 2) : lerp(0.9, 1, ease.outBack(clamp(k0 / 0.35)))})`;
+  }
+
+  _u_notify(n, g, t, k0, inK, outK) {
+    const s = g.instant ? 1 : spring(k0, { freq: 2.2, damping: 0.5 });
+    n.style.opacity = (g.instant ? 1 : clamp(k0 * 6)) * (1 - outK);
+    const vib = Math.max(0, 1 - Math.abs((k0 % 1.6) - 0.25) / 0.25) * (k0 < 3.3 ? 1 : 0);
+    const jx = vib * Math.sin(t * 90) * 7;
+    n.querySelector('.card').style.transform = `translate(${jx}px, ${(1 - s) * -120}px) scale(${0.9 + 0.1 * s})`;
+  }
+
+  _u_chat(n, g, t) {
+    const msgs = n._msgs;
+    const first = Math.min(...msgs.map((m) => m.t0)) - 0.6, last = Math.max(...msgs.map((m) => m.t1)), end = msgs[0]._end;
+    const vis = t >= first && t <= end;
+    if (!vis) { n.style.opacity = 0; return; }
+    const k0 = t - first;
+    n.style.opacity = clamp(k0 * 5) * (1 - clamp((t - (end - 0.2)) / 0.2));
+    n.style.transform = `translateY(${(1 - ease.outCubic(clamp(k0 / 0.4))) * 80}px)`;
+    const body = n.querySelector('.body');
+    const key = msgs.filter((m) => t >= m.t0).length + '|' + msgs.some((m) => m.from !== 'me' && t >= m.t0 - 0.7 && t < m.t0);
+    if (key !== n._key) {
+      n._key = key; body.innerHTML = '';
+      for (const m of msgs) {
+        if (m.from !== 'me' && t >= m.t0 - 0.7 && t < m.t0) { body.appendChild(el('div', 'typing', '<i></i><i></i><i></i>')); }
+        if (t >= m.t0) { const b = el('div', 'b ' + (m.from === 'me' ? 'me' : 'them'), esc(m.text)); b._m = m; body.appendChild(b); }
+      }
+    }
+    body.querySelectorAll('.b').forEach((b) => { const k = clamp((t - b._m.t0) / 0.25); b.style.transform = `scale(${lerp(0.6, 1, ease.outBack(k))})`; b.style.opacity = clamp(k * 3); });
+    body.querySelectorAll('.typing i').forEach((d, i) => { d.style.transform = `translateY(${-8 * Math.max(0, Math.sin(t * 9 - i * 0.8))}px)`; });
+  }
+
+  _u_peephole(n, g, t, k0, inK, outK) { n.style.opacity = clamp(k0 * 4) * (1 - outK); }
+
+  _u_cctv(n, g, t, k0, inK, outK) {
+    n.style.opacity = clamp(k0 * 6) * (1 - outK);
+    n.querySelector('.rec i').style.opacity = Math.floor(t * 2) % 2 ? 0.2 : 1;
+    const base = g.time || '12.11.2025 14:32:07';
+    const m = base.match(/(\d+):(\d+):(\d+)$/);
+    let txt = base;
+    if (m) { const sec = (+m[3] + Math.floor(k0)) % 60; txt = base.replace(/\d+$/, String(sec).padStart(2, '0')); }
+    n.querySelector('.ts').textContent = txt;
+  }
+
+  _u_live(n, g, t, k0, inK, outK) {
+    n.style.opacity = clamp(k0 * 5) * (1 - outK);
+    const dur = Math.max(1, (g.t1 - g.t0) * 0.85);
+    const v = Math.round(Math.exp(lerp(Math.log(g.from || 100), Math.log(g.to || 100000), ease.inOutQuad(clamp(k0 / dur)))));
+    n.querySelector('.vw span').textContent = v.toLocaleString(TR);
+    const cms = g.comments || [];
+    const shown = Math.min(cms.length, Math.floor(k0 / 0.7));
+    const cm = n.querySelector('.cm');
+    if (cm._n !== shown) { cm._n = shown; cm.innerHTML = cms.slice(Math.max(0, shown - 4), shown).map(([u, c]) => `<div><b>${esc(u)}</b>${esc(c)}</div>`).join(''); }
+    const ht = n.querySelector('.ht');
+    let h = '';
+    for (let i = 0; i < 6; i++) { const ph = ((t * 0.7 + i / 6) % 1); h += `<div style="position:absolute;right:${Math.sin(i * 2 + t) * 30}px;bottom:${ph * 520}px;opacity:${1 - ph};transform:scale(${0.6 + ph * 0.6})">${['❤️', '💛', '💙', '😮', '🔥', '❤️'][i]}</div>`; }
+    ht.innerHTML = h;
+  }
+
+  _u_clock(n, g, t, k0, inK, outK) {
+    n.style.opacity = clamp(k0 * 4) * (1 - outK);
+    const txt = g.text || '03:17';
+    n.textContent = Math.floor(t * 2) % 2 && g.blink ? txt.replace(':', ' ') : txt;
+    n.style.transform = `scale(${lerp(1.15, 1, ease.outCubic(clamp(k0 / 0.5)))})`;
+  }
+
+  _u_next(n, g, t, k0, inK, outK) {
+    n.style.opacity = clamp(k0 / 0.35);
+    n.querySelector('.a').style.opacity = clamp((k0 - 0.2) * 4);
+    const b = n.querySelector('.b'); b.style.opacity = clamp((k0 - 0.35) * 4); b.style.transform = `scale(${lerp(0.85, 1, ease.outBack(clamp((k0 - 0.35) / 0.4)))})`;
+    n.querySelector('.c').style.opacity = clamp((k0 - 0.8) * 4) * (0.75 + 0.25 * Math.sin(t * 6));
   }
 
   _u_title(n, g, t, k0, inK, outK) {

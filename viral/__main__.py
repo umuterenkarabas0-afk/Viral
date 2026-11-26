@@ -21,7 +21,7 @@ def main(argv=None):
     m = sub.add_parser("make", help="Bir senaryodan video üret")
     m.add_argument("script")
     m.add_argument("--out", default="output")
-    m.add_argument("--tts", default="auto", choices=["auto", "elevenlabs", "google", "piper", "espeak"])
+    m.add_argument("--tts", default="auto", choices=["auto", "elevenlabs", "google", "piper", "espeak", "none"])
     m.add_argument("--workers", type=int)
     m.add_argument("--target", type=float, help="hedef süre (sn); varsayılan: hikâye 45, geri sayım 60")
     m.add_argument("--no-render", action="store_true")

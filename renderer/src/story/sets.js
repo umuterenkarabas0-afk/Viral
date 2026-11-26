@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { clamp, lerp, smoothstep, noise3, mulberry32, ease } from '../util.js';
 import * as P from './props.js';
 import * as TX from './textures.js';
+import * as Q from './props2.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 // Düz bir kâğıdın (yerel +Y = yazının üstü) dünya uzayındaki "yukarı" yönü
@@ -81,6 +82,12 @@ export class SeaSet extends BaseSet {
     this.props.lighthouse_far = lh; this.props.lighthouse_on = new THREE.Object3D();
     // denizde süzülen şişe
     const drift = (this.drift = P.makeBottle()); this.group.add(drift); this.props.bottle_drift = drift;
+    // Kapıyı Açma: kürek kayığı (baba + Deniz), Selim'in projektörlü teknesi, devrik kayık
+    const row = (this.rowboat = Q.makeRowboat()); this.group.add(row); this.props.rowboat = row;
+    const rs = (n, x, z, ry) => { const o = new THREE.Object3D(); o.position.set(x, 0.12, z); o.rotation.y = ry; row.add(o); this.spots[n] = o; };
+    rs('rower', 0, 0.45, Math.PI); rs('passenger', 0, -0.55, 0);
+    const sb = (this.searchBoat = Q.makeSearchBoat(P.makeBoat)); this.group.add(sb); this.props.searchboat = sb;
+    const cap = (this.capsized = Q.makeRowboat()); cap.rotation.set(Math.PI, 0.6, 0.1); this.group.add(cap); this.props.capsized = cap;
 
     const self = this;
     this.anchors = {
@@ -94,7 +101,11 @@ export class SeaSet extends BaseSet {
       note: { pos: () => board.localToWorld(V(0, 0.03, 0)), frame: 0.45, yaw0: Math.PI / 2, paperUp: () => paperUp(cp.group) },
       lighthouse: { pos: () => lh.localToWorld(V(0, 9, 0)), frame: 32, yaw0: Math.PI / 2 + 0.6 },
       gulls: { pos: () => gg.localToWorld(V(0, 6, 0)), frame: 8, yaw0: 0 },
+      rowboat: { pos: () => row.localToWorld(V(0, 0.6, 0)), frame: 4.2, yaw0: Math.PI / 2 },
+      searchboat: { pos: () => sb.localToWorld(V(0, 1.6, 0)), frame: 12, yaw0: 0 },
+      capsized: { pos: () => cap.localToWorld(V(0, 0, 0)), frame: 4, yaw0: 0.4 },
     };
+    boat.userData.always = false;
   }
 
   _actorAnchor(who, part, fallback) {
@@ -102,8 +113,23 @@ export class SeaSet extends BaseSet {
     return a ? a.anchor(part) : this.boat.localToWorld(fallback.clone());
   }
 
-  update(t, scene) {
+  update(t, world, scene) {
     const w = this.world, boat = this.boat;
+    // kürek kayığı ve takip teknesi
+    const lt = scene?.lt || 0;
+    if (this.rowboat.visible) {
+      const rb = this.rowboat;
+      rb.position.set(0, w.heightAt(0, 0, t) * 0.9 + 0.02, 0);
+      rb.rotation.set(Math.sin(t * 1.1) * 0.05, 0, Math.sin(t * 0.9) * 0.06);
+      for (const [piv, sgn] of rb.userData.oars) piv.rotation.set(0, Math.sin(t * 1.6) * 0.5, sgn * (0.25 + 0.15 * Math.cos(t * 1.6)));
+    }
+    if (this.searchBoat.visible) {
+      const sb = this.searchBoat, z = -42 + Math.min(lt, 8) * 4.2;
+      sb.position.set(1.5, w.heightAt(1.5, z, t) * 0.8, z);
+      sb.rotation.set(-0.06 + Math.sin(t * 2) * 0.03, 0, Math.sin(t * 1.3) * 0.04);
+      sb.userData.searchHead.rotation.set(0.04 * Math.sin(t * 3), 0.05 * Math.sin(t * 1.7), 0);
+    }
+    if (this.capsized.visible) { this.capsized.position.set(0.6, w.heightAt(0.6, 0.5, t) * 0.9 + 0.1, 0.5); }
     // tekne dalgalarda salınır
     const h = w.heightAt(0, 0, t), hb = w.heightAt(0, 2.5, t), hs = w.heightAt(0, -2.5, t), hl = w.heightAt(-1, 0, t), hr = w.heightAt(1, 0, t);
     const amp = w.waveAmp;
@@ -154,16 +180,32 @@ export class SeaSet extends BaseSet {
 
 // ------------------------------------------------------------------ LİMAN KÖYÜ
 export class HarborSet extends BaseSet {
-  constructor(world) {
+  constructor(world, makeExtra, opts = {}) {
     super('harbor', V(400, 0, 0));
     this.world = world;
     const vil = (this.village = P.makeVillage()); this.group.add(vil); this.props.village = vil; vil.userData.always = true;
-    const boat = (this.boat = P.makeBoat({ name: 'İLYAS', stripe: '#2b7a4b' })); boat.position.set(5, 0, -8); boat.rotation.y = 0.05; this.group.add(boat);
+    const boat = (this.boat = P.makeBoat({ name: opts.boatName || 'İLYAS', stripe: '#2b7a4b' })); boat.position.set(4.2, 0, -8); boat.rotation.y = 0.05; this.group.add(boat);
     this.props.boat = boat;
+    const holes = Q.makeHoles(); holes.position.set(-1.2, 0.05, -0.2); holes.rotation.y = Math.PI; boat.add(holes); this.props.holes = holes;
+    const bph = Q.makeBrokenPhone(); bph.position.set(0.2, boat.userData.deckY(0.3) + 0.05, (0.3 - 0.5) * boat.userData.L + 0.9); bph.rotation.y = 0.4; boat.add(bph); this.props.brokenphone = bph;
+    // kalabalık (iskelede tekneye bakan kasabalılar)
+    this.crowd = [];
+    if (makeExtra) {
+      const cg = new THREE.Group(); this.group.add(cg); this.props.crowd = cg;
+      const looks = [{ sweater: '#5a4a3a', cap: '#333', hair: '#bbb' }, { sweater: '#2a4a5a', cap: null, hair: '#2a2a2a', beard: false }, { sweater: '#6a2a2a', cap: '#2a3a2a', hair: '#999' },
+        { sweater: '#3a5a3a', cap: null, hair: '#444', beard: false, mustache: true }, { sweater: '#4a4a6a', cap: null, hair: '#3a2418', female: true, hairStyle: 'long', beard: false, mustache: false },
+        { sweater: '#2f2f2f', cap: '#1d1d1d', hair: '#222', beard: false }, { sweater: '#7a5a2a', cap: null, hair: '#ccc' }];
+      const pos = [[-0.9, -6.2], [0.3, -7.4], [-0.4, -9.0], [0.9, -9.6], [-1.0, -10.4], [0.2, -11.2], [-0.6, -5.2]];
+      pos.forEach(([x, z], i) => { const ch = makeExtra({ coat: null, pants: '#2c2f36', ...looks[i % looks.length] }, 40 + i); ch.group.position.set(x, 1.2, z); ch.group.rotation.y = Math.PI / 2 + (i % 3 - 1) * 0.3; cg.add(ch.group); this.crowd.push(ch); });
+      this.suspect = this.crowd[5];
+    }
     const spot = (x, y, z, ry) => { const o = new THREE.Object3D(); o.position.set(x, y, z); o.rotation.y = ry; this.group.add(o); return o; };
     this.spots.pier = spot(0, 1.2, -6, Math.PI);
     this.spots.pier2 = spot(0.8, 1.2, -4.5, Math.PI + 0.5);
     this.spots.edge = spot(0.6, 1.2, 1.5, 0.2);
+    this.spots.boatside = spot(1.0, 1.2, -8.3, Math.PI / 2);
+    this.spots.boatside2 = spot(0.6, 1.2, -7.2, Math.PI / 2 + 0.6);
+    this.spots.rescue = spot(-0.2, 1.2, -3.0, 0.3);
     this.gulls = [];
     const gg = new THREE.Group(); this.group.add(gg); this.props.gulls = gg;
     for (let i = 0; i < 6; i++) { const g = P.makeGull(); g.scale.setScalar(1.3); gg.add(g); this.gulls.push(g); }
@@ -178,10 +220,16 @@ export class HarborSet extends BaseSet {
       village: { pos: () => self.group.localToWorld(V(0, 8, -50)), frame: 60, yaw0: 0 },
       boat: { pos: () => boat.localToWorld(V(0, 1, 0)), frame: 13, yaw0: Math.PI / 2 },
       lighthouse: { pos: () => self.lh.localToWorld(V(0, 9, 0)), frame: 48, yaw0: Math.PI },
+      holes: { pos: () => holes.localToWorld(V(0, 0.15, 0.35)), frame: 1.6, yaw0: -Math.PI / 2 },
+      brokenphone: { pos: () => bph.localToWorld(V(0, 0, 0)), frame: 0.42, yaw0: 0.3 },
+      crowd: { pos: () => self.group.localToWorld(V(-0.2, 2.6, -8)), frame: 4.2, yaw0: -Math.PI / 2 },
+      suspect: { pos: () => (self.suspect ? self.suspect.anchor('chest') : self.group.localToWorld(V(0, 2.4, -11))), frame: 1.6, yaw0: -Math.PI / 2 + 0.4 },
     };
   }
   _a(who, part, fb) { const a = this.actors && (who === '*' ? Object.values(this.actors)[0] : this.actors[who]); return a ? a.anchor(part) : this.group.localToWorld(fb.clone()); }
-  update(t) {
+  update(t, world, scene) {
+    this.crowd.forEach((c, i) => c.update(t, c === this.suspect && this.has('suspect_phone') ? 'phone' : (i % 3 ? 'stand' : 'look'), 2));
+    if (this.suspect) this.suspect.setLook({ phone: this.has('suspect_phone'), screen: 0.6 });
     const w = this.world;
     this.boat.position.y = w.heightAt(405, -8, t) * 0.6 + 0.05;
     this.boat.rotation.z = Math.sin(t * 0.8) * 0.03;
@@ -369,6 +417,19 @@ export class HomeSet extends BaseSet {
     const nb = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.31), new THREE.MeshStandardMaterial({ map: TX.notebookTexture(), roughness: 0.85 }));
     nb.rotation.x = -Math.PI / 2; nb.position.set(-0.05, 0.787, -0.3); this.group.add(nb); this.props.notebook = nb;
     const chair = P.makeChair(); chair.position.set(0, 0, 0.15); chair.rotation.y = Math.PI; this.group.add(chair);
+    // Kapıyı Açma: masadaki telefon, tapu kâğıdı, saat; kapının dışı (sundurma)
+    const tph = (this.tablePhone = Q.makeOldPhone()); tph.position.set(0.12, 0.79, -0.42); tph.rotation.y = 0.35; this.group.add(tph); this.props.phone_table = tph;
+    const deedTex = TX.canvasTex(600, 800, (g, w, h) => { g.fillStyle = '#f3efe3'; g.fillRect(0, 0, w, h); g.fillStyle = '#7a1020'; g.fillRect(0, 0, w, 90); g.fillStyle = '#fff'; g.font = '400 64px Anton'; g.textAlign = 'center'; g.fillText('TAPU SENEDİ', w / 2, 68);
+      g.fillStyle = '#111'; g.font = '800 30px Montserrat'; g.textAlign = 'left'; ['Satıcı: Deniz K.', 'Ada / Parsel: 117 / 17', 'Liman Mah., Depo No: 17', 'Satış bedeli: ***'].forEach((l, i) => g.fillText(l, 50, 180 + i * 60));
+      TX.handText(g, 'Deniz K.', 300, 640, 72, '#1f3a8a', 7, -0.08); g.strokeStyle = '#7a1020'; g.lineWidth = 5; g.beginPath(); g.arc(150, 640, 70, 0, Math.PI * 2); g.stroke(); g.font = '800 22px Montserrat'; g.fillStyle = '#7a1020'; g.fillText('ONAY', 118, 648); });
+    const deed = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.32), new THREE.MeshStandardMaterial({ map: deedTex, roughness: 0.85 })); deed.rotation.x = -Math.PI / 2; deed.rotation.z = 0.15; deed.position.set(-0.12, 0.787, -0.4); this.group.add(deed); this.props.deed = deed;
+    const step = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 1.2), P.M('#8a857c', 0.95)); step.position.set(0.9, -0.04, 2.85); step.receiveShadow = true; this.group.add(step);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(8, 6), P.M('#3a3b36', 1)); ground.rotation.x = -Math.PI / 2; ground.position.set(0.9, -0.08, 5.4); this.group.add(ground);
+    const ext = new THREE.Mesh(new THREE.PlaneGeometry(6, 3.2), P.M('#ffffff', 0.95, 0, { map: plaster })); ext.position.set(0.9, 1.5, 2.215); this.group.add(ext);
+    const extDoor = new THREE.Mesh(new THREE.BoxGeometry(0.95, 2.05, 0.05), P.M('#ffffff', 0.75, 0, { map: TX.woodTexture('#7a4a2a', 21, [1, 1]) })); extDoor.position.set(0.9, 1.02, 2.24); this.group.add(extDoor); this.extDoor = extDoor;
+    const porchBulb = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), P.M('#fff', 0.2, 0, { emissive: new THREE.Color('#ffcf80'), emissiveIntensity: 4 })); porchBulb.position.set(1.65, 2.25, 2.33); this.group.add(porchBulb);
+    const porch = new THREE.PointLight('#ffbf70', 2.4, 5, 1.6); porch.position.set(1.6, 2.15, 2.6); this.group.add(porch); this.porch = porch;
+    const watch = (this.watch = Q.makeWatch()); this.group.add(watch); this.props.watch = watch; this.props.watch_step = watch;
     // pencere
     const wf = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.1, 1.0), P.M('#3a2a1e', 0.7)); wf.position.set(-2.28, 1.5, -0.6); this.group.add(wf);
     const glassM = new THREE.MeshBasicMaterial({ color: '#16294a' });
@@ -382,6 +443,11 @@ export class HomeSet extends BaseSet {
     this.spots.riza = spot(0, 0, 0.12, Math.PI);
     this.spots.rizaStand = spot(-0.9, 0, 1.0, 0.7);
     this.spots.stranger = spot(0.9, 0, 1.95, Math.PI);
+    this.spots.table = this.spots.riza;
+    this.spots.doorIn = spot(0.85, 0, 1.72, 0.05);
+    this.spots.porch = spot(0.95, 0, 3.25, Math.PI);
+    this.spots.porchLeave = spot(0.6, 0, 3.6, 0.15);
+    this.spots.doorOpen = spot(0.9, 0, 1.95, Math.PI);
     const self = this;
     this.anchors = {
       table: { pos: () => self.group.localToWorld(V(0, 0.85, -0.5)), frame: 1.6, yaw0: 0 },
@@ -392,16 +458,35 @@ export class HomeSet extends BaseSet {
       bottle: { pos: () => bottle.localToWorld(V(0, 0.25, 0)), frame: 0.75, yaw0: 0.4 },
       photo: { pos: () => ph.localToWorld(V(0, 0, 0)), frame: 0.42, yaw0: 0, paperUp: () => paperUp(ph) },
       notebook: { pos: () => nb.localToWorld(V(0, 0, 0)), frame: 0.65, yaw0: 0, paperUp: () => paperUp(nb) },
+      phone_table: { pos: () => tph.localToWorld(V(0, 0.01, 0)), frame: 0.5, yaw0: 0.3 },
+      deed: { pos: () => deed.localToWorld(V(0, 0, 0)), frame: 0.45, yaw0: 0, paperUp: () => paperUp(deed) },
+      watch: { pos: () => watch.localToWorld(V(0, 0, 0)), frame: 0.1, yaw0: Math.PI },
+      peephole: { pos: () => self.group.localToWorld(V(0.9, 1.58, 2.3)), frame: 1, yaw0: 0 },
+      porch: { pos: () => self.group.localToWorld(V(0.95, 1.5, 2.9)), frame: 2.2, yaw0: Math.PI },
+      outside: { pos: () => self.group.localToWorld(V(0.9, 1.1, 3.2)), frame: 2.6, yaw0: 0 },
     };
   }
   _a(who, part, fb) { const a = this.actors && this.actors[who]; return a ? a.anchor(part) : this.group.localToWorld(fb.clone()); }
-  update(t, world) {
+  update(t, world, scene) {
     const day = world.timeName === 'day' || world.timeName === 'dawn';
     this.winM.color.set(day ? '#bfe0ff' : '#16294a');
-    this.lamp.userData.light.intensity = day ? 1.2 : 2.6;
-    const open = this.actors && this.actors.stranger ? 1 : 0;
+    const lm = scene?.lights || (day ? 'on' : 'on');
+    this.lamp.userData.light.intensity = lm === 'off' ? 0 : lm === 'dim' ? 0.35 : day ? 1.2 : 2.6;
+    this.lamp.children.forEach((c) => { if (c.material && c.material.emissive) c.material.emissiveIntensity = lm === 'off' ? 0 : lm === 'dim' ? 0.15 : 0.9; });
+    const open = scene?.door === 'open' || (scene?.door == null && this.actors && this.actors.stranger) ? 1 : 0;
     this.door.userData.leaf.rotation.y = -1.25 * open;
+    this.extDoor.visible = !open;
+    if (this.door.userData.hole) this.door.userData.hole.material.color.set(day ? '#cfe3f5' : '#050a16');
     this.outside.intensity = open * 1.2;
+    this.porch.intensity = scene?.porch ? 2.4 : 0;
+    const lit = scene?.phoneLit || 0, u = this.tablePhone.userData;
+    u.scrM.color.setRGB(0.05 + 0.75 * lit, 0.06 + 0.82 * lit, 0.08 + 0.95 * lit); u.glow.intensity = 1.4 * lit;
+    // saat: Selim'in elinde sallanıyor ya da eşikte yatıyor
+    const holder = this.actors && Object.values(this.actors).find((c) => c.holdsWatch);
+    if (holder && this.watch.visible) {
+      const p = holder.anchor('handR'); this.group.worldToLocal(p);
+      this.watch.position.copy(p).add(V(0, -0.11, 0)); this.watch.rotation.set(0.08 * Math.sin(t * 2.2), Math.PI + 0.2 * Math.sin(t * 1.3), 0.25 * Math.sin(t * 2.2));
+    } else { this.watch.position.set(0.85, 0.012, 2.75); this.watch.rotation.set(-Math.PI / 2, 0, 0.6); }
   }
 }
 
@@ -434,10 +519,12 @@ export class VoidSet extends BaseSet {
     const dc = new THREE.Mesh(new THREE.BoxGeometry(0.9, 4.0, 0.9), new THREE.MeshBasicMaterial({ map: TX.depthTexture() })); dc.position.set(0, 1.6, 0); this.group.add(dc); this.props.depth_column = dc;
     const wreck = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.12, 0.2), P.M('#4a3a2a', 0.9)); wreck.position.set(0.0, -0.1, 0.5); dc.add(wreck);
     const bd = (this.bottle = P.makeBottle()); bd.scale.setScalar(3); this.group.add(bd); this.props.bottle_drift = bd;
+    const keyObj = (this.key = Q.makeKey()); keyObj.scale.setScalar(6); keyObj.position.set(0, 0.9, 0); this.group.add(keyObj); this.props.key = keyObj;
     const photo = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.17), new THREE.MeshStandardMaterial({ map: TX.photoTexture(), roughness: 0.6 })); photo.position.set(0, 1.0, 0); this.group.add(photo); this.props.photo = photo;
     const self = this;
     this.anchors = {
       // ızgara yoksa (para, mantar, şişe, parmak izi…) kamera ortadaki nesneye yakınlaşır
+      key: { pos: () => keyObj.localToWorld(V(0.03, 0, 0)), frame: 1.1, yaw0: 0 },
       grid: { pos: () => self.group.localToWorld(V(0, self.grid.visible ? 0.4 : 0.9, 0)), get frame() { return self.grid.visible ? 1.2 : 0.42; }, yaw0: 0 },
       cork: { pos: () => cork.localToWorld(V(0, 0.35, 0)), frame: 1.5, yaw0: 0 },
       photo: { pos: () => photo.localToWorld(V(0, 0, 0)), frame: 1.6, yaw0: 0 },
@@ -464,5 +551,6 @@ export class VoidSet extends BaseSet {
     this.props.depth_column.rotation.y = t * 0.2;
     this.bottle.position.set(0, 0.6 + Math.sin(t * 1.2) * 0.1, 0); this.bottle.rotation.set(Math.PI / 2 - 0.3 + Math.sin(t) * 0.1, t * 0.4, 0.2);
     this.props.photo.rotation.set(-0.15, Math.sin(t * 0.5) * 0.2, 0.05);
+    this.key.rotation.set(0.3 + Math.sin(t * 0.7) * 0.1, t * 0.35, Math.sin(t * 0.5) * 0.15);
   }
 }

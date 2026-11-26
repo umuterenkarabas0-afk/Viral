@@ -135,7 +135,8 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
                 seg_rec["title"] = {"kicker": d["title"].get("kicker", ""), "big": d["title"].get("big", ""),
                                     "at": round((w["s"] - 0.05) if w else v_start + 2.0, 3)}
         elif seg.kind == "scene":
-            for k in ("set", "time", "shot", "actors", "props", "mood", "weather", "cover", "cover_at", "music"):
+            for k in ("set", "time", "shot", "actors", "props", "mood", "weather", "cover", "cover_at", "music",
+                      "filter", "lights", "door", "porch", "phone_lit", "transition"):
                 if d.get(k) is not None:
                     seg_rec[k] = d[k]
             gfx = []
@@ -143,7 +144,7 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
                 w = _find_word(seg_words, g.get("at_word"))
                 t0 = (w["s"] - 0.08) if w else (v_start + float(g.get("at", 0.0)))
                 rec = {k: v for k, v in g.items() if k not in ("at_word", "at")}
-                rec["t0"] = round(max(prev_boundary, t0), 3)
+                rec["t0"] = round(prev_boundary if g.get("instant") else max(prev_boundary, t0), 3)
                 dur = g.get("dur")
                 rec["t1"] = round(min(boundary, rec["t0"] + dur) if dur else boundary, 3)
                 gfx.append(rec)
@@ -183,6 +184,7 @@ def build_timeline(script: dict[str, Any], clips: list[VoiceClip], *, bpm: float
         "format": script.get("format", "countdown"),
         "series": script.get("series"),
         "cast": script.get("cast", {}),
+        "world": script.get("world", {}),
         "theme": script.get("theme", {}),
         "environment": script.get("environment", "ocean"),
         "segments": segs_out,

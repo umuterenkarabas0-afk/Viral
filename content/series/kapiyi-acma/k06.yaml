@@ -1,0 +1,149 @@
+# Kapıyı Açma — Bölüm 6 (final): Kapıyı Açma
+id: kapiyi-acma-k06
+format: story
+title: "Kapıyı Açma"
+language: tr-TR
+target_duration: 75
+bpm: 76
+series: { id: kapiyi-acma, title: "Kapıyı Açma", episode: 6, total: 6, next_title: null, style: minimal }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.35, style: 0.5 } }
+theme: { accent: "#FFD23F", accent2: "#7FD1FF", danger: "#FF3B4E" }
+world: { boat: "YUSUF REİS" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Babamın son cümlesi yarım kalmıştı: Kartı sakın Kerem'e... Ver mi diyecekti? Yoksa verme mi?"
+    set: sea
+    time: night
+    shot: { type: pull, target: capsized, from: { yaw: 0.4, pitch: 0.1, dist: 1.2 }, to: { yaw: 0.6, pitch: 0.25, dist: 2.2 } }
+    props: [capsized]
+    mood: tension
+    cover: true
+    cover_at: 0.2
+    gfx:
+      - { type: hook, text: "Babamın son cümlesi yarım kaldı: *Kartı sakın Kerem'e...*", instant: true, at: 0, dur: 4.2 }
+
+  - id: factory
+    say: "Telefonum denizde ölmüştü. Kıyıya yüzüp eski buz fabrikasına sığındım. Babamın bir yıl yaşadığı yere."
+    set: factory
+    time: night
+    shot: { type: establish, target: room, from: { yaw: -0.4, pitch: 0.18, dist: 0.6 }, to: { yaw: -0.1, pitch: 0.12, dist: 0.45 } }
+    actors: { deniz: { pose: walk, spot: enter, walk: [-0.35, -0.45] } }
+    mood: tension
+
+  - id: wall
+    say: "Duvarlar fotoğraf ve haritalarla doluydu. Bir köşede üç yüz altmış beş çentik."
+    set: factory
+    time: night
+    shot: { type: track, target: board, from: { yaw: -0.3, pitch: 0.05, dist: 1.2 }, to: { yaw: 0.25, pitch: 0.05, dist: 0.95 } }
+    mood: tension
+    gfx:
+      - { type: counter, from: 0, to: 365, label: "GÜN", suffix: "", at_word: "çentik", dur: 2.4 }
+
+  - id: list
+    say: "Masada bir liste: Selim'in maaşla çalışan adamları. Son isim kırmızıyla daire içine alınmıştı: Kerem."
+    set: factory
+    time: night
+    shot: { type: closeup, target: list, from: { yaw: 0.0, pitch: 1.3, dist: 1.5 }, to: { yaw: 0.05, pitch: 1.15, dist: 1.15 } }
+    mood: reveal
+    cues: [ { type: heartbeat, at_word: "Kerem", dur: 2.0 } ]
+
+  - id: flashback
+    say: "Mesajlarıma uzun uzun bakan adam. Babamın numarasını o andan beri bilen adam. Babam verme diyecekti."
+    set: harbor
+    time: day
+    filter: flashback
+    shot: { type: push, target: kerem.face, from: { yaw: -0.6, pitch: 0.05, dist: 3.0 }, to: { yaw: -0.4, pitch: 0.03, dist: 1.8 } }
+    actors: { kerem: { pose: phone, spot: boatside2, phone: true } }
+    props: [boat]
+    mood: reveal
+    gfx:
+      - { type: stamp, text: "VERME!", tone: danger, at_word: "verme", dur: 2.0 }
+
+  - id: oldphone
+    say: "Masada, bir güneş paneline bağlı eski bir telefon şarj oluyordu. Bana bir yıldır yazan telefon."
+    set: factory
+    time: night
+    shot: { type: push, target: oldphone, from: { yaw: 0.4, pitch: 0.6, dist: 2.0 }, to: { yaw: 0.25, pitch: 0.5, dist: 1.2 } }
+    mood: tension
+
+  - id: kmsg
+    say: "Ekranı yandı. Yeni mesaj: Deniz, burada olduğunu biliyorum. Kerem."
+    set: factory
+    time: night
+    shot: { type: closeup, target: oldphone, from: { yaw: 0.2, pitch: 0.9, dist: 1.2 }, to: { yaw: 0.1, pitch: 0.85, dist: 0.9 } }
+    phone_lit: 0.3
+    mood: reveal
+    cues: [ { type: vibrate, at_word: "yandı" } ]
+    gfx:
+      - { type: notify, from: "Kerem", text: "Deniz, burada olduğunu biliyorum.", when: "şimdi", at_word: "Ekranı" }
+
+  - id: knock
+    say: "Kapı çaldı. Üç kez. Kırmalarına iki dakika vardı. Bana bir dakika yeterdi."
+    set: factory
+    time: night
+    shot: { type: push, target: door, from: { yaw: 0.2, pitch: 0.06, dist: 1.4 }, to: { yaw: 0.1, pitch: 0.04, dist: 0.9 } }
+    mood: reveal
+    cues: [ { type: knock, at_word: "çaldı" }, { type: shake, at_word: "çaldı", dur: 0.5, amount: 0.6 } ]
+
+  - id: live
+    say: "Canlı yayın açtım. Kartta ne varsa okudum. Yüz kişi izliyordu. Sonra on bin. Sonra yüz bin."
+    set: factory
+    time: night
+    shot: { type: push, target: deniz.face, from: { yaw: 0.1, pitch: 0.04, dist: 2.0 }, to: { yaw: 0.05, pitch: 0.02, dist: 1.2 } }
+    actors: { deniz: { pose: phone, spot: deniz, phone: true } }
+    mood: triumph
+    gfx:
+      - { type: live, from: 100, to: 104000, at_word: "Canlı", comments: [["deniz_k_takip", "Polise haber verin!"], ["karadenizli61", "Selim'i tanıyorum..."], ["merve.trbzn", "Kızım yalnız değilsin"], ["hakan_reis", "Paylaşın, herkes görsün!"], ["ayse.k", "Kerem mi?? Olamaz"], ["limanci_ali", "Ekipler yolda!"]] }
+
+  - id: broken
+    say: "Kapıyı kırdıklarında, bütün ülke onları izliyordu."
+    set: factory
+    time: night
+    shot: { type: push, target: selim.face, from: { yaw: 0.1, pitch: 0.05, dist: 3.0 }, to: { yaw: 0.05, pitch: 0.03, dist: 1.8 } }
+    actors: { selim: { pose: shock, spot: selim }, kerem: { pose: shock, spot: kerem } }
+    mood: triumph
+    cues: [ { type: crash, at_word: "kırdıklarında" }, { type: shake, at_word: "kırdıklarında", dur: 0.5, amount: 0.8 } ]
+    gfx:
+      - { type: live, from: 104000, to: 1280000, at: 0, comments: [["canli_izliyorum", "YAKALANDILAR!"], ["deniz_k_takip", "Herkes kaydetti!"]] }
+
+  - id: rescue
+    say: "İki gün sonra balıkçılar denizden bir adam çıkardı. Babam. Deniz onu yine geri vermişti."
+    set: harbor
+    time: dawn
+    shot: { type: establish, target: yusuf, from: { yaw: 0.6, pitch: 0.2, dist: 2.6 }, to: { yaw: 0.3, pitch: 0.12, dist: 1.6 } }
+    actors: { yusuf: { pose: stand, spot: rescue, hood: false }, deniz: { pose: cheer, spot: edge } }
+    props: [boat, crowd]
+    mood: triumph
+
+  - id: tea
+    say: "Şimdi karşımda çayını içiyor. Telefonu masada, ekranı kapalı. Saat üçü on yedi."
+    set: home
+    time: night
+    lights: dim
+    shot: { type: push, target: phone_table, from: { yaw: 0.6, pitch: 0.5, dist: 3.6 }, to: { yaw: 0.35, pitch: 0.4, dist: 2.2 } }
+    actors: { yusuf: { pose: sit, spot: table, hood: false } }
+    props: [phone_table]
+    mood: calm
+    gfx:
+      - { type: clock, text: "03:17", at_word: "Saat", dur: 2.2 }
+
+  - id: end
+    say: "Telefonum titredi. Babamın numarası. Kapıyı açma."
+    set: home
+    time: night
+    lights: off
+    shot: { type: closeup, target: phone_table, from: { yaw: 0.2, pitch: 0.85, dist: 1.2 }, to: { yaw: 0.1, pitch: 0.8, dist: 0.85 } }
+    props: [phone_table]
+    phone_lit: 1
+    mood: cliff
+    cues: [ { type: vibrate, at_word: "titredi" } ]
+    gfx:
+      - { type: notify, from: "Babam", text: "Kapıyı açma.", when: "03:17", at_word: "Babamın" }
+      - { type: next, kicker: "Son", title: "Kapıyı Açma · 2. Sezon yakında", cta: "Takip et", at: 3.2 }
+
+seo:
+  title: "Canlı yayın açtım ve bütün ülke izledi 📱 | Kapıyı Açma #6 FİNAL"
+  description: "Kerem'e verme diyecekti. Ve 03:17'de telefonum yine titredi. (Kurgu dizi) 2. sezon gelsin mi? 👇"
+  hashtags: ["#kapıyıaçma", "#gerilim", "#hikaye", "#minidizi", "#final", "#shorts", "#keşfet", "#karadeniz"]

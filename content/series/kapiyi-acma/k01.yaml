@@ -1,0 +1,157 @@
+# Kapıyı Açma — Bölüm 1: 03.17
+id: kapiyi-acma-k01
+format: story
+title: "03.17"
+language: tr-TR
+target_duration: 70
+bpm: 76
+series: { id: kapiyi-acma, title: "Kapıyı Açma", episode: 1, total: 6, next_title: "Batırılmış", style: minimal }
+voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.35, style: 0.5 } }
+theme: { accent: "#FFD23F", accent2: "#7FD1FF", danger: "#FF3B4E" }
+world: { boat: "YUSUF REİS" }
+cast_ref: series.yaml
+
+scenes:
+  - id: hook
+    say: "Babamı bir yıl önce gömdük. Daha doğrusu, boş bir tabutu."
+    set: home
+    time: night
+    lights: off
+    porch: false
+    shot: { type: push, target: phone_table, from: { yaw: 0.3, pitch: 0.85, dist: 1.5 }, to: { yaw: 0.15, pitch: 0.75, dist: 0.9 } }
+    props: [phone_table]
+    phone_lit: 1
+    mood: tension
+    cover: true
+    cover_at: 0.2
+    gfx:
+      - { type: hook, text: "Babamı bir yıl önce gömdüm. *Dün gece bana mesaj attı.*", instant: true, at: 0, dur: 3.6 }
+      - { type: notify, from: "Babam", text: "Kapıyı açma.", when: "03:17", instant: true, at: 0 }
+
+  - id: storm
+    say: "Fırtınada teknesiyle kayboldu, cesedi hiç bulunamadı."
+    set: sea
+    time: storm
+    filter: flashback
+    shot: { type: establish, target: boat, from: { yaw: -0.6, pitch: 0.18, dist: 1.5 }, to: { yaw: -0.3, pitch: 0.1, dist: 1.0 } }
+    props: [boat]
+    mood: calm
+
+  - id: deed
+    say: "Dün, onun evini satmak için tapuda imza attım."
+    set: home
+    time: day
+    shot: { type: closeup, target: deed, from: { yaw: 0.0, pitch: 1.3, dist: 1.4 }, to: { yaw: 0.08, pitch: 1.15, dist: 1.0 } }
+    actors: { deniz: { pose: sit, spot: table } }
+    props: [deed]
+    mood: calm
+    gfx:
+      - { type: stamp, text: "SATILDI", at_word: "imza", dur: 2.2 }
+
+  - id: buzz
+    say: "Ve dün gece saat üçü on yedi geçe telefonum titredi. Ekranda tek bir isim vardı: Babam."
+    set: home
+    time: night
+    lights: off
+    shot: { type: push, target: deniz.face, from: { yaw: 0.5, pitch: 0.05, dist: 2.2 }, to: { yaw: 0.25, pitch: 0.02, dist: 1.2 } }
+    actors: { deniz: { pose: phone, spot: table, phone: true } }
+    mood: tension
+    cues: [ { type: vibrate, at_word: "titredi" } ]
+    gfx:
+      - { type: notify, from: "Babam", text: "Kapıyı açma.", when: "03:17", at_word: "Babam" }
+
+  - id: two
+    say: "Mesajda iki kelime yazıyordu: Kapıyı açma."
+    set: home
+    time: night
+    lights: off
+    shot: { type: closeup, target: deniz.face, from: { yaw: 0.15, pitch: 0.0, dist: 1.0 }, to: { yaw: 0.05, pitch: 0.0, dist: 0.7 } }
+    actors: { deniz: { pose: phone, spot: table, phone: true } }
+    mood: tension
+    cues: [ { type: heartbeat, at_word: "Kapıyı", dur: 2.0 } ]
+
+  - id: who
+    say: "Ellerim titreyerek yazdım: Kimsin sen? Cevap hemen geldi: Üç dakika sonra kapın çalacak. Ne olursa olsun açma."
+    set: home
+    time: night
+    lights: off
+    shot: { type: over, target: deniz.hands, from: { yaw: 2.7, pitch: 0.6, dist: 1.4 }, to: { yaw: 2.9, pitch: 0.7, dist: 1.0 } }
+    actors: { deniz: { pose: type, spot: table, phone: true } }
+    mood: tension
+    gfx:
+      - { type: chat, contact: "Babam", status: "son görülme: 1 yıl önce", from: me, text: "Kimsin sen?", at_word: "Kimsin" }
+      - { type: chat, contact: "Babam", from: them, text: "3 dakika sonra kapın çalacak. Ne olursa olsun açma.", at_word: "Üç" }
+
+  - id: knock
+    say: "Saate baktım. Üçü yirmi geçe... kapı çaldı."
+    set: home
+    time: night
+    lights: off
+    shot: { type: push, target: door, from: { yaw: 0.25, pitch: 0.08, dist: 1.6 }, to: { yaw: 0.1, pitch: 0.04, dist: 1.0 } }
+    mood: reveal
+    cues: [ { type: knock, at_word: "kapı" }, { type: shake, at_word: "kapı", dur: 0.4, amount: 0.5 } ]
+    gfx:
+      - { type: clock, text: "03:20", at_word: "Saate", dur: 2.2 }
+
+  - id: voice
+    say: "Dışarıdan tanıdık bir ses geldi. Babamın en yakın arkadaşı, Selim amca. Deniz, kızım, aç kapıyı. Babanla ilgili bir şey buldum."
+    set: home
+    time: night
+    lights: off
+    shot: { type: push, target: deniz.head, from: { yaw: 2.5, pitch: 0.12, dist: 2.4 }, to: { yaw: 2.75, pitch: 0.08, dist: 1.6 } }
+    actors: { deniz: { pose: peek, spot: doorIn, phone: true, screen: 0.3 } }
+    mood: tension
+
+  - id: warn
+    say: "Telefon yeniden titredi: Onu iyi biri sanıyorsun. Değil."
+    set: home
+    time: night
+    lights: off
+    shot: { type: closeup, target: deniz.hands, from: { yaw: 0.2, pitch: 0.5, dist: 1.2 }, to: { yaw: 0.1, pitch: 0.45, dist: 0.8 } }
+    actors: { deniz: { pose: phone, spot: doorIn, phone: true } }
+    mood: reveal
+    cues: [ { type: vibrate, at_word: "titredi" } ]
+    gfx:
+      - { type: notify, from: "Babam", text: "Onu iyi biri sanıyorsun. Değil.", when: "03:20", at_word: "Onu" }
+
+  - id: peephole
+    say: "Kapının deliğinden baktım. Selim amca gülümsüyordu. Elinde bir kol saati sallanıyordu."
+    set: home
+    time: night
+    filter: peephole
+    shot: { type: pov, eye: peephole, target: selim.head, tilt: -0.3, fov: [82, 70] }
+    porch: true
+    actors: { selim: { pose: dangle, spot: porch, holds: watch } }
+    props: [watch]
+    mood: tension
+    gfx:
+      - { type: peephole, at: 0 }
+
+  - id: watch
+    say: "Babamın saati. Kaybolduğu gece kolundaydı. Camı kırılmış, akrebi ve yelkovanı tek bir anda durmuştu."
+    set: home
+    time: night
+    porch: true
+    shot: { type: push, target: watch, from: { yaw: 0.2, pitch: 0.1, dist: 2.4 }, to: { yaw: 0.05, pitch: 0.02, dist: 1.3 } }
+    actors: { selim: { pose: dangle, spot: porch, holds: watch } }
+    props: [watch]
+    mood: reveal
+    cues: [ { type: heartbeat, at_word: "durmuştu", dur: 2.0 } ]
+
+  - id: cliff
+    say: "Üçü on yedi geçe."
+    set: home
+    time: night
+    porch: true
+    shot: { type: closeup, target: watch, from: { yaw: 0.0, pitch: 0.0, dist: 1.0 }, to: { yaw: 0.0, pitch: 0.0, dist: 0.7 } }
+    actors: { selim: { pose: dangle, spot: porch, holds: watch } }
+    props: [watch]
+    mood: cliff
+    cues: [ { type: flash, at_word: "Üçü", amount: 0.5 } ]
+    gfx:
+      - { type: next, kicker: "Devamı yarın", title: "2. Bölüm: Batırılmış", cta: "Takip et", at: 1.4 }
+
+seo:
+  title: "Ölen babamdan gece 03:17'de mesaj geldi 😨 | Kapıyı Açma #1"
+  description: "Babamı bir yıl önce gömdük. Dün gece ondan tek bir mesaj geldi: Kapıyı açma. (Kurgu dizi) Sence mesajı kim atıyor? 👇"
+  hashtags: ["#kapıyıaçma", "#gerilim", "#hikaye", "#minidizi", "#gizem", "#shorts", "#keşfet", "#karadeniz"]

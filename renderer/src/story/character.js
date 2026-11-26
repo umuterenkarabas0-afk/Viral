@@ -20,7 +20,8 @@ function sphere(r, m, sx = 1, sy = 1, sz = 1, ws = 20, hs = 14) {
   return mesh;
 }
 
-const DEF = { skin: '#c98f6b', hair: '#d9d4cc', beard: true, mustache: true, cap: '#2b3a55', coat: '#f2b705', sweater: '#24344f', pants: '#2c2f36', boots: '#1d2a22', glasses: false, tie: null, age: 60 };
+const DEF = { skin: '#c98f6b', hair: '#d9d4cc', beard: true, mustache: true, cap: '#2b3a55', coat: '#f2b705', sweater: '#24344f', pants: '#2c2f36', boots: '#1d2a22', glasses: false, tie: null, age: 60,
+  female: false, hairStyle: null, hood: null, lips: '#b5525a', scale: 1 };
 
 export class Character {
   constructor(params = {}, seed = 1) {
@@ -62,17 +63,17 @@ export class Character {
     const prof = [[0.0, 0.16], [0.06, 0.175], [0.16, 0.19], [0.26, 0.2], [0.33, 0.19], [0.4, 0.165], [0.46, 0.11], [0.5, 0.0]];
     for (const [y, r] of prof) torsoPts.push(new THREE.Vector2(r, y));
     const torsoG = new THREE.LatheGeometry(torsoPts, 22);
-    const torso = new THREE.Mesh(torsoG, coatM); torso.scale.set(1.08, 1, 0.78); torso.position.y = -0.06; torso.castShadow = true;
+    const torso = new THREE.Mesh(torsoG, coatM); torso.scale.set(p.female ? 0.92 : 1.08, 1, p.female ? 0.72 : 0.78); torso.position.y = -0.06; torso.castShadow = true;
     spine.add(torso);
     // yaka / kazak boğazı
-    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.03, 8, 18), M.sweater);
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(p.female ? 0.062 : 0.07, p.female ? 0.018 : 0.03, 8, 18), M.sweater);
     collar.rotation.x = Math.PI / 2; collar.position.set(0, 0.18, 0.0); chest.add(collar);
     if (p.coat) {
       // fermuar / ön şerit ve ceplere benzeyen çizgiler
-      const strip = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.42, 0.01), mat('#c98f00', 0.5));
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.42, 0.01), mat(new THREE.Color(p.coat).multiplyScalar(0.7).getStyle(), 0.5));
       strip.position.set(0, -0.02, 0.152); strip.rotation.x = -0.05; chest.add(strip);
       for (const s of [1, -1]) {
-        const pocket = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.07, 0.01), mat('#d99f00', 0.45));
+        const pocket = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.07, 0.01), mat(new THREE.Color(p.coat).multiplyScalar(0.85).getStyle(), 0.45));
         pocket.position.set(0.09 * s, -0.17, 0.14); pocket.rotation.x = -0.25; chest.add(pocket);
       }
     }
@@ -102,8 +103,9 @@ export class Character {
     // ---- baş
     const skull = sphere(0.135, M.skin, 1, 1.1, 1.04, 28, 20); skull.position.y = 0.1; head.add(skull);
     const jaw = sphere(0.115, M.skin, 1, 0.8, 1.0); jaw.position.set(0, 0.035, 0.015); head.add(jaw);
-    const nose = sphere(0.026, M.skin, 0.85, 1.05, 1.2); nose.position.set(0, 0.085, 0.135); head.add(nose);
-    const noseTip = sphere(0.021, M.skin); noseTip.position.set(0, 0.072, 0.15); head.add(noseTip);
+    const nk = p.female ? 0.78 : 1;
+    const nose = sphere(0.026 * nk, M.skin, 0.85, 1.05, 1.2); nose.position.set(0, 0.085, 0.133); head.add(nose);
+    const noseTip = sphere(0.021 * nk, M.skin); noseTip.position.set(0, 0.074, 0.146); head.add(noseTip);
     for (const s of [1, -1]) {
       const ear = sphere(0.032, M.skin, 0.5, 1, 0.8); ear.position.set(0.135 * s, 0.1, -0.005); head.add(ear);
     }
@@ -122,6 +124,12 @@ export class Character {
     }
     // ağız
     this.mouth = sphere(0.022, M.dark, 1.3, 0.25, 0.5); this.mouth.position.set(0, 0.012, 0.128); head.add(this.mouth);
+    if (p.female) {
+      // dudaklar + kirpikler
+      const lipM = mat(p.lips, 0.35);
+      this.lip = new THREE.Mesh(new THREE.TorusGeometry(0.019, 0.0065, 8, 18), lipM); this.lip.scale.set(1.25, 0.55, 0.6); this.lip.position.set(0, 0.016, 0.13); head.add(this.lip);
+      for (const e of this.eyes) { const lash = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.006, 0.01), M.pupil); lash.position.set(0, 0.022, 0.017); lash.rotation.x = -0.4; e.add(lash); }
+    }
     if (p.mustache) {
       const mg = new THREE.TorusGeometry(0.045, 0.017, 8, 16, Math.PI);
       const must = new THREE.Mesh(mg, M.hair); must.rotation.z = Math.PI; must.position.set(0, 0.052, 0.135); must.scale.set(1.15, 0.7, 1); must.castShadow = true;
@@ -131,7 +139,17 @@ export class Character {
       const beard = sphere(0.118, mat(p.hair, 1.0), 1.02, 0.78, 0.95); beard.position.set(0, 0.0, 0.02); head.add(beard);
       // yanaklar ağzın üstünde kalsın
     }
-    if (p.cap) {
+    if (p.hairStyle === 'long') {
+      // uzun saç: üst kapak + kâküller + omuzlara inen arka kütle + yan tutamlar
+      const hairM = mat(p.hair, 0.55, 0, { sheen: 0 });
+      const top = new THREE.Mesh(new THREE.SphereGeometry(0.15, 26, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), hairM);
+      top.position.set(0, 0.125, -0.02); top.rotation.x = -0.55; top.scale.set(1.02, 1.0, 1.05); top.castShadow = true; head.add(top);
+      const back = sphere(0.15, hairM, 1.05, 1.75, 0.62); back.position.set(0, -0.02, -0.07); head.add(back);
+      for (const s2 of [1, -1]) {
+        const side = capsule(0.045, 0.2, hairM, 8); side.position.set(0.118 * s2, 0.13, -0.01); side.rotation.z = 0.08 * s2; head.add(side);
+      }
+      const bang = sphere(0.085, hairM, 1.25, 0.32, 0.5); bang.position.set(0.035, 0.235, 0.085); bang.rotation.z = -0.3; bang.rotation.x = -0.35; head.add(bang);
+    } else if (p.cap) {
       const cap = new THREE.Mesh(new THREE.SphereGeometry(0.145, 24, 14, 0, Math.PI * 2, 0, Math.PI / 2), M.cap);
       cap.position.y = 0.19; cap.scale.set(0.98, 0.85, 1.0); cap.castShadow = true; head.add(cap);
       const brim = new THREE.Mesh(new THREE.TorusGeometry(0.135, 0.024, 10, 28), M.cap); brim.rotation.x = Math.PI / 2; brim.position.y = 0.195; brim.scale.set(1.02, 1.05, 1); head.add(brim);
@@ -146,8 +164,31 @@ export class Character {
       }
       const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.006, 0.006), M.glass); bridge.position.set(0, 0.13, 0.14); head.add(bridge);
     }
+    if (p.hood) {
+      // kapüşon: yüzü açık bırakan kubbe (görünürlüğü sahneye göre açılıp kapanır)
+      const hm = mat(p.hood, 0.85, 0, { side: THREE.DoubleSide });
+      const g = new THREE.SphereGeometry(0.185, 24, 16, Math.PI / 2 + 0.95, Math.PI * 2 - 1.9, 0, Math.PI * 0.66);
+      this.hood = new THREE.Mesh(g, hm); this.hood.position.set(0, 0.1, -0.012); this.hood.scale.set(1, 1.08, 1.08); this.hood.castShadow = true; head.add(this.hood);
+      this.hoodBack = sphere(0.12, hm, 1.3, 0.6, 0.9); this.hoodBack.position.set(0, -0.07, -0.09); head.add(this.hoodBack);
+    }
+    // elde telefon (ekran ışığı yüzü aydınlatır)
+    const ph = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.072, 0.15, 0.009), mat('#0d0d10', 0.25, 0.6)); ph.add(body);
+    this.phoneScreenM = new THREE.MeshBasicMaterial({ color: new THREE.Color('#cfe6ff'), toneMapped: false });
+    const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.064, 0.138), this.phoneScreenM); scr.position.z = 0.0048; ph.add(scr);
+    this.phoneLight = new THREE.PointLight('#bcd8ff', 0, 0.9, 1.6); this.phoneLight.position.set(0, 0, 0.12); ph.add(this.phoneLight);
+    ph.position.set(-0.01, -0.09, 0.035); ph.rotation.set(-1.2, 0, 0.1); ph.visible = false;
+    J.wrR.add(ph); this.phone = ph;
+    this.group.scale.setScalar(p.scale || 1);
     this.group.traverse((o) => { if (o.isMesh) o.receiveShadow = true; });
     this.pose = 'stand';
+  }
+
+  setLook({ hood = null, phone = false, screen = 0.9 } = {}) {
+    if (this.hood) { const on = hood == null ? true : !!hood; this.hood.visible = on; this.hoodBack.visible = on; }
+    this.phone.visible = !!phone;
+    this.phoneLight.intensity = phone ? 0.9 * screen : 0;
+    this.phoneScreenM.color.setScalar(0.25 + 0.75 * screen).multiply(new THREE.Color('#d6eaff'));
   }
 
   // Pozlar: eklem açıları (radyan). Konvansiyonlar dosya başında anlatıldığı gibi:
@@ -211,6 +252,34 @@ export class Character {
       }
       case 'look':
         P.head = [0.0, 0.55 * smoothstep(0, 1.2, k), 0]; P.spine = [0.03, 0.2 * smoothstep(0, 1.2, k), 0]; P.brows = 0.4;
+        break;
+      case 'dangle':
+        P.shR = [-1.35, 0, 0.15]; P.elR = -0.45; P.head = [0.05, 0.05, 0]; P.spine = [0.06, 0, 0]; P.mouth = 0.35;
+        break;
+      case 'phone':
+        P.spine = [0.1 + breathe, 0, 0]; P.head = [0.42, 0.05, 0];
+        P.shR = [-0.85, 0, -0.32]; P.elR = -1.35; P.shL = [-0.55, 0, -0.18]; P.elL = -1.2;
+        break;
+      case 'hide': {
+        const tr = noise3(ph * 6, 3, 0) * 0.03;
+        P.hipsY = -0.5; P.spine = [0.55, 0, 0]; P.head = [0.05 + tr, 0.25, 0];
+        P.hipL = -1.7; P.knL = 2.0; P.hipR = -1.6; P.knR = 2.1; P.anL = -0.2; P.anR = -0.2;
+        P.shL = [-1.0, 0, -0.2]; P.shR = [-0.7, 0, -0.1]; P.elL = -1.6; P.elR = -1.5; P.eyes = 1.25; P.brows = 0.8;
+        break;
+      }
+      case 'peek':
+        P.spine = [0.18, 0, 0]; P.head = [0.05, 0, 0]; P.shR = [-1.7, 0, 0.1]; P.elR = -0.9; P.hipL = -0.15; P.brows = 0.5;
+        break;
+      case 'row': {
+        const c = ph * 1.6;
+        P.hipsY = -0.44; P.hipL = -1.5; P.knL = 1.4; P.hipR = -1.5; P.knR = 1.4;
+        P.spine = [0.15 + 0.3 * Math.sin(c), 0, 0];
+        P.shL = [-1.2 - 0.45 * Math.sin(c), 0, 0.25]; P.shR = [-1.2 - 0.45 * Math.sin(c), 0, 0.25]; P.elL = -0.5 + 0.4 * Math.cos(c); P.elR = -0.5 + 0.4 * Math.cos(c);
+        break;
+      }
+      case 'type':
+        P.spine = [0.12 + breathe, 0, 0]; P.head = [0.45, 0, 0];
+        P.shR = [-0.9, 0, -0.35]; P.elR = -1.3 + 0.08 * Math.sin(ph * 14); P.shL = [-0.9, 0, -0.3]; P.elL = -1.3;
         break;
       case 'point':
         P.shR = [-1.45, 0.2, -0.05]; P.elR = -0.05; P.head = [0, 0.1, 0]; P.brows = -0.3;
