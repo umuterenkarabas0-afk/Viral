@@ -4,6 +4,7 @@
     düzeyinde zaman döndürür → altyazılar kelimesi kelimesine senkron olur.
     Anahtar: ELEVENLABS_API_KEY (GitHub Actions'ta repo secret'ı).
   • Google Cloud Text-to-Speech (alternatif) — Chirp3-HD / WaveNet.
+  • Piper (tr_TR-dfki-medium) — yerel, ücretsiz sinirsel TTS; kredi gerektirmez.
   • espeak-ng — yalnızca anahtarsız yerel önizleme (robotik ses).
 
 Google kimlik doğrulama (öncelik sırasıyla):
@@ -348,10 +349,50 @@ def synthesize_elevenlabs(text: str, words: list[str], voice_id: str, rate: floa
     return TTSResult(_resample(a, sr), SR, word_starts, voice_id, "elevenlabs")
 
 
+# ------------------------------------------------------------------ Piper (yerel, açık kaynak sinirsel TTS)
+PIPER_DEFAULT_VOICE = "tr_TR-dfki-medium"   # piper-voices'taki tek Türkçe ses (erkek)
+PIPER_DIR = Path(os.environ.get("VIRAL_CACHE", ".cache")) / "piper"
+PIPER_HF = "https://huggingface.co/rhasspy/piper-voices/resolve/main"
+
+
+def _piper_model(voice: str) -> Path:
+    """Ses modelini (.onnx + .onnx.json) gerekirse Hugging Face'ten indirir."""
+    PIPER_DIR.mkdir(parents=True, exist_ok=True)
+    onnx = PIPER_DIR / f"{voice}.onnx"
+    lang, rest = voice.split("-", 1)          # tr_TR, dfki-medium
+    name, quality = rest.rsplit("-", 1)
+    base = f"{PIPER_HF}/{lang.split('_')[0]}/{lang}/{name}/{quality}/{voice}"
+    for ext in (".onnx", ".onnx.json"):
+        f = PIPER_DIR / f"{voice}{ext}"
+        if not f.exists():
+            print(f"[tts] Piper sesi indiriliyor: {voice}{ext}")
+            with urllib.request.urlopen(base + ext, timeout=300) as r:
+                f.with_suffix(f.suffix + ".tmp").write_bytes(r.read())
+            f.with_suffix(f.suffix + ".tmp").rename(f)
+    return onnx
+
+
+def synthesize_piper(text: str, voice: str = PIPER_DEFAULT_VOICE, rate: float = 1.0) -> TTSResult:
+    CACHE.mkdir(parents=True, exist_ok=True)
+    key = _cache_key("pp1", text, voice, round(rate, 3))
+    p = CACHE / f"{key}.wav"
+    if not p.exists():
+        model = _piper_model(voice)
+        cmd = [os.environ.get("PYTHON", "python3"), "-m", "piper", "-m", str(model), "-f", str(p) + ".tmp",
+               "--length-scale", f"{1.0 / max(0.5, rate):.3f}", "--noise-scale", "0.6", "--noise-w-scale", "0.75",
+               "--sentence-silence", "0.18"]
+        import sys
+        cmd[0] = sys.executable
+        subprocess.run(cmd, input=text.encode("utf-8"), check=True, capture_output=True)
+        Path(str(p) + ".tmp").rename(p)
+    a, sr = _decode_wav(p.read_bytes())
+    return TTSResult(_resample(a, sr), SR, None, voice, "piper")
+
+
 class Voice:
     """Pipeline'ın kullandığı TTS cephesi.
 
-    engine: auto | elevenlabs | google | espeak
+    engine: auto | elevenlabs | google | piper | espeak
       auto → ElevenLabs anahtarı varsa ElevenLabs, yoksa Google, o da yoksa espeak (önizleme).
     """
 
@@ -364,6 +405,10 @@ class Voice:
         self.prefs = prefs
         self.settings = settings or {}
         self.model = model
+        if engine == "piper":
+            self.voice = os.environ.get("PIPER_VOICE") or PIPER_DEFAULT_VOICE
+            print(f"[tts] motor=piper ses={self.voice}")
+            return
         if engine == "elevenlabs" or (engine == "auto" and elevenlabs_available()):
             self.engine = "elevenlabs"
             self.voice = pick_elevenlabs_voice(voice if voice and not str(voice).startswith("tr-TR") else None)
@@ -385,6 +430,8 @@ class Voice:
         if self.engine == "elevenlabs":
             return synthesize_elevenlabs(text, words, self.voice, rate, model=self.model, settings=self.settings,
                                          prev_text=prev_text, next_text=next_text)
+        if self.engine == "piper":
+            return synthesize_piper(text, self.voice, rate)
         if self.engine == "google":
             return synthesize_google(text, words, self.voice, rate, self.pitch, self.lang)
         return synthesize_espeak(text, rate)
