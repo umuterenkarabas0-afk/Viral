@@ -49,7 +49,7 @@ topics:
   error: 'ElevenLabs yetkilendirme hatası (401). ELEVENLABS_API_KEY''i kontrol edin.
 
     {"detail":{"type":"invalid_request","code":"quota_exceeded","message":"This request exceeds your quota of 10000. You have 9 credits remaining,
-    while 78 credits are required for this request.","status":"quota_exceeded","request_id":"0766f68b771653e3b1bb1b12ebad567e"}}'
+    while 78 credits are required for this request.","status":"quota_exceeded","request_id":"b82b56ca3045d1818f837e37abf8d3e4"}}'
 - title: 'Balıkçının Kuponu · Bölüm 8/8: Son Şişe'
   status: failed
   script: content/series/balikci-kuponu/b08.yaml
