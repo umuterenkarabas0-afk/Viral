@@ -42,7 +42,7 @@ topics:
   date: '2026-11-24'
   video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b06-20261124-1518
 - title: 'Balıkçının Kuponu · Bölüm 7/8: Fırtına'
-  status: failed
+  status: rendering
   script: content/series/balikci-kuponu/b07.yaml
   series: balikci-kuponu
   episode: 7
@@ -51,7 +51,7 @@ topics:
     {"detail":{"type":"invalid_request","code":"quota_exceeded","message":"This request exceeds your quota of 10000. You have 9 credits remaining,
     while 78 credits are required for this request.","status":"quota_exceeded","request_id":"b82b56ca3045d1818f837e37abf8d3e4"}}'
 - title: 'Balıkçının Kuponu · Bölüm 8/8: Son Şişe'
-  status: failed
+  status: rendering
   script: content/series/balikci-kuponu/b08.yaml
   series: balikci-kuponu
   episode: 8
