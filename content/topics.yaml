@@ -62,10 +62,10 @@ topics:
 - title: Akdeniz'e özgü 10 balık çeşidi
   status: failed
   script: content/scripts/akdeniz-baliklari.yaml
-  error: "Google TTS yetkilendirme hatası (403). GOOGLE_TTS_API_KEY ayarlayın ve projede 'Cloud Text-to-Speech API'nin etkin olduğundan emin olun.\n\
-    {\n  \"error\": {\n    \"code\": 403,\n    \"message\": \"Permission denied on the service.\",\n    \"status\": \"PERMISSION_DENIED\",\n \
-    \   \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"ACCESS_DENIED\",\n  \
-    \      \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"texttospeech.googleapis.com\"\n        }\n    "
+  error: 'ElevenLabs yetkilendirme hatası (401). ELEVENLABS_API_KEY''i kontrol edin.
+
+    {"detail":{"type":"invalid_request","code":"quota_exceeded","message":"This request exceeds your quota of 10000. You have 9 credits remaining,
+    while 102 credits are required for this request.","status":"quota_exceeded","request_id":"2a6d5392949ce6f8116ad1ac95c01670"}}'
 - title: Karadeniz'in en ilginç 10 balığı
   status: pending
 - title: Okyanusun en zehirli 7 balığı
