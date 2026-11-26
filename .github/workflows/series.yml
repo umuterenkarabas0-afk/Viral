@@ -12,6 +12,9 @@ on:
       episodes:
         description: "Bölüm numaraları, virgülle (ör. 2,3,4,5,6,7,8)"
         default: "2,3,4,5,6,7,8"
+      tts:
+        description: "Seslendirme motoru: auto (senaryodaki, ElevenLabs) | piper | google"
+        default: "auto"
 
 permissions:
   contents: write
@@ -78,11 +81,15 @@ jobs:
           npx playwright install --with-deps chromium
       - uses: actions/cache@v4
         with:
+          path: .cache/piper
+          key: piper-voices-v1
+      - uses: actions/cache@v4
+        with:
           path: .cache/tts
           key: tts-${{ github.run_id }}-${{ strategy.job-index }}
           restore-keys: tts-
       - name: Video üret
-        run: python -m viral make "${{ matrix.script }}" --workers 3
+        run: python -m viral make "${{ matrix.script }}" --workers 3 --tts "${{ github.event.inputs.tts || 'auto' }}"
       - name: Release olarak yayınla
         env:
           GH_TOKEN: ${{ github.token }}

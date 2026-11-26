@@ -216,7 +216,7 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
         target = float(script.get("target_duration", 45.0 if story else 60.0))
 
     # süreyi hedefe oturt (konuşma hızı ile)
-    rate = float(vcfg.get("speaking_rate", 1.0 if voice.engine == "elevenlabs" else 1.1))
+    rate = float(vcfg.get("speaking_rate", 1.0 if voice.engine in ("elevenlabs", "piper") else 1.1))
     log(f"TTS: {len(segs)} segment, hız {rate:.2f}")
     clips = synth_voice(segs, voice, rate)
     hold = 3.2 if story else 2.3
@@ -229,7 +229,7 @@ def make(script_path: str | Path, out_root: str | Path = "output", *, tts: str =
         speech = sum(c.speech_end - c.speech_start for c in clips)
         other = est - speech
         want = max(10.0, target - other)
-        lo, hi = {"google": (0.9, 1.3), "elevenlabs": (0.85, 1.2)}.get(voice.engine, (0.9, 1.6))
+        lo, hi = {"google": (0.9, 1.3), "elevenlabs": (0.85, 1.2), "piper": (0.85, 1.35)}.get(voice.engine, (0.9, 1.6))
         new_rate = float(np.clip(rate * speech / want, lo, hi))
         if abs(new_rate - rate) < 0.02:
             break
