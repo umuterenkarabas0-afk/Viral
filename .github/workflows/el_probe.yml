@@ -1,0 +1,45 @@
+name: ElevenLabs ses keşfi
+
+# Kredi durumunu gösterir, ElevenLabs ses kütüphanesinde anadili Türkçe sesleri listeler,
+# en uygun anlatıcıyı seçip hesaba ekler ve kısa bir deneme seslendirmesi yapar.
+on:
+  workflow_dispatch:
+    inputs:
+      gender:
+        description: "female | male"
+        default: "female"
+      name:
+        description: "Hesaba eklenecek sesin adı"
+        default: "Deniz (TR)"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg && pip install numpy scipy PyYAML
+      - name: Kredi durumu
+        run: python -m viral.el_tools status
+      - name: Ses seç ve hesaba ekle
+        id: pick
+        run: |
+          python -m viral.el_tools pick --lang tr --gender "${{ github.event.inputs.gender }}" --name "${{ github.event.inputs.name }}" | tee pick.txt
+          echo "voice=$(grep '^VOICE_ID=' pick.txt | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+      - name: Deneme seslendirmesi
+        run: |
+          python - <<'PY'
+          import os, wave
+          from viral.tts import synthesize_elevenlabs
+          text = "Babamı bir yıl önce gömdük. Dün gece saat üçü on yedi geçe telefonum titredi."
+          r = synthesize_elevenlabs(text, text.split(), "${{ steps.pick.outputs.voice }}", 1.0)
+          print(f"[el] deneme tamam: {len(r.audio)/r.sr:.2f} sn, kelime zamanları: {'var' if r.word_starts else 'yok'}")
+          PY
+      - name: Kredi durumu (sonra)
+        run: python -m viral.el_tools status
