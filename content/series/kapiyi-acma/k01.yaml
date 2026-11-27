@@ -6,7 +6,7 @@ language: tr-TR
 target_duration: 70
 bpm: 76
 series: { id: kapiyi-acma, title: "Kapıyı Açma", episode: 1, total: 6, next_title: "Batırılmış", style: minimal }
-voice: { engine: elevenlabs, speaking_rate: 1.0, settings: { stability: 0.35, style: 0.5 } }
+voice: { engine: elevenlabs, name: NNn9dv8zq2kUo7d3JSGG, speaking_rate: 1.0, settings: { stability: 0.38, similarity_boost: 0.8, style: 0.45 } }  # Derya — Türkçe anlatıcı (ElevenLabs kütüphanesi)
 theme: { accent: "#FFD23F", accent2: "#7FD1FF", danger: "#FF3B4E" }
 world: { boat: "YUSUF REİS" }
 cast_ref: series.yaml
