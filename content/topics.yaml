@@ -60,12 +60,11 @@ topics:
   date: '2026-11-26'
   video: https://github.com/umuterenkarabas0-afk/Viral/releases/tag/video-balikci-kuponu-b08-20261126-1435
 - title: Akdeniz'e özgü 10 balık çeşidi
-  status: failed
+  status: done
   script: content/scripts/akdeniz-baliklari.yaml
-  error: 'ElevenLabs yetkilendirme hatası (401). ELEVENLABS_API_KEY''i kontrol edin.
-
-    {"detail":{"type":"invalid_request","code":"quota_exceeded","message":"This request exceeds your quota of 10000. You have 9 credits remaining,
-    while 102 credits are required for this request.","status":"quota_exceeded","request_id":"3e92401e0ddfadf0f36b8d435c3eb835"}}'
+  video: output/akdeniz-baliklari/akdeniz-baliklari.mp4
+  date: '2026-11-28'
+  duration: 73.8
 - title: Karadeniz'in en ilginç 10 balığı
   status: pending
 - title: Okyanusun en zehirli 7 balığı
