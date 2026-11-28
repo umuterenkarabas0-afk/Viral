@@ -68,7 +68,7 @@ async function main() {
   const srv = await serve(ROOT);
   const port = srv.address().port;
   const gpu = !!o.gpu;
-  const ropts = { scale: Number(o.scale || (gpu ? 1 : 0.75)), msaa: Number(o.msaa ?? (gpu ? 4 : 0)) };
+  const ropts = { scale: Number(o.scale || (gpu ? 1 : 0.75)), msaa: Number(o.msaa ?? (gpu ? 4 : 0)), noui: !!o.noui };
 
   if (o.stills) {
     const outDir = o['out-dir'] || path.join(path.dirname(o.timeline), 'stills');

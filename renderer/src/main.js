@@ -264,6 +264,7 @@ class Director {
     }
     await d.init();
     window.__director = d;
+    if ((window.__RENDER_OPTS__ || {}).noui) document.getElementById('ui').style.display = 'none';
     window.renderFrame = (t) => { d.frame(t); return true; };
     window.__ready = true;
   } catch (e) {
